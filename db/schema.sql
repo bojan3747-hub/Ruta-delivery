@@ -1,0 +1,180 @@
+-- RUTA — MVP schema
+--
+-- NOTE ON TOOLING: this app talks to Postgres directly through the `pg`
+-- driver (see src/lib/db.ts) instead of through the Prisma Client. The
+-- Prisma schema at prisma/schema.prisma still documents the same data
+-- model and is kept for when the project runs somewhere with normal
+-- internet access, where `npx prisma migrate dev` / `npx prisma generate`
+-- work as usual — inside this build sandbox, outbound access to
+-- binaries.prisma.sh (needed to download Prisma's engine) is blocked by
+-- network policy, so the CLI cannot fetch its engine here. Everything in
+-- this file is applied with `npm run db:push` (see package.json), which
+-- just pipes this file into psql.
+
+CREATE EXTENSION IF NOT EXISTS pgcrypto;
+
+-- ---------------------------------------------------------------------------
+-- Enums
+-- ---------------------------------------------------------------------------
+
+DO $$ BEGIN
+  CREATE TYPE role AS ENUM ('CLIENT', 'COURIER', 'OPERATOR');
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+DO $$ BEGIN
+  CREATE TYPE zone AS ENUM (
+    'STARI_GRAD', 'VRACAR', 'SAVSKI_VENAC', 'NOVI_BEOGRAD', 'ZEMUN',
+    'ZVEZDARA', 'VOZDOVAC', 'CUKARICA', 'PALILULA', 'RAKOVICA'
+  );
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+DO $$ BEGIN
+  CREATE TYPE vehicle_type AS ENUM ('MOTOR', 'PUTNICKO_VOZILO', 'KOMBI', 'KAMION');
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+DO $$ BEGIN
+  CREATE TYPE courier_status AS ENUM ('NA_POTVRDI', 'AKTIVAN');
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+DO $$ BEGIN
+  CREATE TYPE shipment_type AS ENUM ('DOKUMENT', 'MALI_PAKET', 'SREDNJI_PAKET', 'VELIKI_PAKET');
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+DO $$ BEGIN
+  CREATE TYPE termin_type AS ENUM ('ODMAH', 'DANAS_DO', 'ZAKAZANO');
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+DO $$ BEGIN
+  CREATE TYPE shipment_status AS ENUM ('OTVORENA', 'PONUDE_STIGLE', 'IZABRANA', 'ZAVRSENA', 'OTKAZANA');
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+DO $$ BEGIN
+  CREATE TYPE offer_type AS ENUM ('AUTOMATSKA', 'RUCNA');
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+DO $$ BEGIN
+  CREATE TYPE offer_status AS ENUM ('POSLATA', 'PRIHVACENA', 'ODBIJENA', 'ISTEKLA');
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+DO $$ BEGIN
+  CREATE TYPE order_status AS ENUM ('PREUZETO', 'U_TRANZITU', 'NA_ISPORUCI', 'ISPORUCENO', 'OTKAZANO');
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- ---------------------------------------------------------------------------
+-- Tables
+-- ---------------------------------------------------------------------------
+
+CREATE TABLE IF NOT EXISTS users (
+  id            UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  email         TEXT UNIQUE NOT NULL,
+  password_hash TEXT NOT NULL,
+  role          role NOT NULL,
+  ime           TEXT NOT NULL,
+  telefon       TEXT,
+  created_at    TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+CREATE TABLE IF NOT EXISTS companies (
+  id         UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id    UUID UNIQUE NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  naziv      TEXT NOT NULL,
+  pib        TEXT,
+  adresa     TEXT,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+CREATE TABLE IF NOT EXISTS couriers (
+  id                UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id           UUID UNIQUE REFERENCES users(id) ON DELETE SET NULL,
+  naziv             TEXT NOT NULL,
+  telefon           TEXT NOT NULL,
+  email             TEXT,
+  pib               TEXT,
+  tip_vozila        vehicle_type,
+  nosivost_kg       NUMERIC(10, 2),
+  cena_po_km        NUMERIC(10, 2),
+  cena_po_kg        NUMERIC(10, 2),
+  minimalna_cena    NUMERIC(10, 2),
+  dnevni_kapacitet  INTEGER NOT NULL DEFAULT 0,
+  status            courier_status NOT NULL DEFAULT 'NA_POTVRDI',
+  izvor_kontakta    TEXT,
+  ocena_prosek      NUMERIC(3, 2),
+  broj_ocena        INTEGER NOT NULL DEFAULT 0,
+  aktivacioni_token UUID NOT NULL DEFAULT gen_random_uuid(),
+  created_at        TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+CREATE TABLE IF NOT EXISTS courier_zones (
+  id         UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  courier_id UUID NOT NULL REFERENCES couriers(id) ON DELETE CASCADE,
+  zone       zone NOT NULL,
+  UNIQUE (courier_id, zone)
+);
+
+CREATE TABLE IF NOT EXISTS shipments (
+  id                  UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  client_id           UUID NOT NULL REFERENCES companies(id) ON DELETE CASCADE,
+  zona_preuzimanja    zone NOT NULL,
+  zona_isporuke       zone NOT NULL,
+  adresa_preuzimanja  TEXT NOT NULL,
+  adresa_isporuke     TEXT NOT NULL,
+  tip                 shipment_type NOT NULL,
+  hitno               BOOLEAN NOT NULL DEFAULT false,
+  nestandardna        BOOLEAN NOT NULL DEFAULT false,
+  zeljeni_termin      termin_type NOT NULL DEFAULT 'ODMAH',
+  termin_detalji      TEXT,
+  napomena            TEXT,
+  fotografija_url     TEXT,
+  status              shipment_status NOT NULL DEFAULT 'OTVORENA',
+  created_at          TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+CREATE TABLE IF NOT EXISTS offers (
+  id                    UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  shipment_id           UUID NOT NULL REFERENCES shipments(id) ON DELETE CASCADE,
+  courier_id            UUID NOT NULL REFERENCES couriers(id) ON DELETE CASCADE,
+  cena                  NUMERIC(10, 2) NOT NULL,
+  procenjeno_vreme_min  INTEGER NOT NULL,
+  napomena              TEXT,
+  tip                   offer_type NOT NULL,
+  status                offer_status NOT NULL DEFAULT 'POSLATA',
+  rok_isteka            TIMESTAMPTZ,
+  created_at            TIMESTAMPTZ NOT NULL DEFAULT now(),
+  UNIQUE (shipment_id, courier_id)
+);
+
+CREATE TABLE IF NOT EXISTS orders (
+  id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  shipment_id UUID UNIQUE NOT NULL REFERENCES shipments(id) ON DELETE CASCADE,
+  offer_id    UUID UNIQUE NOT NULL REFERENCES offers(id) ON DELETE CASCADE,
+  courier_id  UUID NOT NULL REFERENCES couriers(id) ON DELETE CASCADE,
+  cena        NUMERIC(10, 2) NOT NULL,
+  provizija   NUMERIC(10, 2),
+  status      order_status NOT NULL DEFAULT 'PREUZETO',
+  created_at  TIMESTAMPTZ NOT NULL DEFAULT now(),
+  updated_at  TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+CREATE TABLE IF NOT EXISTS ratings (
+  id         UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  order_id   UUID UNIQUE NOT NULL REFERENCES orders(id) ON DELETE CASCADE,
+  ocena      SMALLINT NOT NULL CHECK (ocena BETWEEN 1 AND 5),
+  komentar   TEXT,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+CREATE TABLE IF NOT EXISTS commission_settings (
+  id         SMALLINT PRIMARY KEY DEFAULT 1 CHECK (id = 1),
+  procenat   NUMERIC(5, 2) NOT NULL,
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+INSERT INTO commission_settings (id, procenat)
+VALUES (1, 10.00)
+ON CONFLICT (id) DO NOTHING;
+
+CREATE INDEX IF NOT EXISTS idx_shipments_client ON shipments(client_id);
+CREATE INDEX IF NOT EXISTS idx_offers_shipment ON offers(shipment_id);
+CREATE INDEX IF NOT EXISTS idx_offers_courier ON offers(courier_id);
+CREATE INDEX IF NOT EXISTS idx_orders_courier ON orders(courier_id);
+CREATE INDEX IF NOT EXISTS idx_courier_zones_courier ON courier_zones(courier_id);

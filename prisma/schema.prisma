@@ -1,0 +1,237 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ---------------------------------------------------------------------------
+// Enums
+// ---------------------------------------------------------------------------
+
+enum Role {
+  CLIENT
+  COURIER
+  OPERATOR
+}
+
+enum Zone {
+  STARI_GRAD
+  VRACAR
+  SAVSKI_VENAC
+  NOVI_BEOGRAD
+  ZEMUN
+  ZVEZDARA
+  VOZDOVAC
+  CUKARICA
+  PALILULA
+  RAKOVICA
+}
+
+enum VehicleType {
+  MOTOR
+  PUTNICKO_VOZILO
+  KOMBI
+  KAMION
+}
+
+enum CourierStatus {
+  NA_POTVRDI
+  AKTIVAN
+}
+
+enum ShipmentType {
+  DOKUMENT
+  MALI_PAKET
+  SREDNJI_PAKET
+  VELIKI_PAKET
+}
+
+enum TerminType {
+  ODMAH
+  DANAS_DO
+  ZAKAZANO
+}
+
+enum ShipmentStatus {
+  OTVORENA
+  PONUDE_STIGLE
+  IZABRANA
+  ZAVRSENA
+  OTKAZANA
+}
+
+enum OfferType {
+  AUTOMATSKA
+  RUCNA
+}
+
+enum OfferStatus {
+  POSLATA
+  PRIHVACENA
+  ODBIJENA
+  ISTEKLA
+}
+
+enum OrderStatus {
+  PREUZETO
+  U_TRANZITU
+  NA_ISPORUCI
+  ISPORUCENO
+  OTKAZANO
+}
+
+// ---------------------------------------------------------------------------
+// Models
+// ---------------------------------------------------------------------------
+
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  passwordHash String
+  role         Role
+  ime          String
+  telefon      String?
+  createdAt    DateTime @default(now())
+
+  company  Company?
+  courier  Courier?
+
+  @@map("users")
+}
+
+model Company {
+  id        String   @id @default(cuid())
+  userId    String   @unique
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  naziv     String
+  pib       String?
+  adresa    String?
+  createdAt DateTime @default(now())
+
+  shipments Shipment[]
+
+  @@map("companies")
+}
+
+model Courier {
+  id                String        @id @default(cuid())
+  userId            String?       @unique
+  user              User?         @relation(fields: [userId], references: [id], onDelete: SetNull)
+  naziv             String
+  telefon           String
+  email             String?
+  pib               String?
+  tipVozila         VehicleType?
+  nosivostKg        Decimal?      @db.Decimal(10, 2)
+  cenaPoKm          Decimal?      @db.Decimal(10, 2)
+  cenaPoKg          Decimal?      @db.Decimal(10, 2)
+  minimalnaCena     Decimal?      @db.Decimal(10, 2)
+  dnevniKapacitet   Int           @default(0)
+  status            CourierStatus @default(NA_POTVRDI)
+  izvorKontakta     String?
+  ocenaProsek       Decimal?      @db.Decimal(3, 2)
+  brojOcena         Int           @default(0)
+  createdAt         DateTime      @default(now())
+
+  zone   CourierZone[]
+  offers Offer[]
+  orders Order[]
+
+  @@map("couriers")
+}
+
+model CourierZone {
+  id        String  @id @default(cuid())
+  courierId String
+  courier   Courier @relation(fields: [courierId], references: [id], onDelete: Cascade)
+  zone      Zone
+
+  @@unique([courierId, zone])
+  @@map("courier_zones")
+}
+
+model Shipment {
+  id                  String         @id @default(cuid())
+  clientId            String
+  client              Company        @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  zonaPreuzimanja     Zone
+  zonaIsporuke        Zone
+  adresaPreuzimanja   String
+  adresaIsporuke      String
+  tip                 ShipmentType
+  hitno               Boolean        @default(false)
+  nestandardna        Boolean        @default(false)
+  zeljeniTermin        TerminType     @default(ODMAH)
+  terminDetalji       String?
+  napomena            String?
+  fotografijaUrl      String?
+  status              ShipmentStatus @default(OTVORENA)
+  createdAt           DateTime       @default(now())
+
+  offers Offer[]
+  order  Order?
+
+  @@map("shipments")
+}
+
+model Offer {
+  id                  String      @id @default(cuid())
+  shipmentId          String
+  shipment            Shipment    @relation(fields: [shipmentId], references: [id], onDelete: Cascade)
+  courierId           String
+  courier             Courier     @relation(fields: [courierId], references: [id], onDelete: Cascade)
+  cena                Decimal     @db.Decimal(10, 2)
+  procenjenoVremeMin  Int
+  napomena            String?
+  tip                 OfferType
+  status              OfferStatus @default(POSLATA)
+  rokIsteka           DateTime?
+  createdAt           DateTime    @default(now())
+
+  order Order?
+
+  @@unique([shipmentId, courierId])
+  @@map("offers")
+}
+
+model Order {
+  id          String      @id @default(cuid())
+  shipmentId  String      @unique
+  shipment    Shipment    @relation(fields: [shipmentId], references: [id], onDelete: Cascade)
+  offerId     String      @unique
+  offer       Offer       @relation(fields: [offerId], references: [id], onDelete: Cascade)
+  courierId   String
+  courier     Courier     @relation(fields: [courierId], references: [id], onDelete: Cascade)
+  cena        Decimal     @db.Decimal(10, 2)
+  provizija   Decimal?    @db.Decimal(10, 2)
+  status      OrderStatus @default(PREUZETO)
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  rating Rating?
+
+  @@map("orders")
+}
+
+model Rating {
+  id        String   @id @default(cuid())
+  orderId   String   @unique
+  order     Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  ocena     Int
+  komentar  String?
+  createdAt DateTime @default(now())
+
+  @@map("ratings")
+}
+
+model CommissionSetting {
+  id        Int      @id @default(1)
+  procenat  Decimal  @db.Decimal(5, 2)
+  updatedAt DateTime @updatedAt
+
+  @@map("commission_settings")
+}
