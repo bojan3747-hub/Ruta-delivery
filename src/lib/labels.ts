@@ -1,4 +1,5 @@
 import type {
+  InvoiceStatus,
   OfferStatus,
   OrderStatus,
   ShipmentStatus,
@@ -67,6 +68,16 @@ export const VEHICLE_TYPE_LABELS: Record<VehicleType, string> = {
 export function formatMoney(value: string | number): string {
   const n = typeof value === "string" ? Number(value) : value;
   return `${n.toLocaleString("sr-RS", { minimumFractionDigits: 0, maximumFractionDigits: 2 })} RSD`;
+}
+
+export const INVOICE_STATUS_LABELS: Record<InvoiceStatus, string> = {
+  NEPLACENO: "Neplaćeno",
+  NAPLACENO: "Naplaćeno",
+  NEUSPESNO: "Neuspešna naplata",
+};
+
+export function formatMonth(value: string): string {
+  return new Date(value).toLocaleDateString("sr-RS", { month: "long", year: "numeric" });
 }
 
 export function formatDateTime(value: string): string {

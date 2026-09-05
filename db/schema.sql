@@ -61,6 +61,10 @@ DO $$ BEGIN
   CREATE TYPE order_status AS ENUM ('PREUZETO', 'U_TRANZITU', 'NA_ISPORUCI', 'ISPORUCENO', 'OTKAZANO');
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
+DO $$ BEGIN
+  CREATE TYPE invoice_status AS ENUM ('NEPLACENO', 'NAPLACENO', 'NEUSPESNO');
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
 -- ---------------------------------------------------------------------------
 -- Tables
 -- ---------------------------------------------------------------------------
@@ -102,8 +106,13 @@ CREATE TABLE IF NOT EXISTS couriers (
   ocena_prosek      NUMERIC(3, 2),
   broj_ocena        INTEGER NOT NULL DEFAULT 0,
   aktivacioni_token UUID NOT NULL DEFAULT gen_random_uuid(),
+  payu_customer_token TEXT,
   created_at        TIMESTAMPTZ NOT NULL DEFAULT now()
 );
+
+-- Dodato posle prvog izdanja; ALTER (pored kolone gore) da bi stiglo i na
+-- baze koje već imaju tabelu couriers.
+ALTER TABLE couriers ADD COLUMN IF NOT EXISTS payu_customer_token TEXT;
 
 CREATE TABLE IF NOT EXISTS courier_zones (
   id         UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -179,8 +188,27 @@ INSERT INTO commission_settings (id, procenat)
 VALUES (1, 10.00)
 ON CONFLICT (id) DO NOTHING;
 
+-- Mesečna faktura provizije po dostavljaču (KAN-12 nastavak): operater
+-- generiše po jednu fakturu po dostavljaču za svaki kalendarski mesec u
+-- kom je dostavljač imao isporučene porudžbine. Naplata (PayU, kartica na
+-- dosijeu iz couriers.payu_customer_token) je posebna, kasnija faza —
+-- ova tabela samo prati iznos i status po periodu.
+CREATE TABLE IF NOT EXISTS commission_invoices (
+  id            UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  courier_id    UUID NOT NULL REFERENCES couriers(id) ON DELETE CASCADE,
+  period_start  DATE NOT NULL,
+  period_end    DATE NOT NULL,
+  iznos         NUMERIC(10, 2) NOT NULL,
+  status        invoice_status NOT NULL DEFAULT 'NEPLACENO',
+  payu_order_id TEXT,
+  created_at    TIMESTAMPTZ NOT NULL DEFAULT now(),
+  placeno_at    TIMESTAMPTZ,
+  UNIQUE (courier_id, period_start)
+);
+
 CREATE INDEX IF NOT EXISTS idx_shipments_client ON shipments(client_id);
 CREATE INDEX IF NOT EXISTS idx_offers_shipment ON offers(shipment_id);
 CREATE INDEX IF NOT EXISTS idx_offers_courier ON offers(courier_id);
 CREATE INDEX IF NOT EXISTS idx_orders_courier ON orders(courier_id);
 CREATE INDEX IF NOT EXISTS idx_courier_zones_courier ON courier_zones(courier_id);
+CREATE INDEX IF NOT EXISTS idx_commission_invoices_courier ON commission_invoices(courier_id);

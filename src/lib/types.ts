@@ -47,6 +47,8 @@ export type OrderStatus =
   | "ISPORUCENO"
   | "OTKAZANO";
 
+export type InvoiceStatus = "NEPLACENO" | "NAPLACENO" | "NEUSPESNO";
+
 export interface UserRow {
   id: string;
   email: string;
@@ -84,6 +86,7 @@ export interface CourierRow {
   ocena_prosek: string | null;
   broj_ocena: number;
   aktivacioni_token: string;
+  payu_customer_token: string | null;
   created_at: string;
 }
 
@@ -149,4 +152,16 @@ export interface CommissionSettingRow {
   id: number;
   procenat: string;
   updated_at: string;
+}
+
+export interface CommissionInvoiceRow {
+  id: string;
+  courier_id: string;
+  period_start: string;
+  period_end: string;
+  iznos: string;
+  status: InvoiceStatus;
+  payu_order_id: string | null;
+  created_at: string;
+  placeno_at: string | null;
 }

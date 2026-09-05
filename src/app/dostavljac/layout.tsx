@@ -6,6 +6,7 @@ const NAV_ITEMS = [
   { href: "/dostavljac/zahtevi", label: "Zahtevi za ponude" },
   { href: "/dostavljac/aktivne", label: "Aktivne isporuke" },
   { href: "/dostavljac/cenovnik", label: "Cenovnik i zone" },
+  { href: "/dostavljac/fakture", label: "Fakture" },
 ];
 
 export default async function DostavljacLayout({

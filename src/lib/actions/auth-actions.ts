@@ -9,6 +9,7 @@ import type { UserRow } from "../types";
 export interface ActionState {
   error?: string;
   success?: boolean;
+  message?: string;
 }
 
 function str(formData: FormData, key: string): string {

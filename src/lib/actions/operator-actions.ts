@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { getCurrentUser } from "../auth";
 import { createPreApprovedCourier } from "../queries/couriers";
 import { setCommissionPercent } from "../queries/commission";
+import { generateInvoicesForPeriod, setInvoiceStatus } from "../queries/invoices";
 import type { ActionState } from "./auth-actions";
 
 function str(formData: FormData, key: string): string {
@@ -60,4 +61,37 @@ export async function setCommissionAction(
   await setCommissionPercent(procenat);
   revalidatePath("/operater/provizija");
   return { success: true };
+}
+
+export async function generateInvoicesAction(
+  _prev: ActionState,
+  formData: FormData
+): Promise<ActionState> {
+  try {
+    await requireOperator();
+  } catch (err) {
+    return { error: err instanceof Error ? err.message : "Greška." };
+  }
+
+  const periodStr = String(formData.get("period") ?? "");
+  const periodStart = new Date(`${periodStr}-01T00:00:00Z`);
+  if (Number.isNaN(periodStart.getTime())) {
+    return { error: "Izaberite validan mesec." };
+  }
+
+  const created = await generateInvoicesForPeriod(periodStart);
+  revalidatePath("/operater/provizija");
+  return { success: true, message: `Kreirano faktura: ${created}.` };
+}
+
+export async function markInvoicePaidAction(invoiceId: string): Promise<{ error?: string }> {
+  try {
+    await requireOperator();
+  } catch (err) {
+    return { error: err instanceof Error ? err.message : "Greška." };
+  }
+
+  await setInvoiceStatus(invoiceId, "NAPLACENO");
+  revalidatePath("/operater/provizija");
+  return {};
 }
