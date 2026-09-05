@@ -18,6 +18,11 @@ interface PhotonFeature {
 const BEOGRAD_LON = 20.4573;
 const BEOGRAD_LAT = 44.7866;
 
+// Približan geografski okvir Srbije — tvrdo ograničava rezultate na ovo
+// područje (proximity bias sam po sebi nije bio dovoljan da isključi
+// susedne zemlje, npr. Bosnu i Hercegovinu za ulice istog imena).
+const SRBIJA_BBOX = "18.83,42.23,23.01,46.19"; // minLon,minLat,maxLon,maxLat
+
 function displayName(props: PhotonFeature["properties"]): string {
   const parts: string[] = [];
   if (props.street) {
@@ -41,6 +46,7 @@ export async function GET(req: NextRequest) {
   url.searchParams.set("limit", "5");
   url.searchParams.set("lat", String(BEOGRAD_LAT));
   url.searchParams.set("lon", String(BEOGRAD_LON));
+  url.searchParams.set("bbox", SRBIJA_BBOX);
 
   try {
     const res = await fetch(url);
@@ -48,6 +54,11 @@ export async function GET(req: NextRequest) {
 
     const data = (await res.json()) as { features: PhotonFeature[] };
     const results = (data.features ?? [])
+      .filter((f) => {
+        const country = f.properties.country;
+        // Dodatna provera pored bbox-a, za slučaj graničnih rezultata.
+        return !country || toLatin(country) === "Srbija" || country === "Serbia";
+      })
       .map((f) => ({
         display_name: displayName(f.properties),
         lat: String(f.geometry.coordinates[1]),
