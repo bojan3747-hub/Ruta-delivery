@@ -28,7 +28,7 @@ export default async function AktivacijaPage({
       <div>
         <h1 className="text-2xl font-semibold">Aktivacija naloga — {courier.naziv}</h1>
         <p className="mt-1 text-sm text-neutral-600">
-          RUTA vas je kontaktirala i pripremila nalog na osnovu vaših
+          Ruta-Dostava vas je kontaktirala i pripremila nalog na osnovu vaših
           osnovnih podataka. Dopunite podatke ispod da počnete da primate
           zahteve za dostavu.
         </p>

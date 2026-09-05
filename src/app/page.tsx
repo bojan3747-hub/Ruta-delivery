@@ -19,7 +19,7 @@ export default async function HomePage() {
           Dostava u Beogradu, na jednom mestu
         </h1>
         <p className="mx-auto max-w-2xl text-lg text-neutral-600">
-          RUTA povezuje firme sa proverenim kombi prevoznicima i kurirskim
+          Ruta-Dostava povezuje firme sa proverenim kombi prevoznicima i kurirskim
           službama u Beogradu. Unesite pošiljku, uporedite ponude, pratite
           isporuku — sve na jednoj platformi.
         </p>
@@ -32,7 +32,7 @@ export default async function HomePage() {
           </Link>
           <Link
             href="/prijava"
-            className="rounded-md border border-black/15 px-5 py-2.5 text-sm font-medium hover:bg-black/5"
+            className="rounded-md border border-[#1e3a5f] px-5 py-2.5 text-sm font-medium text-[#1e3a5f] hover:bg-[#1e3a5f]/5"
           >
             Prijavite se
           </Link>
@@ -67,7 +67,7 @@ export default async function HomePage() {
         <h2 className="font-semibold">Vozite kombi ili ste kurirska služba?</h2>
         <p className="mt-1 text-sm text-neutral-600">
           Naloge za dostavljače trenutno kreira operater platforme na osnovu
-          direktnog kontakta. Ako vas je RUTA kontaktirala, aktivirajte nalog
+          direktnog kontakta. Ako vas je Ruta-Dostava kontaktirala, aktivirajte nalog
           preko linka koji ste dobili.
         </p>
       </section>
