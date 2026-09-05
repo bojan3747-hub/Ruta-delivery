@@ -1,5 +1,12 @@
-import Link from "next/link";
 import { requireUser } from "@/lib/auth";
+import { NavTabs } from "@/components/NavTabs";
+
+const NAV_ITEMS = [
+  { href: "/dostavljac", label: "Pregled" },
+  { href: "/dostavljac/zahtevi", label: "Zahtevi za ponude" },
+  { href: "/dostavljac/aktivne", label: "Aktivne isporuke" },
+  { href: "/dostavljac/cenovnik", label: "Cenovnik i zone" },
+];
 
 export default async function DostavljacLayout({
   children,
@@ -8,20 +15,7 @@ export default async function DostavljacLayout({
 
   return (
     <div className="space-y-6">
-      <nav className="flex flex-wrap gap-4 border-b border-black/10 pb-3 text-sm">
-        <Link href="/dostavljac" className="font-medium hover:underline">
-          Pregled
-        </Link>
-        <Link href="/dostavljac/zahtevi" className="hover:underline">
-          Zahtevi za ponude
-        </Link>
-        <Link href="/dostavljac/aktivne" className="hover:underline">
-          Aktivne isporuke
-        </Link>
-        <Link href="/dostavljac/cenovnik" className="hover:underline">
-          Cenovnik i zone
-        </Link>
-      </nav>
+      <NavTabs items={NAV_ITEMS} />
       {children}
     </div>
   );

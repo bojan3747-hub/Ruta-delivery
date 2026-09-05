@@ -1,5 +1,11 @@
-import Link from "next/link";
 import { requireUser } from "@/lib/auth";
+import { NavTabs } from "@/components/NavTabs";
+
+const NAV_ITEMS = [
+  { href: "/operater", label: "Pregled" },
+  { href: "/operater/dostavljaci", label: "Dostavljači" },
+  { href: "/operater/provizija", label: "Provizija" },
+];
 
 export default async function OperaterLayout({
   children,
@@ -8,17 +14,7 @@ export default async function OperaterLayout({
 
   return (
     <div className="space-y-6">
-      <nav className="flex flex-wrap gap-4 border-b border-black/10 pb-3 text-sm">
-        <Link href="/operater" className="font-medium hover:underline">
-          Pregled
-        </Link>
-        <Link href="/operater/dostavljaci" className="hover:underline">
-          Dostavljači
-        </Link>
-        <Link href="/operater/provizija" className="hover:underline">
-          Provizija
-        </Link>
-      </nav>
+      <NavTabs items={NAV_ITEMS} />
       {children}
     </div>
   );
