@@ -8,6 +8,7 @@ interface Suggestion {
   display_name: string;
   lat: string;
   lon: string;
+  has_housenumber: boolean;
 }
 
 const PIN_SVG = `
@@ -35,10 +36,13 @@ export function AddressPicker({
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<LeafletMap | null>(null);
   const markerRef = useRef<Marker | null>(null);
+  // Tekst polja u trenutku poslednjeg izbora iz liste — dok se ne promeni,
+  // ne pokrećemo novu pretragu (izbor ne sme da obriše broj koji je korisnik ukucao).
+  const resolvedQueryRef = useRef<string | null>(null);
 
   // Pretraga adresa (debounced), preko naše /api/geocode rute.
   useEffect(() => {
-    if (query.trim().length < 3 || selected?.display_name === query) {
+    if (query.trim().length < 3 || query === resolvedQueryRef.current) {
       setSuggestions([]);
       setLoading(false);
       return;
@@ -64,7 +68,7 @@ export function AddressPicker({
       controller.abort();
       setLoading(false);
     };
-  }, [query, selected]);
+  }, [query]);
 
   // Mapa se iscrtava tek kad je adresa izabrana iz predloga.
   useEffect(() => {
@@ -148,7 +152,9 @@ export function AddressPicker({
                 type="button"
                 onMouseDown={() => {
                   setSelected(s);
-                  setQuery(s.display_name);
+                  // Ne prepisujemo uneti tekst predlogom — ako korisnik unese
+                  // broj koji OSM baza nema, taj broj ostaje sačuvan u polju.
+                  resolvedQueryRef.current = query;
                   setSuggestions([]);
                   setOpen(false);
                 }}
@@ -162,10 +168,17 @@ export function AddressPicker({
       )}
 
       {selected && (
-        <div
-          ref={mapContainerRef}
-          className="mt-2 h-40 w-full rounded-md border border-black/10"
-        />
+        <>
+          <div
+            ref={mapContainerRef}
+            className="mt-2 h-40 w-full rounded-md border border-black/10"
+          />
+          {!selected.has_housenumber && (
+            <p className="mt-1 text-xs text-neutral-500">
+              Mapa prikazuje ulicu — tačan kućni broj nije uvek precizno pozicioniran.
+            </p>
+          )}
+        </>
       )}
     </div>
   );

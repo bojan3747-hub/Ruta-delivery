@@ -52,6 +52,7 @@ export async function GET(req: NextRequest) {
         display_name: displayName(f.properties),
         lat: String(f.geometry.coordinates[1]),
         lon: String(f.geometry.coordinates[0]),
+        has_housenumber: Boolean(f.properties.housenumber),
       }))
       .filter((r) => r.display_name);
 
