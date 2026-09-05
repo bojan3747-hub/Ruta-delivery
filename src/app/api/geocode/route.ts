@@ -14,14 +14,15 @@ interface PhotonFeature {
   };
 }
 
-// Beograd, za relevantnije rezultate pretrage (proximity bias).
+// Beograd, za sortiranje rezultata po blizini centru grada.
 const BEOGRAD_LON = 20.4573;
 const BEOGRAD_LAT = 44.7866;
 
-// Približan geografski okvir Srbije — tvrdo ograničava rezultate na ovo
-// područje (proximity bias sam po sebi nije bio dovoljan da isključi
-// susedne zemlje, npr. Bosnu i Hercegovinu za ulice istog imena).
-const SRBIJA_BBOX = "18.83,42.23,23.01,46.19"; // minLon,minLat,maxLon,maxLat
+// RUTA-Dostava trenutno radi isključivo u Beogradu (sve zone u aplikaciji su
+// beogradske opštine), pa pretragu tvrdo ograničavamo na širu teritoriju
+// grada — ovo isključuje i istoimene ulice u drugim gradovima/zemljama
+// (npr. "Kneza Miloša" postoji i van Beograda) i selâ širom Srbije.
+const BEOGRAD_BBOX = "20.15,44.60,20.75,44.95"; // minLon,minLat,maxLon,maxLat
 
 function displayName(props: PhotonFeature["properties"]): string {
   const parts: string[] = [];
@@ -35,6 +36,12 @@ function displayName(props: PhotonFeature["properties"]): string {
   return toLatin(parts.join(", "));
 }
 
+function distanceFromBeograd(lat: number, lon: number): number {
+  // Nije potrebna prava Haversine formula — na ovako maloj oblasti
+  // (jedan grad) obična euklidska razdaljina dovoljno dobro sortira.
+  return Math.hypot(lat - BEOGRAD_LAT, lon - BEOGRAD_LON);
+}
+
 export async function GET(req: NextRequest) {
   const q = req.nextUrl.searchParams.get("q") ?? "";
   if (q.trim().length < 3) return NextResponse.json([]);
@@ -43,29 +50,39 @@ export async function GET(req: NextRequest) {
   // bez potrebe za nalogom/ključem, i osetno brži od javnog Nominatim servera.
   const url = new URL("https://photon.komoot.io/api/");
   url.searchParams.set("q", q);
-  url.searchParams.set("limit", "5");
+  url.searchParams.set("limit", "15");
   url.searchParams.set("lat", String(BEOGRAD_LAT));
   url.searchParams.set("lon", String(BEOGRAD_LON));
-  url.searchParams.set("bbox", SRBIJA_BBOX);
+  url.searchParams.set("bbox", BEOGRAD_BBOX);
 
   try {
     const res = await fetch(url);
     if (!res.ok) return NextResponse.json([]);
 
     const data = (await res.json()) as { features: PhotonFeature[] };
+    const seen = new Set<string>();
     const results = (data.features ?? [])
-      .filter((f) => {
-        const country = f.properties.country;
-        // Dodatna provera pored bbox-a, za slučaj graničnih rezultata.
-        return !country || toLatin(country) === "Srbija" || country === "Serbia";
-      })
       .map((f) => ({
         display_name: displayName(f.properties),
-        lat: String(f.geometry.coordinates[1]),
-        lon: String(f.geometry.coordinates[0]),
+        lat: f.geometry.coordinates[1],
+        lon: f.geometry.coordinates[0],
         has_housenumber: Boolean(f.properties.housenumber),
       }))
-      .filter((r) => r.display_name);
+      .filter((r) => {
+        if (!r.display_name || seen.has(r.display_name)) return false;
+        seen.add(r.display_name);
+        return true;
+      })
+      .sort(
+        (a, b) => distanceFromBeograd(a.lat, a.lon) - distanceFromBeograd(b.lat, b.lon)
+      )
+      .slice(0, 5)
+      .map((r) => ({
+        display_name: r.display_name,
+        lat: String(r.lat),
+        lon: String(r.lon),
+        has_housenumber: r.has_housenumber,
+      }));
 
     return NextResponse.json(results);
   } catch {
