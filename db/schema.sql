@@ -106,13 +106,17 @@ CREATE TABLE IF NOT EXISTS couriers (
   ocena_prosek      NUMERIC(3, 2),
   broj_ocena        INTEGER NOT NULL DEFAULT 0,
   aktivacioni_token UUID NOT NULL DEFAULT gen_random_uuid(),
-  payu_customer_token TEXT,
+  payment_customer_token TEXT,
   created_at        TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
 -- Dodato posle prvog izdanja; ALTER (pored kolone gore) da bi stiglo i na
--- baze koje već imaju tabelu couriers.
-ALTER TABLE couriers ADD COLUMN IF NOT EXISTS payu_customer_token TEXT;
+-- baze koje već imaju tabelu couriers. Kolona se zvala payu_customer_token
+-- dok je provajder za naplatu bio predviđen kao PayU; posle se ispostavilo
+-- da PayU ne pokriva Srbiju, pa je preimenovana pre nego što je ijedan red
+-- ikad upisan u nju.
+ALTER TABLE couriers ADD COLUMN IF NOT EXISTS payment_customer_token TEXT;
+ALTER TABLE couriers DROP COLUMN IF EXISTS payu_customer_token;
 
 CREATE TABLE IF NOT EXISTS courier_zones (
   id         UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -190,19 +194,19 @@ ON CONFLICT (id) DO NOTHING;
 
 -- Mesečna faktura provizije po dostavljaču (KAN-12 nastavak): operater
 -- generiše po jednu fakturu po dostavljaču za svaki kalendarski mesec u
--- kom je dostavljač imao isporučene porudžbine. Naplata (PayU, kartica na
--- dosijeu iz couriers.payu_customer_token) je posebna, kasnija faza —
--- ova tabela samo prati iznos i status po periodu.
+-- kom je dostavljač imao isporučene porudžbine. Naplata (servis za
+-- naplatu, kartica na dosijeu iz couriers.payment_customer_token) je
+-- posebna, kasnija faza — ova tabela samo prati iznos i status po periodu.
 CREATE TABLE IF NOT EXISTS commission_invoices (
-  id            UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  courier_id    UUID NOT NULL REFERENCES couriers(id) ON DELETE CASCADE,
-  period_start  DATE NOT NULL,
-  period_end    DATE NOT NULL,
-  iznos         NUMERIC(10, 2) NOT NULL,
-  status        invoice_status NOT NULL DEFAULT 'NEPLACENO',
-  payu_order_id TEXT,
-  created_at    TIMESTAMPTZ NOT NULL DEFAULT now(),
-  placeno_at    TIMESTAMPTZ,
+  id                 UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  courier_id         UUID NOT NULL REFERENCES couriers(id) ON DELETE CASCADE,
+  period_start       DATE NOT NULL,
+  period_end         DATE NOT NULL,
+  iznos              NUMERIC(10, 2) NOT NULL,
+  status             invoice_status NOT NULL DEFAULT 'NEPLACENO',
+  naplata_referenca  TEXT,
+  created_at         TIMESTAMPTZ NOT NULL DEFAULT now(),
+  placeno_at         TIMESTAMPTZ,
   UNIQUE (courier_id, period_start)
 );
 

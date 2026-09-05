@@ -86,7 +86,7 @@ export interface CourierRow {
   ocena_prosek: string | null;
   broj_ocena: number;
   aktivacioni_token: string;
-  payu_customer_token: string | null;
+  payment_customer_token: string | null;
   created_at: string;
 }
 
@@ -161,7 +161,7 @@ export interface CommissionInvoiceRow {
   period_end: string;
   iznos: string;
   status: InvoiceStatus;
-  payu_order_id: string | null;
+  naplata_referenca: string | null;
   created_at: string;
   placeno_at: string | null;
 }

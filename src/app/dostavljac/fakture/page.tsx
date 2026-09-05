@@ -10,7 +10,7 @@ export default async function FakturePage() {
   if (!courier) return null;
 
   const invoices = await listInvoicesForCourier(courier.id);
-  const karticaRegistrovana = Boolean(courier.payu_customer_token);
+  const karticaRegistrovana = Boolean(courier.payment_customer_token);
 
   return (
     <div className="space-y-6">

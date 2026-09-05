@@ -39,7 +39,7 @@ export default async function ProvizijaPage() {
           <h2 className="font-semibold">Mesečne fakture dostavljača</h2>
           <p className="mt-1 text-sm text-neutral-600">
             Generiše po jednu fakturu po dostavljaču, za zbir provizije od
-            svih isporuka u izabranom mesecu. Naplata kartice (PayU) je
+            svih isporuka u izabranom mesecu. Naplata kartice (AllSecure) je
             zasebna faza — za sada se ovde ručno prati status.
           </p>
         </div>
