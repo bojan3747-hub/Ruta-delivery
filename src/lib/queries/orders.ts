@@ -11,6 +11,8 @@ export interface OrderWithShipment extends OrderRow {
   courier_naziv: string;
   courier_telefon: string;
   client_naziv?: string;
+  client_kontakt_ime?: string;
+  client_telefon?: string;
 }
 
 const NEXT_STATUS: Record<OrderStatus, OrderStatus | null> = {
@@ -57,10 +59,13 @@ export async function listOrdersForCourier(
 ): Promise<OrderWithShipment[]> {
   return query<OrderWithShipment>(
     `SELECT o.*, s.zona_preuzimanja, s.zona_isporuke, s.adresa_preuzimanja,
-            s.adresa_isporuke, s.tip, c.naziv AS courier_naziv, c.telefon AS courier_telefon
+            s.adresa_isporuke, s.tip, c.naziv AS courier_naziv, c.telefon AS courier_telefon,
+            u.ime AS client_kontakt_ime, u.telefon AS client_telefon
      FROM orders o
      JOIN shipments s ON s.id = o.shipment_id
      JOIN couriers c ON c.id = o.courier_id
+     JOIN companies comp ON comp.id = s.client_id
+     JOIN users u ON u.id = comp.user_id
      WHERE o.courier_id = $1
        AND o.status NOT IN ('ISPORUCENO', 'OTKAZANO')
      ORDER BY o.created_at ASC`,
