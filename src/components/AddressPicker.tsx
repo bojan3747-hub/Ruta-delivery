@@ -29,6 +29,7 @@ export function AddressPicker({
   const [query, setQuery] = useState("");
   const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
   const [open, setOpen] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [selected, setSelected] = useState<Suggestion | null>(null);
 
   const mapContainerRef = useRef<HTMLDivElement>(null);
@@ -39,8 +40,10 @@ export function AddressPicker({
   useEffect(() => {
     if (query.trim().length < 3 || selected?.display_name === query) {
       setSuggestions([]);
+      setLoading(false);
       return;
     }
+    setLoading(true);
     const controller = new AbortController();
     const timeout = setTimeout(async () => {
       try {
@@ -52,11 +55,14 @@ export function AddressPicker({
         setOpen(true);
       } catch {
         // Pretraga je pomoćna funkcija — tiho odustani (korisnik i dalje može ručno da otkuca adresu).
+      } finally {
+        setLoading(false);
       }
-    }, 500);
+    }, 250);
     return () => {
       clearTimeout(timeout);
       controller.abort();
+      setLoading(false);
     };
   }, [query, selected]);
 
@@ -83,7 +89,8 @@ export function AddressPicker({
           zoomControl: false,
           attributionControl: true,
         }).setView([lat, lon], 15);
-        L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
+        L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+          subdomains: "abc",
           attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
           maxZoom: 19,
         }).addTo(map);
@@ -127,7 +134,13 @@ export function AddressPicker({
         className={inputClass}
       />
 
-      {open && suggestions.length > 0 && (
+      {loading && (
+        <p className="absolute z-10 mt-1 w-full rounded-md border border-black/15 bg-white px-3 py-2 text-sm text-neutral-500 shadow-md">
+          Tražim…
+        </p>
+      )}
+
+      {!loading && open && suggestions.length > 0 && (
         <ul className="absolute z-10 mt-1 max-h-56 w-full overflow-auto rounded-md border border-black/15 bg-white text-sm shadow-md">
           {suggestions.map((s, i) => (
             <li key={i}>
