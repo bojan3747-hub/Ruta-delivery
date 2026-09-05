@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { toLatin } from "@/lib/cyrillic";
 
 interface PhotonFeature {
   properties: {
@@ -26,7 +27,7 @@ function displayName(props: PhotonFeature["properties"]): string {
   }
   if (props.city) parts.push(props.city);
   if (props.country) parts.push(props.country);
-  return parts.join(", ");
+  return toLatin(parts.join(", "));
 }
 
 export async function GET(req: NextRequest) {
