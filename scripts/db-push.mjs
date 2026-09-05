@@ -1,9 +1,16 @@
 import "dotenv/config";
-import { spawnSync } from "node:child_process";
+import { readFileSync } from "node:fs";
+import { fileURLToPath } from "node:url";
+import { Client } from "pg";
 
-const result = spawnSync(
-  "psql",
-  [process.env.DATABASE_URL ?? "", "-f", "db/schema.sql"],
-  { stdio: "inherit" }
-);
-process.exit(result.status ?? 1);
+const schemaPath = fileURLToPath(new URL("../db/schema.sql", import.meta.url));
+const schema = readFileSync(schemaPath, "utf8");
+
+const client = new Client({ connectionString: process.env.DATABASE_URL });
+await client.connect();
+try {
+  await client.query(schema);
+  console.log("Schema applied.");
+} finally {
+  await client.end();
+}

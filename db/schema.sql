@@ -9,7 +9,8 @@
 -- binaries.prisma.sh (needed to download Prisma's engine) is blocked by
 -- network policy, so the CLI cannot fetch its engine here. Everything in
 -- this file is applied with `npm run db:push` (see package.json), which
--- just pipes this file into psql.
+-- runs it through a plain `pg` client connection (scripts/db-push.mjs) —
+-- no system `psql` binary required.
 
 CREATE EXTENSION IF NOT EXISTS pgcrypto;
 
