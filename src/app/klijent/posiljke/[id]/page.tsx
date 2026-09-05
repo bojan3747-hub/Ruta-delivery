@@ -61,6 +61,12 @@ export default async function PosiljkaDetailPage({
         </span>
       </div>
 
+      {shipment.deklarisana_vrednost && (
+        <p className="text-sm text-neutral-500">
+          Deklarisana vrednost: {formatMoney(shipment.deklarisana_vrednost)}
+        </p>
+      )}
+
       {shipment.napomena && (
         <p className="rounded-md bg-neutral-100 px-3 py-2 text-sm text-neutral-700">
           Napomena: {shipment.napomena}

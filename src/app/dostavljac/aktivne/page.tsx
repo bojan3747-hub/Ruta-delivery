@@ -42,6 +42,11 @@ export default async function AktivneIsporukePage() {
                       Kontakt: {o.client_kontakt_ime} · {o.client_telefon}
                     </p>
                   )}
+                  {o.deklarisana_vrednost && (
+                    <p className="mt-1 text-sm text-neutral-500">
+                      Odgovarate za pošiljku do: {formatMoney(o.deklarisana_vrednost)}
+                    </p>
+                  )}
                 </div>
                 <div className="flex flex-col items-end gap-2">
                   <StatusBadge status={o.status} label={ORDER_STATUS_LABELS[o.status]} />

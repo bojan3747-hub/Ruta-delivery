@@ -126,9 +126,14 @@ CREATE TABLE IF NOT EXISTS shipments (
   termin_detalji      TEXT,
   napomena            TEXT,
   fotografija_url     TEXT,
+  deklarisana_vrednost NUMERIC(10, 2),
   status              shipment_status NOT NULL DEFAULT 'OTVORENA',
   created_at          TIMESTAMPTZ NOT NULL DEFAULT now()
 );
+
+-- Added after the initial release; ALTER (not just the column above) so it
+-- also lands on databases that already have a shipments table.
+ALTER TABLE shipments ADD COLUMN IF NOT EXISTS deklarisana_vrednost NUMERIC(10, 2);
 
 CREATE TABLE IF NOT EXISTS offers (
   id                    UUID PRIMARY KEY DEFAULT gen_random_uuid(),

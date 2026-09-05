@@ -20,13 +20,14 @@ export async function createShipment(input: {
   terminDetalji?: string;
   napomena?: string;
   fotografijaUrl?: string;
+  deklarisanaVrednost: number;
 }): Promise<ShipmentRow> {
   const row = await queryOne<ShipmentRow>(
     `INSERT INTO shipments (
        client_id, zona_preuzimanja, zona_isporuke, adresa_preuzimanja,
        adresa_isporuke, tip, hitno, nestandardna, zeljeni_termin,
-       termin_detalji, napomena, fotografija_url
-     ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12)
+       termin_detalji, napomena, fotografija_url, deklarisana_vrednost
+     ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13)
      RETURNING *`,
     [
       input.clientId,
@@ -41,6 +42,7 @@ export async function createShipment(input: {
       input.terminDetalji ?? null,
       input.napomena ?? null,
       input.fotografijaUrl ?? null,
+      input.deklarisanaVrednost,
     ]
   );
   if (!row) throw new Error("Kreiranje pošiljke nije uspelo");

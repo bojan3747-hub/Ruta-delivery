@@ -107,6 +107,7 @@ export interface ShipmentRow {
   termin_detalji: string | null;
   napomena: string | null;
   fotografija_url: string | null;
+  deklarisana_vrednost: string | null;
   status: ShipmentStatus;
   created_at: string;
 }

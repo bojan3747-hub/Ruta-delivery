@@ -30,6 +30,7 @@ export async function createShipmentAction(
   const zeljeniTermin = str(formData, "zeljeniTermin") as TerminType;
   const terminDetalji = str(formData, "terminDetalji");
   const napomena = str(formData, "napomena");
+  const deklarisanaVrednost = Number(str(formData, "deklarisanaVrednost"));
 
   if (
     !zonaPreuzimanja ||
@@ -40,6 +41,9 @@ export async function createShipmentAction(
     !zeljeniTermin
   ) {
     return { error: "Popunite sva obavezna polja." };
+  }
+  if (!Number.isFinite(deklarisanaVrednost) || deklarisanaVrednost <= 0) {
+    return { error: "Unesite validnu deklarisanu vrednost pošiljke (veću od 0)." };
   }
 
   const shipment = await createShipment({
@@ -54,6 +58,7 @@ export async function createShipmentAction(
     zeljeniTermin,
     terminDetalji: terminDetalji || undefined,
     napomena: napomena || undefined,
+    deklarisanaVrednost,
   });
 
   if (!nestandardna) {

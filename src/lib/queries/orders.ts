@@ -8,6 +8,7 @@ export interface OrderWithShipment extends OrderRow {
   adresa_preuzimanja: string;
   adresa_isporuke: string;
   tip: ShipmentRow["tip"];
+  deklarisana_vrednost: ShipmentRow["deklarisana_vrednost"];
   courier_naziv: string;
   courier_telefon: string;
   client_naziv?: string;
@@ -44,7 +45,7 @@ export async function listOrdersForClient(
 ): Promise<OrderWithShipment[]> {
   return query<OrderWithShipment>(
     `SELECT o.*, s.zona_preuzimanja, s.zona_isporuke, s.adresa_preuzimanja,
-            s.adresa_isporuke, s.tip, c.naziv AS courier_naziv, c.telefon AS courier_telefon
+            s.adresa_isporuke, s.tip, s.deklarisana_vrednost, c.naziv AS courier_naziv, c.telefon AS courier_telefon
      FROM orders o
      JOIN shipments s ON s.id = o.shipment_id
      JOIN couriers c ON c.id = o.courier_id
@@ -59,7 +60,7 @@ export async function listOrdersForCourier(
 ): Promise<OrderWithShipment[]> {
   return query<OrderWithShipment>(
     `SELECT o.*, s.zona_preuzimanja, s.zona_isporuke, s.adresa_preuzimanja,
-            s.adresa_isporuke, s.tip, c.naziv AS courier_naziv, c.telefon AS courier_telefon,
+            s.adresa_isporuke, s.tip, s.deklarisana_vrednost, c.naziv AS courier_naziv, c.telefon AS courier_telefon,
             u.ime AS client_kontakt_ime, u.telefon AS client_telefon
      FROM orders o
      JOIN shipments s ON s.id = o.shipment_id
@@ -78,7 +79,7 @@ export async function listCompletedOrdersForCourier(
 ): Promise<OrderWithShipment[]> {
   return query<OrderWithShipment>(
     `SELECT o.*, s.zona_preuzimanja, s.zona_isporuke, s.adresa_preuzimanja,
-            s.adresa_isporuke, s.tip, c.naziv AS courier_naziv, c.telefon AS courier_telefon
+            s.adresa_isporuke, s.tip, s.deklarisana_vrednost, c.naziv AS courier_naziv, c.telefon AS courier_telefon
      FROM orders o
      JOIN shipments s ON s.id = o.shipment_id
      JOIN couriers c ON c.id = o.courier_id
@@ -94,7 +95,7 @@ export async function listAllOrdersForOperator(): Promise<
 > {
   return query<OrderWithShipment>(
     `SELECT o.*, s.zona_preuzimanja, s.zona_isporuke, s.adresa_preuzimanja,
-            s.adresa_isporuke, s.tip, c.naziv AS courier_naziv, c.telefon AS courier_telefon,
+            s.adresa_isporuke, s.tip, s.deklarisana_vrednost, c.naziv AS courier_naziv, c.telefon AS courier_telefon,
             comp.naziv AS client_naziv
      FROM orders o
      JOIN shipments s ON s.id = o.shipment_id

@@ -67,6 +67,23 @@ export function ShipmentForm() {
       </div>
 
       <div>
+        <label className="block text-sm font-medium">
+          Deklarisana vrednost pošiljke (RSD) *
+        </label>
+        <input
+          type="number"
+          name="deklarisanaVrednost"
+          min="1"
+          step="1"
+          required
+          className={inputClass}
+        />
+        <p className="mt-1 text-xs text-neutral-500">
+          Dostavljač odgovara za pošiljku do ovog iznosa, od preuzimanja do isporuke.
+        </p>
+      </div>
+
+      <div>
         <label className="block text-sm font-medium">Tip pošiljke *</label>
         <select name="tip" required className={inputClass} defaultValue="">
           <option value="" disabled>

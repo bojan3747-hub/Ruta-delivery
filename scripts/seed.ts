@@ -137,6 +137,7 @@ async function main() {
     zeljeniTermin: "DANAS_DO",
     terminDetalji: "do 17h",
     napomena: "Pozvati pre dolaska.",
+    deklarisanaVrednost: 15000,
   });
   await createAutoOffers(standardna);
 
@@ -152,6 +153,7 @@ async function main() {
     zeljeniTermin: "ZAKAZANO",
     terminDetalji: "Sutra ujutru",
     napomena: "3 palete povrća, potrebna rampa za utovar.",
+    deklarisanaVrednost: 40000,
   });
 
   console.log("\nGotovo. Nalozi za prijavu:");

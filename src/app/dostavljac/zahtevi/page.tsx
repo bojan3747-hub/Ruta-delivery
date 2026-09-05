@@ -4,7 +4,7 @@ import {
   listOpenManualRequestsForCourier,
 } from "@/lib/queries/shipments";
 import { ZONE_LABELS } from "@/lib/zones";
-import { SHIPMENT_TYPE_LABELS, TERMIN_LABELS } from "@/lib/labels";
+import { SHIPMENT_TYPE_LABELS, TERMIN_LABELS, formatMoney } from "@/lib/labels";
 import { ManualOfferForm } from "@/components/ManualOfferForm";
 
 function minutesLeft(createdAt: string): number {
@@ -47,6 +47,11 @@ export default async function ZahteviPage() {
                     {s.termin_detalji ? ` (${s.termin_detalji})` : ""}
                     {s.hitno ? " · Hitno" : ""}
                   </p>
+                  {s.deklarisana_vrednost && (
+                    <p className="mt-1 text-sm text-neutral-500">
+                      Deklarisana vrednost: {formatMoney(s.deklarisana_vrednost)}
+                    </p>
+                  )}
                   {s.napomena && (
                     <p className="mt-1 text-sm text-neutral-700">{s.napomena}</p>
                   )}
