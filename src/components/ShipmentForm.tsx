@@ -9,6 +9,7 @@ import { ZONES, ZONE_LABELS } from "@/lib/zones";
 import { SHIPMENT_TYPE_LABELS, TERMIN_LABELS } from "@/lib/labels";
 import { FormMessage } from "./FormMessage";
 import { SubmitButton } from "./SubmitButton";
+import { AddressPicker } from "./AddressPicker";
 
 const initialState: ActionState = {};
 const inputClass =
@@ -52,18 +53,8 @@ export function ShipmentForm() {
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2">
-        <div>
-          <label className="block text-sm font-medium">
-            Tačna adresa preuzimanja *
-          </label>
-          <input name="adresaPreuzimanja" required className={inputClass} />
-        </div>
-        <div>
-          <label className="block text-sm font-medium">
-            Tačna adresa isporuke *
-          </label>
-          <input name="adresaIsporuke" required className={inputClass} />
-        </div>
+        <AddressPicker name="adresaPreuzimanja" label="Tačna adresa preuzimanja *" required />
+        <AddressPicker name="adresaIsporuke" label="Tačna adresa isporuke *" required />
       </div>
 
       <div>
