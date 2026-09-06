@@ -74,15 +74,24 @@ export async function listOrdersForCourier(
   );
 }
 
+export interface CompletedOrderForCourier extends OrderWithShipment {
+  client_naziv: string;
+  client_rating_ocena: number | null;
+  client_rating_komentar: string | null;
+}
+
 export async function listCompletedOrdersForCourier(
   courierId: string
-): Promise<OrderWithShipment[]> {
-  return query<OrderWithShipment>(
+): Promise<CompletedOrderForCourier[]> {
+  return query<CompletedOrderForCourier>(
     `SELECT o.*, s.zona_preuzimanja, s.zona_isporuke, s.adresa_preuzimanja,
-            s.adresa_isporuke, s.tip, s.deklarisana_vrednost, c.naziv AS courier_naziv, c.telefon AS courier_telefon
+            s.adresa_isporuke, s.tip, s.deklarisana_vrednost, c.naziv AS courier_naziv, c.telefon AS courier_telefon,
+            comp.naziv AS client_naziv, r.ocena AS client_rating_ocena, r.komentar AS client_rating_komentar
      FROM orders o
      JOIN shipments s ON s.id = o.shipment_id
      JOIN couriers c ON c.id = o.courier_id
+     JOIN companies comp ON comp.id = s.client_id
+     LEFT JOIN ratings r ON r.order_id = o.id AND r.smer = 'DOSTAVLJAC_KA_KLIJENTU'
      WHERE o.courier_id = $1 AND o.status = 'ISPORUCENO'
      ORDER BY o.updated_at DESC
      LIMIT 20`,

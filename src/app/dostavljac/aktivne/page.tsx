@@ -5,6 +5,7 @@ import { ORDER_STATUS_LABELS, SHIPMENT_TYPE_LABELS, formatMoney } from "@/lib/la
 import { StatusBadge } from "@/components/StatusBadge";
 import { AdvanceOrderButton } from "@/components/AdvanceOrderButton";
 import { CancelOrderButton } from "@/components/CancelOrderButton";
+import { RatingForm } from "@/components/RatingForm";
 
 export default async function AktivneIsporukePage() {
   const user = await getCurrentUser();
@@ -63,30 +64,33 @@ export default async function AktivneIsporukePage() {
       {completed.length > 0 && (
         <div className="space-y-3">
           <h2 className="font-semibold">Nedavno završene</h2>
-          <div className="overflow-x-auto rounded-lg border border-black/10 bg-white">
-            <table className="w-full text-left text-sm">
-              <thead className="border-b border-black/10 text-neutral-500">
-                <tr>
-                  <th className="px-4 py-2 font-medium">Ruta</th>
-                  <th className="px-4 py-2 font-medium">Cena</th>
-                  <th className="px-4 py-2 font-medium">Provizija platforme</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-black/5">
-                {completed.map((o) => (
-                  <tr key={o.id}>
-                    <td className="px-4 py-2">
+          <ul className="space-y-3">
+            {completed.map((o) => (
+              <li key={o.id} className="rounded-lg border border-black/10 bg-white p-4 text-sm">
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <div>
+                    <p className="font-medium">
                       {ZONE_LABELS[o.zona_preuzimanja]} → {ZONE_LABELS[o.zona_isporuke]}
-                    </td>
-                    <td className="px-4 py-2">{formatMoney(o.cena)}</td>
-                    <td className="px-4 py-2">
-                      {o.provizija ? formatMoney(o.provizija) : "—"}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                    </p>
+                    <p className="text-neutral-500">
+                      Klijent: {o.client_naziv} · {formatMoney(o.cena)}
+                      {o.provizija ? ` · Provizija: ${formatMoney(o.provizija)}` : ""}
+                    </p>
+                  </div>
+                </div>
+                {o.client_rating_ocena ? (
+                  <p className="mt-2 text-neutral-600">
+                    Ocenili ste klijenta sa {o.client_rating_ocena} ★
+                    {o.client_rating_komentar ? ` — "${o.client_rating_komentar}"` : ""}
+                  </p>
+                ) : (
+                  <div className="mt-3">
+                    <RatingForm orderId={o.id} target="klijent" />
+                  </div>
+                )}
+              </li>
+            ))}
+          </ul>
         </div>
       )}
     </div>

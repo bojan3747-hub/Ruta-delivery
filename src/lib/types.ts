@@ -68,6 +68,8 @@ export interface CompanyRow {
   naziv: string;
   pib: string | null;
   adresa: string | null;
+  ocena_prosek: string | null;
+  broj_ocena: number;
   created_at: string;
 }
 
@@ -86,6 +88,7 @@ export interface CourierRow {
   dnevni_kapacitet: number;
   status: CourierStatus;
   dostupan: boolean;
+  verifikovan: boolean;
   izvor_kontakta: string | null;
   ocena_prosek: string | null;
   broj_ocena: number;
@@ -145,9 +148,12 @@ export interface OrderRow {
   updated_at: string;
 }
 
+export type RatingDirection = "KLIJENT_KA_DOSTAVLJACU" | "DOSTAVLJAC_KA_KLIJENTU";
+
 export interface RatingRow {
   id: string;
   order_id: string;
+  smer: RatingDirection;
   ocena: number;
   komentar: string | null;
   created_at: string;

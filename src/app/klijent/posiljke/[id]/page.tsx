@@ -36,7 +36,9 @@ export default async function PosiljkaDetailPage({
   const order = await getOrderByShipmentId(shipment.id);
   const offers = order ? [] : await listOffersForShipment(shipment.id);
   const courier = order ? await getCourierById(order.courier_id) : null;
-  const rating = order ? await getRatingForOrder(order.id) : null;
+  const rating = order
+    ? await getRatingForOrder(order.id, "KLIJENT_KA_DOSTAVLJACU")
+    : null;
 
   return (
     <div className="mx-auto max-w-2xl space-y-6">
@@ -97,7 +99,17 @@ export default async function PosiljkaDetailPage({
                   className="flex flex-wrap items-center justify-between gap-3 px-4 py-3"
                 >
                   <div>
-                    <p className="font-medium">{o.courier_naziv}</p>
+                    <p className="flex items-center gap-1.5 font-medium">
+                      {o.courier_naziv}
+                      {o.courier_verifikovan && (
+                        <span
+                          title="Operater je proverio registraciju ovog dostavljača"
+                          className="rounded-full bg-emerald-100 px-1.5 py-0.5 text-xs font-medium text-emerald-800"
+                        >
+                          ✓ Verifikovan
+                        </span>
+                      )}
+                    </p>
                     <p className="text-sm text-neutral-500">
                       ETA ~{o.procenjeno_vreme_min} min
                       {o.courier_ocena_prosek
@@ -161,7 +173,7 @@ export default async function PosiljkaDetailPage({
                 {rating.komentar ? ` — “${rating.komentar}”` : ""}
               </p>
             ) : (
-              <RatingForm orderId={order.id} />
+              <RatingForm orderId={order.id} target="dostavljac" />
             ))}
 
           {order.status === "OTKAZANO" && (

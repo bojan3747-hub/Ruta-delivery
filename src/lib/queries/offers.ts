@@ -8,6 +8,7 @@ export interface OfferWithCourier extends OfferRow {
   courier_naziv: string;
   courier_tip_vozila: string | null;
   courier_ocena_prosek: string | null;
+  courier_verifikovan: boolean;
 }
 
 /**
@@ -70,7 +71,7 @@ export async function listOffersForShipment(
 ): Promise<OfferWithCourier[]> {
   return query<OfferWithCourier>(
     `SELECT o.*, c.naziv AS courier_naziv, c.tip_vozila AS courier_tip_vozila,
-            c.ocena_prosek AS courier_ocena_prosek
+            c.ocena_prosek AS courier_ocena_prosek, c.verifikovan AS courier_verifikovan
      FROM offers o
      JOIN couriers c ON c.id = o.courier_id
      WHERE o.shipment_id = $1 AND o.status = 'POSLATA'

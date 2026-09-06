@@ -217,6 +217,17 @@ export async function setCourierStatus(
   ]);
 }
 
+/** Operator marks (or unmarks) a courier as verified (checked PIB/APR registration). */
+export async function setCourierVerified(
+  courierId: string,
+  verifikovan: boolean
+): Promise<void> {
+  await query("UPDATE couriers SET verifikovan = $1 WHERE id = $2", [
+    verifikovan,
+    courierId,
+  ]);
+}
+
 /** Courier pauses/resumes receiving new offers without deactivating the account. */
 export async function setCourierAvailability(
   courierId: string,

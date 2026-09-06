@@ -67,6 +67,10 @@ DO $$ BEGIN
   CREATE TYPE invoice_status AS ENUM ('NEPLACENO', 'NAPLACENO', 'NEUSPESNO');
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
+DO $$ BEGIN
+  CREATE TYPE rating_direction AS ENUM ('KLIJENT_KA_DOSTAVLJACU', 'DOSTAVLJAC_KA_KLIJENTU');
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
 -- ---------------------------------------------------------------------------
 -- Tables
 -- ---------------------------------------------------------------------------
@@ -96,8 +100,13 @@ CREATE TABLE IF NOT EXISTS companies (
   naziv      TEXT NOT NULL,
   pib        TEXT,
   adresa     TEXT,
+  ocena_prosek NUMERIC(3, 2),
+  broj_ocena   INTEGER NOT NULL DEFAULT 0,
   created_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
+
+ALTER TABLE companies ADD COLUMN IF NOT EXISTS ocena_prosek NUMERIC(3, 2);
+ALTER TABLE companies ADD COLUMN IF NOT EXISTS broj_ocena INTEGER NOT NULL DEFAULT 0;
 
 CREATE TABLE IF NOT EXISTS couriers (
   id                UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -114,6 +123,7 @@ CREATE TABLE IF NOT EXISTS couriers (
   dnevni_kapacitet  INTEGER NOT NULL DEFAULT 0,
   status            courier_status NOT NULL DEFAULT 'NA_POTVRDI',
   dostupan          BOOLEAN NOT NULL DEFAULT true,
+  verifikovan       BOOLEAN NOT NULL DEFAULT false,
   izvor_kontakta    TEXT,
   ocena_prosek      NUMERIC(3, 2),
   broj_ocena        INTEGER NOT NULL DEFAULT 0,
@@ -130,6 +140,7 @@ CREATE TABLE IF NOT EXISTS couriers (
 ALTER TABLE couriers ADD COLUMN IF NOT EXISTS payment_customer_token TEXT;
 ALTER TABLE couriers DROP COLUMN IF EXISTS payu_customer_token;
 ALTER TABLE couriers ADD COLUMN IF NOT EXISTS dostupan BOOLEAN NOT NULL DEFAULT true;
+ALTER TABLE couriers ADD COLUMN IF NOT EXISTS verifikovan BOOLEAN NOT NULL DEFAULT false;
 
 CREATE TABLE IF NOT EXISTS courier_zones (
   id         UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -194,11 +205,20 @@ ALTER TABLE orders ADD COLUMN IF NOT EXISTS otkazano_razlog TEXT;
 
 CREATE TABLE IF NOT EXISTS ratings (
   id         UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  order_id   UUID UNIQUE NOT NULL REFERENCES orders(id) ON DELETE CASCADE,
+  order_id   UUID NOT NULL REFERENCES orders(id) ON DELETE CASCADE,
+  smer       rating_direction NOT NULL DEFAULT 'KLIJENT_KA_DOSTAVLJACU',
   ocena      SMALLINT NOT NULL CHECK (ocena BETWEEN 1 AND 5),
   komentar   TEXT,
   created_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
+
+-- Dodato posle prvog izdanja da bi ocenjivanje bilo obostrano (dostavljač
+-- takođe ocenjuje klijenta), ne samo klijent -> dostavljač kao ranije.
+ALTER TABLE ratings ADD COLUMN IF NOT EXISTS smer rating_direction NOT NULL DEFAULT 'KLIJENT_KA_DOSTAVLJACU';
+ALTER TABLE ratings DROP CONSTRAINT IF EXISTS ratings_order_id_key;
+DO $$ BEGIN
+  ALTER TABLE ratings ADD CONSTRAINT ratings_order_id_smer_key UNIQUE (order_id, smer);
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 CREATE TABLE IF NOT EXISTS commission_settings (
   id         SMALLINT PRIMARY KEY DEFAULT 1 CHECK (id = 1),

@@ -3,6 +3,7 @@ import { listCouriersForOperator } from "@/lib/queries/couriers";
 import { CreatePreApprovedCourierForm } from "@/components/CreatePreApprovedCourierForm";
 import { BulkImportCouriersForm } from "@/components/BulkImportCouriersForm";
 import { CourierStatusButton } from "@/components/CourierStatusButton";
+import { CourierVerifiedButton } from "@/components/CourierVerifiedButton";
 import { StatusBadge } from "@/components/StatusBadge";
 import { VEHICLE_TYPE_LABELS } from "@/lib/labels";
 
@@ -39,7 +40,14 @@ export default async function DostavljaciPage() {
           <li key={c.id} className="px-4 py-3">
             <div className="flex flex-wrap items-center justify-between gap-2">
               <div>
-                <p className="font-medium">{c.naziv}</p>
+                <p className="flex items-center gap-1.5 font-medium">
+                  {c.naziv}
+                  {c.verifikovan && (
+                    <span className="rounded-full bg-emerald-100 px-1.5 py-0.5 text-xs font-medium text-emerald-800">
+                      ✓ Verifikovan
+                    </span>
+                  )}
+                </p>
                 <p className="text-sm text-neutral-500">
                   {c.telefon}
                   {c.izvor_kontakta ? ` · ${c.izvor_kontakta}` : ""}
@@ -48,6 +56,12 @@ export default async function DostavljaciPage() {
               </div>
               <div className="flex items-center gap-2">
                 <StatusBadge status={c.status} label={STATUS_LABELS[c.status]} />
+                {c.status !== "NA_POTVRDI" && (
+                  <CourierVerifiedButton
+                    courierId={c.id}
+                    verifikovan={c.verifikovan}
+                  />
+                )}
                 <CourierStatusButton courierId={c.id} status={c.status} />
               </div>
             </div>

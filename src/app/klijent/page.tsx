@@ -36,12 +36,20 @@ export default async function KlijentPage({
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-semibold">Moje pošiljke</h1>
-        <Link
-          href="/klijent/nova-posiljka"
-          className="rounded-md bg-emerald-700 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-800"
-        >
-          + Nova pošiljka
-        </Link>
+        <div className="flex items-center gap-3">
+          <Link
+            href="/klijent/ocene"
+            className="text-sm text-emerald-700 hover:underline"
+          >
+            Ocene o meni
+          </Link>
+          <Link
+            href="/klijent/nova-posiljka"
+            className="rounded-md bg-emerald-700 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-800"
+          >
+            + Nova pošiljka
+          </Link>
+        </div>
       </div>
 
       {allShipments.length > 0 && (

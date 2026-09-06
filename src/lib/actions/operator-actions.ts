@@ -6,6 +6,7 @@ import {
   createPreApprovedCourier,
   listCouriersForOperator,
   setCourierStatus,
+  setCourierVerified,
 } from "../queries/couriers";
 import { setCommissionPercent } from "../queries/commission";
 import { generateInvoicesForPeriod, setInvoiceStatus } from "../queries/invoices";
@@ -146,6 +147,21 @@ export async function setCourierStatusAction(
     return { error: err instanceof Error ? err.message : "Greška." };
   }
 
+  revalidatePath("/operater/dostavljaci");
+  return {};
+}
+
+export async function setCourierVerifiedAction(
+  courierId: string,
+  verifikovan: boolean
+): Promise<{ error?: string }> {
+  try {
+    await requireOperator();
+  } catch (err) {
+    return { error: err instanceof Error ? err.message : "Greška." };
+  }
+
+  await setCourierVerified(courierId, verifikovan);
   revalidatePath("/operater/dostavljaci");
   return {};
 }

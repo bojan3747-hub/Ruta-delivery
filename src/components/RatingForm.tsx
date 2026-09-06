@@ -8,13 +8,21 @@ import { SubmitButton } from "./SubmitButton";
 
 const initialState: ActionState = {};
 
-export function RatingForm({ orderId }: { orderId: string }) {
+export function RatingForm({
+  orderId,
+  target,
+}: {
+  orderId: string;
+  target: "dostavljac" | "klijent";
+}) {
   const [state, formAction] = useActionState(submitRatingAction, initialState);
   const [ocena, setOcena] = useState(5);
 
   return (
     <form action={formAction} className="space-y-3 rounded-lg border border-black/10 bg-white p-4">
-      <h3 className="font-medium">Ocenite dostavljača</h3>
+      <h3 className="font-medium">
+        {target === "dostavljac" ? "Ocenite dostavljača" : "Ocenite klijenta"}
+      </h3>
       <FormMessage error={state.error} />
       <input type="hidden" name="orderId" value={orderId} />
       <div className="flex gap-1">
