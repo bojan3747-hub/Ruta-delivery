@@ -116,7 +116,6 @@ export interface ShipmentRow {
   zeljeni_termin: TerminType;
   termin_detalji: string | null;
   napomena: string | null;
-  fotografija_url: string | null;
   deklarisana_vrednost: string | null;
   status: ShipmentStatus;
   created_at: string;
@@ -181,4 +180,13 @@ export interface CommissionInvoiceRow {
   naplata_referenca: string | null;
   created_at: string;
   placeno_at: string | null;
+}
+
+export interface SavedAddressRow {
+  id: string;
+  company_id: string;
+  naziv: string;
+  adresa: string;
+  zona: Zone;
+  created_at: string;
 }

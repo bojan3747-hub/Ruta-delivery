@@ -1,6 +1,13 @@
+import { getCurrentUser } from "@/lib/auth";
+import { listSavedAddresses } from "@/lib/queries/saved-addresses";
 import { ShipmentForm } from "@/components/ShipmentForm";
 
-export default function NovaPosiljkaPage() {
+export default async function NovaPosiljkaPage() {
+  const user = await getCurrentUser();
+  const savedAddresses = user?.companyId
+    ? await listSavedAddresses(user.companyId)
+    : [];
+
   return (
     <div className="mx-auto max-w-xl space-y-6">
       <div>
@@ -12,7 +19,7 @@ export default function NovaPosiljkaPage() {
           minuta.
         </p>
       </div>
-      <ShipmentForm />
+      <ShipmentForm savedAddresses={savedAddresses} />
     </div>
   );
 }

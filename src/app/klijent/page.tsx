@@ -38,6 +38,12 @@ export default async function KlijentPage({
         <h1 className="text-2xl font-semibold">Moje pošiljke</h1>
         <div className="flex items-center gap-3">
           <Link
+            href="/klijent/adrese"
+            className="text-sm text-emerald-700 hover:underline"
+          >
+            Sačuvane adrese
+          </Link>
+          <Link
             href="/klijent/ocene"
             className="text-sm text-emerald-700 hover:underline"
           >

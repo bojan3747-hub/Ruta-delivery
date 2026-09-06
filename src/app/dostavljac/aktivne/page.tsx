@@ -77,6 +77,16 @@ export default async function AktivneIsporukePage() {
                       {o.provizija ? ` · Provizija: ${formatMoney(o.provizija)}` : ""}
                     </p>
                   </div>
+                  {o.has_fotografija && (
+                    <a
+                      href={`/api/posiljke/${o.shipment_id}/fotografija`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-emerald-700 hover:underline"
+                    >
+                      Foto-dokaz
+                    </a>
+                  )}
                 </div>
                 {o.client_rating_ocena ? (
                   <p className="mt-2 text-neutral-600">

@@ -162,7 +162,6 @@ CREATE TABLE IF NOT EXISTS shipments (
   zeljeni_termin      termin_type NOT NULL DEFAULT 'ODMAH',
   termin_detalji      TEXT,
   napomena            TEXT,
-  fotografija_url     TEXT,
   deklarisana_vrednost NUMERIC(10, 2),
   status              shipment_status NOT NULL DEFAULT 'OTVORENA',
   created_at          TIMESTAMPTZ NOT NULL DEFAULT now()
@@ -171,6 +170,27 @@ CREATE TABLE IF NOT EXISTS shipments (
 -- Added after the initial release; ALTER (not just the column above) so it
 -- also lands on databases that already have a shipments table.
 ALTER TABLE shipments ADD COLUMN IF NOT EXISTS deklarisana_vrednost NUMERIC(10, 2);
+-- fotografija_url je bila neiskorišćena kolona (nikad povezana ni sa jednim
+-- ekranom) — foto-dokaz o isporuci sada čuva zasebna tabela ispod, po istom
+-- obrascu kao opsti_uslovi_dokumenti (da SELECT * na shipments ne vuče BYTEA).
+ALTER TABLE shipments DROP COLUMN IF EXISTS fotografija_url;
+
+CREATE TABLE IF NOT EXISTS shipment_fotografije (
+  id           UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  shipment_id  UUID UNIQUE NOT NULL REFERENCES shipments(id) ON DELETE CASCADE,
+  sadrzaj      BYTEA NOT NULL,
+  content_type TEXT NOT NULL,
+  created_at   TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+CREATE TABLE IF NOT EXISTS saved_addresses (
+  id         UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  company_id UUID NOT NULL REFERENCES companies(id) ON DELETE CASCADE,
+  naziv      TEXT NOT NULL,
+  adresa     TEXT NOT NULL,
+  zona       zone NOT NULL,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
 
 CREATE TABLE IF NOT EXISTS offers (
   id                    UUID PRIMARY KEY DEFAULT gen_random_uuid(),

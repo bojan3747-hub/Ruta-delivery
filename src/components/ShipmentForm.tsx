@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useState } from "react";
+import { useActionState, useState, type Dispatch, type SetStateAction } from "react";
 import {
   createShipmentAction,
 } from "@/lib/actions/shipment-actions";
@@ -10,14 +10,36 @@ import { SHIPMENT_TYPE_LABELS, TERMIN_LABELS } from "@/lib/labels";
 import { FormMessage } from "./FormMessage";
 import { SubmitButton } from "./SubmitButton";
 import { AddressPicker } from "./AddressPicker";
+import type { SavedAddressRow } from "@/lib/types";
 
 const initialState: ActionState = {};
 const inputClass =
   "mt-1 w-full rounded-md border border-black/15 px-3 py-2 text-sm";
 
-export function ShipmentForm() {
+export function ShipmentForm({
+  savedAddresses = [],
+}: {
+  savedAddresses?: SavedAddressRow[];
+}) {
   const [state, formAction] = useActionState(createShipmentAction, initialState);
   const [zeljeniTermin, setZeljeniTermin] = useState("ODMAH");
+
+  const [zonaPreuzimanja, setZonaPreuzimanja] = useState("");
+  const [zonaIsporuke, setZonaIsporuke] = useState("");
+
+  const [pickupAddress, setPickupAddress] = useState({ value: "", key: 0 });
+  const [deliveryAddress, setDeliveryAddress] = useState({ value: "", key: 0 });
+
+  function applySavedAddress(
+    addressId: string,
+    setZona: (z: string) => void,
+    setAddress: Dispatch<SetStateAction<{ value: string; key: number }>>
+  ) {
+    const saved = savedAddresses.find((a) => a.id === addressId);
+    if (!saved) return;
+    setZona(saved.zona);
+    setAddress((prev) => ({ value: saved.adresa, key: prev.key + 1 }));
+  }
 
   return (
     <form action={formAction} className="space-y-5">
@@ -26,7 +48,13 @@ export function ShipmentForm() {
       <div className="grid gap-4 sm:grid-cols-2">
         <div>
           <label className="block text-sm font-medium">Zona preuzimanja *</label>
-          <select name="zonaPreuzimanja" required className={inputClass} defaultValue="">
+          <select
+            name="zonaPreuzimanja"
+            required
+            className={inputClass}
+            value={zonaPreuzimanja}
+            onChange={(e) => setZonaPreuzimanja(e.target.value)}
+          >
             <option value="" disabled>
               Izaberite zonu
             </option>
@@ -39,7 +67,13 @@ export function ShipmentForm() {
         </div>
         <div>
           <label className="block text-sm font-medium">Zona isporuke *</label>
-          <select name="zonaIsporuke" required className={inputClass} defaultValue="">
+          <select
+            name="zonaIsporuke"
+            required
+            className={inputClass}
+            value={zonaIsporuke}
+            onChange={(e) => setZonaIsporuke(e.target.value)}
+          >
             <option value="" disabled>
               Izaberite zonu
             </option>
@@ -52,9 +86,66 @@ export function ShipmentForm() {
         </div>
       </div>
 
+      {savedAddresses.length > 0 && (
+        <div className="grid gap-4 sm:grid-cols-2">
+          <div>
+            <label className="block text-sm font-medium">Sačuvana adresa preuzimanja</label>
+            <select
+              defaultValue=""
+              className={inputClass}
+              onChange={(e) => {
+                applySavedAddress(e.target.value, setZonaPreuzimanja, setPickupAddress);
+                e.target.value = "";
+              }}
+            >
+              <option value="" disabled>
+                Izaberite (opciono)
+              </option>
+              {savedAddresses.map((a) => (
+                <option key={a.id} value={a.id}>
+                  {a.naziv}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <label className="block text-sm font-medium">Sačuvana adresa isporuke</label>
+            <select
+              defaultValue=""
+              className={inputClass}
+              onChange={(e) => {
+                applySavedAddress(e.target.value, setZonaIsporuke, setDeliveryAddress);
+                e.target.value = "";
+              }}
+            >
+              <option value="" disabled>
+                Izaberite (opciono)
+              </option>
+              {savedAddresses.map((a) => (
+                <option key={a.id} value={a.id}>
+                  {a.naziv}
+                </option>
+              ))}
+            </select>
+          </div>
+        </div>
+      )}
+
       <div className="grid gap-4 sm:grid-cols-2">
-        <AddressPicker name="adresaPreuzimanja" label="Tačna adresa preuzimanja *" required />
-        <AddressPicker name="adresaIsporuke" label="Tačna adresa isporuke *" required />
+        <AddressPicker
+          key={pickupAddress.key}
+          name="adresaPreuzimanja"
+          label="Tačna adresa preuzimanja *"
+          required
+          initialValue={pickupAddress.value}
+        />
+        <AddressPicker
+          key={`d-${deliveryAddress.key}`}
+          name="adresaIsporuke"
+          label="Tačna adresa isporuke *"
+          required
+          initialValue={deliveryAddress.value}
+        />
       </div>
 
       <div>

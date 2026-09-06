@@ -5,6 +5,7 @@ import { listOffersForShipment } from "@/lib/queries/offers";
 import { getOrderByShipmentId } from "@/lib/queries/orders";
 import { getRatingForOrder } from "@/lib/queries/ratings";
 import { getCourierById } from "@/lib/queries/couriers";
+import { hasShipmentFotografija } from "@/lib/queries/shipment-fotografije";
 import { ZONE_LABELS } from "@/lib/zones";
 import {
   ORDER_STATUS_LABELS,
@@ -39,6 +40,8 @@ export default async function PosiljkaDetailPage({
   const rating = order
     ? await getRatingForOrder(order.id, "KLIJENT_KA_DOSTAVLJACU")
     : null;
+  const hasFotografija =
+    order?.status === "ISPORUCENO" ? await hasShipmentFotografija(shipment.id) : false;
 
   return (
     <div className="mx-auto max-w-2xl space-y-6">
@@ -164,6 +167,18 @@ export default async function PosiljkaDetailPage({
               <span className="text-neutral-500">Cena:</span>{" "}
               {formatMoney(order.cena)}
             </p>
+            {hasFotografija && (
+              <p className="mt-1">
+                <a
+                  href={`/api/posiljke/${shipment.id}/fotografija`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-emerald-700 hover:underline"
+                >
+                  Pogledajte foto-dokaz o isporuci
+                </a>
+              </p>
+            )}
           </div>
 
           {order.status === "ISPORUCENO" &&

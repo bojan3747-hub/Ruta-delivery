@@ -13,13 +13,15 @@ export function AddressPicker({
   name,
   label,
   required,
+  initialValue,
 }: {
   name: string;
   label: string;
   required?: boolean;
+  initialValue?: string;
 }) {
   const token = process.env.NEXT_PUBLIC_MAPBOX_TOKEN;
-  const [query, setQuery] = useState("");
+  const [query, setQuery] = useState(initialValue ?? "");
   const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -27,7 +29,10 @@ export function AddressPicker({
 
   // Tekst polja u trenutku poslednjeg izbora iz liste — dok se ne promeni,
   // ne pokrećemo novu pretragu (izbor ne sme da obriše broj koji je korisnik ukucao).
-  const [resolvedQuery, setResolvedQuery] = useState<string | null>(null);
+  // Sačuvana adresa iz adresara se tretira isto — ne pokreće pretragu čim se učita.
+  const [resolvedQuery, setResolvedQuery] = useState<string | null>(
+    initialValue ?? null
+  );
 
   // Pretraga adresa (debounced), preko naše /api/geocode rute.
   useEffect(() => {

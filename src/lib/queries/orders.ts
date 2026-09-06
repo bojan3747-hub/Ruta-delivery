@@ -78,6 +78,7 @@ export interface CompletedOrderForCourier extends OrderWithShipment {
   client_naziv: string;
   client_rating_ocena: number | null;
   client_rating_komentar: string | null;
+  has_fotografija: boolean;
 }
 
 export async function listCompletedOrdersForCourier(
@@ -86,12 +87,14 @@ export async function listCompletedOrdersForCourier(
   return query<CompletedOrderForCourier>(
     `SELECT o.*, s.zona_preuzimanja, s.zona_isporuke, s.adresa_preuzimanja,
             s.adresa_isporuke, s.tip, s.deklarisana_vrednost, c.naziv AS courier_naziv, c.telefon AS courier_telefon,
-            comp.naziv AS client_naziv, r.ocena AS client_rating_ocena, r.komentar AS client_rating_komentar
+            comp.naziv AS client_naziv, r.ocena AS client_rating_ocena, r.komentar AS client_rating_komentar,
+            (sf.id IS NOT NULL) AS has_fotografija
      FROM orders o
      JOIN shipments s ON s.id = o.shipment_id
      JOIN couriers c ON c.id = o.courier_id
      JOIN companies comp ON comp.id = s.client_id
      LEFT JOIN ratings r ON r.order_id = o.id AND r.smer = 'DOSTAVLJAC_KA_KLIJENTU'
+     LEFT JOIN shipment_fotografije sf ON sf.shipment_id = s.id
      WHERE o.courier_id = $1 AND o.status = 'ISPORUCENO'
      ORDER BY o.updated_at DESC
      LIMIT 20`,
@@ -114,6 +117,28 @@ export async function listAllOrdersForOperator(): Promise<
   );
 }
 
+export interface OrderDetailForOperator extends OrderWithShipment {
+  napomena: string | null;
+}
+
+export async function getOrderDetailForOperator(
+  orderId: string
+): Promise<OrderDetailForOperator | null> {
+  return queryOne<OrderDetailForOperator>(
+    `SELECT o.*, s.zona_preuzimanja, s.zona_isporuke, s.adresa_preuzimanja,
+            s.adresa_isporuke, s.tip, s.deklarisana_vrednost, s.napomena,
+            c.naziv AS courier_naziv, c.telefon AS courier_telefon,
+            comp.naziv AS client_naziv, u.ime AS client_kontakt_ime, u.telefon AS client_telefon
+     FROM orders o
+     JOIN shipments s ON s.id = o.shipment_id
+     JOIN couriers c ON c.id = o.courier_id
+     JOIN companies comp ON comp.id = s.client_id
+     JOIN users u ON u.id = comp.user_id
+     WHERE o.id = $1`,
+    [orderId]
+  );
+}
+
 /**
  * Advances an order to the next delivery status (KAN-7). When it reaches
  * ISPORUCENO, marks the shipment finished and calculates the platform
@@ -122,7 +147,7 @@ export async function listAllOrdersForOperator(): Promise<
 export async function advanceOrder(
   orderId: string,
   courierId: string
-): Promise<void> {
+): Promise<OrderRow> {
   const client = await pool.connect();
   try {
     await client.query("BEGIN");
@@ -137,25 +162,29 @@ export async function advanceOrder(
     const next = nextOrderStatus(order.status);
     if (!next) throw new Error("Porudžbina je već završena");
 
+    let updated: OrderRow;
     if (next === "ISPORUCENO") {
       const percent = await getActiveCommissionPercent();
       const provizija = Math.round(Number(order.cena) * (percent / 100) * 100) / 100;
-      await client.query(
-        `UPDATE orders SET status = $1, provizija = $2, updated_at = now() WHERE id = $3`,
+      const res = await client.query<OrderRow>(
+        `UPDATE orders SET status = $1, provizija = $2, updated_at = now() WHERE id = $3 RETURNING *`,
         [next, provizija, orderId]
       );
+      updated = res.rows[0];
       await client.query(
         "UPDATE shipments SET status = 'ZAVRSENA' WHERE id = $1",
         [order.shipment_id]
       );
     } else {
-      await client.query(
-        "UPDATE orders SET status = $1, updated_at = now() WHERE id = $2",
+      const res = await client.query<OrderRow>(
+        "UPDATE orders SET status = $1, updated_at = now() WHERE id = $2 RETURNING *",
         [next, orderId]
       );
+      updated = res.rows[0];
     }
 
     await client.query("COMMIT");
+    return updated;
   } catch (err) {
     await client.query("ROLLBACK");
     throw err;

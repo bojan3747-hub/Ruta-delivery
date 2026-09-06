@@ -3,6 +3,7 @@ import { NavTabs } from "@/components/NavTabs";
 
 const NAV_ITEMS = [
   { href: "/operater", label: "Pregled" },
+  { href: "/operater/porudzbine", label: "Porudžbine" },
   { href: "/operater/dostavljaci", label: "Dostavljači" },
   { href: "/operater/provizija", label: "Provizija" },
   { href: "/operater/opsti-uslovi", label: "Opšti uslovi" },
