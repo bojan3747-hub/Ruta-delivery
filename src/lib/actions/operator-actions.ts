@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { getCurrentUser } from "../auth";
-import { createPreApprovedCourier } from "../queries/couriers";
+import { createPreApprovedCourier, setCourierStatus } from "../queries/couriers";
 import { setCommissionPercent } from "../queries/commission";
 import { generateInvoicesForPeriod, setInvoiceStatus } from "../queries/invoices";
 import { uploadOpstiUslovi } from "../queries/opsti-uslovi";
@@ -42,6 +42,26 @@ export async function createPreApprovedCourierAction(
 
   revalidatePath("/operater/dostavljaci");
   return { success: true };
+}
+
+export async function setCourierStatusAction(
+  courierId: string,
+  status: "AKTIVAN" | "SUSPENDOVAN"
+): Promise<{ error?: string }> {
+  try {
+    await requireOperator();
+  } catch (err) {
+    return { error: err instanceof Error ? err.message : "Greška." };
+  }
+
+  try {
+    await setCourierStatus(courierId, status);
+  } catch (err) {
+    return { error: err instanceof Error ? err.message : "Greška." };
+  }
+
+  revalidatePath("/operater/dostavljaci");
+  return {};
 }
 
 export async function setCommissionAction(

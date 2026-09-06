@@ -19,7 +19,7 @@ export type Zone =
 
 export type VehicleType = "MOTOR" | "PUTNICKO_VOZILO" | "KOMBI" | "KAMION";
 
-export type CourierStatus = "NA_POTVRDI" | "AKTIVAN";
+export type CourierStatus = "NA_POTVRDI" | "AKTIVAN" | "SUSPENDOVAN";
 
 export type ShipmentType =
   | "DOKUMENT"
@@ -85,6 +85,7 @@ export interface CourierRow {
   minimalna_cena: string | null;
   dnevni_kapacitet: number;
   status: CourierStatus;
+  dostupan: boolean;
   izvor_kontakta: string | null;
   ocena_prosek: string | null;
   broj_ocena: number;

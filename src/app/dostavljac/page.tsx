@@ -5,6 +5,7 @@ import { listOpenManualRequestsForCourier } from "@/lib/queries/shipments";
 import { listOrdersForCourier } from "@/lib/queries/orders";
 import { ZONE_LABELS } from "@/lib/zones";
 import { VEHICLE_TYPE_LABELS } from "@/lib/labels";
+import { CourierAvailabilityToggle } from "@/components/CourierAvailabilityToggle";
 
 export default async function DostavljacPage() {
   const user = await getCurrentUser();
@@ -22,6 +23,18 @@ export default async function DostavljacPage() {
   return (
     <div className="space-y-6">
       <h1 className="text-2xl font-semibold">Zdravo, {courier.naziv}</h1>
+
+      {courier.status === "SUSPENDOVAN" && (
+        <p className="rounded-md bg-red-50 px-4 py-3 text-sm text-red-800 border border-red-200">
+          Vaš nalog je suspendovan od strane operatera — ne dobijate nove
+          zahteve za ponude. Postojeće aktivne isporuke možete da završite
+          normalno. Za više informacija kontaktirajte operatera.
+        </p>
+      )}
+
+      {courier.status === "AKTIVAN" && (
+        <CourierAvailabilityToggle dostupan={courier.dostupan} />
+      )}
 
       {!cenovnikPodesen && (
         <p className="rounded-md bg-amber-50 px-4 py-3 text-sm text-amber-800 border border-amber-200">

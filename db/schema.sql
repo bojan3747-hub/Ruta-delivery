@@ -37,6 +37,8 @@ DO $$ BEGIN
   CREATE TYPE courier_status AS ENUM ('NA_POTVRDI', 'AKTIVAN');
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
+ALTER TYPE courier_status ADD VALUE IF NOT EXISTS 'SUSPENDOVAN';
+
 DO $$ BEGIN
   CREATE TYPE shipment_type AS ENUM ('DOKUMENT', 'MALI_PAKET', 'SREDNJI_PAKET', 'VELIKI_PAKET');
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
@@ -111,6 +113,7 @@ CREATE TABLE IF NOT EXISTS couriers (
   minimalna_cena    NUMERIC(10, 2),
   dnevni_kapacitet  INTEGER NOT NULL DEFAULT 0,
   status            courier_status NOT NULL DEFAULT 'NA_POTVRDI',
+  dostupan          BOOLEAN NOT NULL DEFAULT true,
   izvor_kontakta    TEXT,
   ocena_prosek      NUMERIC(3, 2),
   broj_ocena        INTEGER NOT NULL DEFAULT 0,
@@ -126,6 +129,7 @@ CREATE TABLE IF NOT EXISTS couriers (
 -- ikad upisan u nju.
 ALTER TABLE couriers ADD COLUMN IF NOT EXISTS payment_customer_token TEXT;
 ALTER TABLE couriers DROP COLUMN IF EXISTS payu_customer_token;
+ALTER TABLE couriers ADD COLUMN IF NOT EXISTS dostupan BOOLEAN NOT NULL DEFAULT true;
 
 CREATE TABLE IF NOT EXISTS courier_zones (
   id         UUID PRIMARY KEY DEFAULT gen_random_uuid(),

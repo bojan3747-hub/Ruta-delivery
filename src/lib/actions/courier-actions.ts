@@ -6,6 +6,7 @@ import { getCurrentUser } from "../auth";
 import {
   activateCourier,
   getCourierByToken,
+  setCourierAvailability,
   updateCourierPricing,
 } from "../queries/couriers";
 import { ZONES } from "../zones";
@@ -73,6 +74,19 @@ export async function activateCourierAction(
   }
 
   redirect("/prijava?aktivirano=1");
+}
+
+export async function setCourierAvailabilityAction(
+  dostupan: boolean
+): Promise<{ error?: string }> {
+  const user = await getCurrentUser();
+  if (!user || user.role !== "COURIER" || !user.courierId) {
+    return { error: "Morate biti prijavljeni kao dostavljač." };
+  }
+
+  await setCourierAvailability(user.courierId, dostupan);
+  revalidatePath("/dostavljac");
+  return {};
 }
 
 export async function updatePricingAction(

@@ -4,12 +4,33 @@ import { listShipmentsByClient } from "@/lib/queries/shipments";
 import { ZONE_LABELS } from "@/lib/zones";
 import { SHIPMENT_STATUS_LABELS, SHIPMENT_TYPE_LABELS } from "@/lib/labels";
 import { StatusBadge } from "@/components/StatusBadge";
+import type { ShipmentStatus } from "@/lib/types";
 
-export default async function KlijentPage() {
+const FILTERS: { value: ShipmentStatus | "SVE"; label: string }[] = [
+  { value: "SVE", label: "Sve" },
+  ...(Object.keys(SHIPMENT_STATUS_LABELS) as ShipmentStatus[]).map(
+    (status) => ({ value: status, label: SHIPMENT_STATUS_LABELS[status] })
+  ),
+];
+
+export default async function KlijentPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ status?: string }>;
+}) {
+  const { status } = await searchParams;
   const user = await getCurrentUser();
-  const shipments = user?.companyId
+  const allShipments = user?.companyId
     ? await listShipmentsByClient(user.companyId)
     : [];
+  const activeFilter =
+    status && status in SHIPMENT_STATUS_LABELS
+      ? (status as ShipmentStatus)
+      : "SVE";
+  const shipments =
+    activeFilter === "SVE"
+      ? allShipments
+      : allShipments.filter((s) => s.status === activeFilter);
 
   return (
     <div className="space-y-6">
@@ -23,10 +44,32 @@ export default async function KlijentPage() {
         </Link>
       </div>
 
-      {shipments.length === 0 ? (
+      {allShipments.length > 0 && (
+        <div className="flex flex-wrap gap-2">
+          {FILTERS.map((f) => (
+            <Link
+              key={f.value}
+              href={f.value === "SVE" ? "/klijent" : `/klijent?status=${f.value}`}
+              className={`rounded-full px-3 py-1 text-xs font-medium ${
+                activeFilter === f.value
+                  ? "bg-emerald-700 text-white"
+                  : "bg-black/5 text-neutral-700 hover:bg-black/10"
+              }`}
+            >
+              {f.label}
+            </Link>
+          ))}
+        </div>
+      )}
+
+      {allShipments.length === 0 ? (
         <p className="rounded-lg border border-dashed border-black/15 p-8 text-center text-neutral-500">
           Nemate još nijednu pošiljku. Kliknite &ldquo;Nova pošiljka&rdquo; da
           unesete prvu.
+        </p>
+      ) : shipments.length === 0 ? (
+        <p className="rounded-lg border border-dashed border-black/15 p-8 text-center text-neutral-500">
+          Nema pošiljki sa ovim statusom.
         </p>
       ) : (
         <ul className="divide-y divide-black/10 rounded-lg border border-black/10 bg-white">

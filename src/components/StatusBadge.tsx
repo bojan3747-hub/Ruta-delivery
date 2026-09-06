@@ -20,6 +20,7 @@ const COLORS: Record<string, string> = {
   OTKAZANO: "bg-neutral-200 text-neutral-600",
   ODBIJENA: "bg-red-100 text-red-700",
   NEUSPESNO: "bg-red-100 text-red-700",
+  SUSPENDOVAN: "bg-red-100 text-red-700",
   ISTEKLA: "bg-neutral-200 text-neutral-600",
 };
 

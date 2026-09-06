@@ -171,6 +171,7 @@ export async function findEligibleActiveCouriers(
   return query<CourierRow>(
     `SELECT c.* FROM couriers c
      WHERE c.status = 'AKTIVAN'
+       AND c.dostupan = true
        AND c.cena_po_km IS NOT NULL
        AND EXISTS (SELECT 1 FROM courier_zones cz WHERE cz.courier_id = c.id AND cz.zone = $1)
        AND EXISTS (SELECT 1 FROM courier_zones cz WHERE cz.courier_id = c.id AND cz.zone = $2)
@@ -185,7 +186,7 @@ export async function findEligibleActiveCouriers(
   );
 }
 
-/** Active couriers covering both zones, regardless of pricing/capacity (used for manual/non-standard requests). */
+/** Active, available couriers covering both zones, regardless of pricing/capacity (used for manual/non-standard requests). */
 export async function findCouriersCoveringZones(
   zonaPreuzimanja: Zone,
   zonaIsporuke: Zone
@@ -193,8 +194,36 @@ export async function findCouriersCoveringZones(
   return query<CourierRow>(
     `SELECT c.* FROM couriers c
      WHERE c.status = 'AKTIVAN'
+       AND c.dostupan = true
        AND EXISTS (SELECT 1 FROM courier_zones cz WHERE cz.courier_id = c.id AND cz.zone = $1)
        AND EXISTS (SELECT 1 FROM courier_zones cz WHERE cz.courier_id = c.id AND cz.zone = $2)`,
     [zonaPreuzimanja, zonaIsporuke]
   );
+}
+
+/** Operator suspends or reactivates a courier; only toggles between AKTIVAN and SUSPENDOVAN. */
+export async function setCourierStatus(
+  courierId: string,
+  status: "AKTIVAN" | "SUSPENDOVAN"
+): Promise<void> {
+  const courier = await getCourierById(courierId);
+  if (!courier) throw new Error("Dostavljač nije pronađen");
+  if (courier.status === "NA_POTVRDI") {
+    throw new Error("Nalog još nije aktiviran.");
+  }
+  await query("UPDATE couriers SET status = $1 WHERE id = $2", [
+    status,
+    courierId,
+  ]);
+}
+
+/** Courier pauses/resumes receiving new offers without deactivating the account. */
+export async function setCourierAvailability(
+  courierId: string,
+  dostupan: boolean
+): Promise<void> {
+  await query("UPDATE couriers SET dostupan = $1 WHERE id = $2", [
+    dostupan,
+    courierId,
+  ]);
 }
