@@ -218,7 +218,7 @@ ALTER TABLE ratings ADD COLUMN IF NOT EXISTS smer rating_direction NOT NULL DEFA
 ALTER TABLE ratings DROP CONSTRAINT IF EXISTS ratings_order_id_key;
 DO $$ BEGIN
   ALTER TABLE ratings ADD CONSTRAINT ratings_order_id_smer_key UNIQUE (order_id, smer);
-EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+EXCEPTION WHEN duplicate_table OR duplicate_object THEN NULL; END $$;
 
 CREATE TABLE IF NOT EXISTS commission_settings (
   id         SMALLINT PRIMARY KEY DEFAULT 1 CHECK (id = 1),
