@@ -57,6 +57,8 @@ export interface UserRow {
   ime: string;
   telefon: string | null;
   uslovi_prihvaceni_at: string | null;
+  reset_token: string | null;
+  reset_token_expires_at: string | null;
   created_at: string;
 }
 
@@ -137,6 +139,7 @@ export interface OrderRow {
   cena: string;
   provizija: string | null;
   status: OrderStatus;
+  otkazano_razlog: string | null;
   created_at: string;
   updated_at: string;
 }

@@ -6,6 +6,7 @@ const NAV_ITEMS = [
   { href: "/operater/dostavljaci", label: "Dostavljači" },
   { href: "/operater/provizija", label: "Provizija" },
   { href: "/operater/opsti-uslovi", label: "Opšti uslovi" },
+  { href: "/operater/reset-lozinke", label: "Reset lozinke" },
 ];
 
 export default async function OperaterLayout({

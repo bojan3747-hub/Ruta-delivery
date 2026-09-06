@@ -17,6 +17,8 @@ import {
 import { StatusBadge } from "@/components/StatusBadge";
 import { AcceptOfferButton } from "@/components/AcceptOfferButton";
 import { RatingForm } from "@/components/RatingForm";
+import { CancelShipmentButton } from "@/components/CancelShipmentButton";
+import { CancelOrderButton } from "@/components/CancelOrderButton";
 
 export default async function PosiljkaDetailPage({
   params,
@@ -72,6 +74,11 @@ export default async function PosiljkaDetailPage({
           Napomena: {shipment.napomena}
         </p>
       )}
+
+      {!order &&
+        (shipment.status === "OTVORENA" || shipment.status === "PONUDE_STIGLE") && (
+          <CancelShipmentButton shipmentId={shipment.id} />
+        )}
 
       {!order && (
         <section className="space-y-3">
@@ -156,6 +163,17 @@ export default async function PosiljkaDetailPage({
             ) : (
               <RatingForm orderId={order.id} />
             ))}
+
+          {order.status === "OTKAZANO" && (
+            <p className="rounded-lg border border-black/10 bg-white p-4 text-sm text-neutral-600">
+              Porudžbina je otkazana.
+              {order.otkazano_razlog ? ` Razlog: ${order.otkazano_razlog}` : ""}
+            </p>
+          )}
+
+          {order.status !== "ISPORUCENO" && order.status !== "OTKAZANO" && (
+            <CancelOrderButton orderId={order.id} />
+          )}
         </section>
       )}
     </div>

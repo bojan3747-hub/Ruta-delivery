@@ -154,3 +154,55 @@ export async function advanceOrder(
     client.release();
   }
 }
+
+/**
+ * Cancels an order — either the client (owner of the shipment) or the
+ * assigned courier may do this, as long as the order hasn't already
+ * reached a final state. Exactly one of courierId/clientId should be
+ * passed, matching whichever role is calling.
+ */
+export async function cancelOrder(
+  orderId: string,
+  actor: { courierId?: string; clientId?: string },
+  razlog?: string
+): Promise<void> {
+  const client = await pool.connect();
+  try {
+    await client.query("BEGIN");
+
+    const res = await client.query<OrderRow & { client_id: string }>(
+      `SELECT o.*, s.client_id
+       FROM orders o
+       JOIN shipments s ON s.id = o.shipment_id
+       WHERE o.id = $1
+       FOR UPDATE`,
+      [orderId]
+    );
+    const order = res.rows[0];
+    if (!order) throw new Error("Porudžbina nije pronađena");
+
+    const allowed =
+      (actor.courierId && order.courier_id === actor.courierId) ||
+      (actor.clientId && order.client_id === actor.clientId);
+    if (!allowed) throw new Error("Nemate pravo da otkažete ovu porudžbinu");
+
+    if (order.status === "ISPORUCENO" || order.status === "OTKAZANO") {
+      throw new Error("Porudžbina se više ne može otkazati u ovom statusu");
+    }
+
+    await client.query(
+      `UPDATE orders SET status = 'OTKAZANO', otkazano_razlog = $1, updated_at = now() WHERE id = $2`,
+      [razlog ?? null, orderId]
+    );
+    await client.query("UPDATE shipments SET status = 'OTKAZANA' WHERE id = $1", [
+      order.shipment_id,
+    ]);
+
+    await client.query("COMMIT");
+  } catch (err) {
+    await client.query("ROLLBACK");
+    throw err;
+  } finally {
+    client.release();
+  }
+}

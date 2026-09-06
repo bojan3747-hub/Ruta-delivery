@@ -77,12 +77,16 @@ CREATE TABLE IF NOT EXISTS users (
   ime           TEXT NOT NULL,
   telefon       TEXT,
   uslovi_prihvaceni_at TIMESTAMPTZ,
+  reset_token             UUID,
+  reset_token_expires_at  TIMESTAMPTZ,
   created_at    TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
 -- Dodato posle prvog izdanja; ALTER (pored kolone gore) da bi stiglo i na
 -- baze koje već imaju tabelu users.
 ALTER TABLE users ADD COLUMN IF NOT EXISTS uslovi_prihvaceni_at TIMESTAMPTZ;
+ALTER TABLE users ADD COLUMN IF NOT EXISTS reset_token UUID;
+ALTER TABLE users ADD COLUMN IF NOT EXISTS reset_token_expires_at TIMESTAMPTZ;
 
 CREATE TABLE IF NOT EXISTS companies (
   id         UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -168,16 +172,21 @@ CREATE TABLE IF NOT EXISTS offers (
 );
 
 CREATE TABLE IF NOT EXISTS orders (
-  id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  shipment_id UUID UNIQUE NOT NULL REFERENCES shipments(id) ON DELETE CASCADE,
-  offer_id    UUID UNIQUE NOT NULL REFERENCES offers(id) ON DELETE CASCADE,
-  courier_id  UUID NOT NULL REFERENCES couriers(id) ON DELETE CASCADE,
-  cena        NUMERIC(10, 2) NOT NULL,
-  provizija   NUMERIC(10, 2),
-  status      order_status NOT NULL DEFAULT 'PREUZETO',
-  created_at  TIMESTAMPTZ NOT NULL DEFAULT now(),
-  updated_at  TIMESTAMPTZ NOT NULL DEFAULT now()
+  id                UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  shipment_id       UUID UNIQUE NOT NULL REFERENCES shipments(id) ON DELETE CASCADE,
+  offer_id          UUID UNIQUE NOT NULL REFERENCES offers(id) ON DELETE CASCADE,
+  courier_id        UUID NOT NULL REFERENCES couriers(id) ON DELETE CASCADE,
+  cena              NUMERIC(10, 2) NOT NULL,
+  provizija         NUMERIC(10, 2),
+  status            order_status NOT NULL DEFAULT 'PREUZETO',
+  otkazano_razlog   TEXT,
+  created_at        TIMESTAMPTZ NOT NULL DEFAULT now(),
+  updated_at        TIMESTAMPTZ NOT NULL DEFAULT now()
 );
+
+-- Dodato posle prvog izdanja; ALTER (pored kolone gore) da bi stiglo i na
+-- baze koje već imaju tabelu orders.
+ALTER TABLE orders ADD COLUMN IF NOT EXISTS otkazano_razlog TEXT;
 
 CREATE TABLE IF NOT EXISTS ratings (
   id         UUID PRIMARY KEY DEFAULT gen_random_uuid(),

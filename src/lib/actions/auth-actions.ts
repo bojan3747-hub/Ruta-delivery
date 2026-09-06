@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { queryOne } from "../db";
 import { createSession, destroySession, verifyPassword } from "../auth";
 import { createCompanyAccount } from "../queries/companies";
+import { requestPasswordReset, resetPassword } from "../queries/password-reset";
 import type { UserRow } from "../types";
 
 export interface ActionState {
@@ -98,4 +99,44 @@ export async function registerClientAction(
 
   await createSession(userId, "CLIENT");
   redirect("/klijent");
+}
+
+export async function requestPasswordResetAction(
+  _prev: ActionState,
+  formData: FormData
+): Promise<ActionState> {
+  const email = str(formData, "email").toLowerCase();
+  if (!email) return { error: "Unesite email." };
+
+  await requestPasswordReset(email);
+
+  // Namerno ista poruka bez obzira da li nalog postoji (da se ne otkriva
+  // koji su emailovi registrovani). Pošto još nema slanja mejla, link za
+  // reset operater vidi u /operater/reset-lozinke i prosleđuje ga korisniku.
+  return {
+    success: true,
+    message:
+      "Ako nalog sa ovim emailom postoji, zahtev je zabeležen — kontaktiraćemo vas uskoro na broj telefona koji imamo u sistemu.",
+  };
+}
+
+export async function resetPasswordAction(
+  _prev: ActionState,
+  formData: FormData
+): Promise<ActionState> {
+  const token = str(formData, "token");
+  const password = str(formData, "password");
+
+  if (!token) return { error: "Nevažeći link." };
+  if (password.length < 6) {
+    return { error: "Lozinka mora imati bar 6 karaktera." };
+  }
+
+  try {
+    await resetPassword(token, password);
+  } catch (err) {
+    return { error: err instanceof Error ? err.message : "Greška." };
+  }
+
+  redirect("/prijava?resetovano=1");
 }

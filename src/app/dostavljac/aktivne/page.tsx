@@ -4,6 +4,7 @@ import { ZONE_LABELS } from "@/lib/zones";
 import { ORDER_STATUS_LABELS, SHIPMENT_TYPE_LABELS, formatMoney } from "@/lib/labels";
 import { StatusBadge } from "@/components/StatusBadge";
 import { AdvanceOrderButton } from "@/components/AdvanceOrderButton";
+import { CancelOrderButton } from "@/components/CancelOrderButton";
 
 export default async function AktivneIsporukePage() {
   const user = await getCurrentUser();
@@ -51,6 +52,7 @@ export default async function AktivneIsporukePage() {
                 <div className="flex flex-col items-end gap-2">
                   <StatusBadge status={o.status} label={ORDER_STATUS_LABELS[o.status]} />
                   <AdvanceOrderButton orderId={o.id} status={o.status} />
+                  <CancelOrderButton orderId={o.id} />
                 </div>
               </div>
             </li>

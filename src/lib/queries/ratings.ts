@@ -1,4 +1,4 @@
-import { pool, queryOne } from "../db";
+import { pool, query, queryOne } from "../db";
 import type { OrderRow, RatingRow } from "../types";
 
 export async function getRatingForOrder(
@@ -7,6 +7,25 @@ export async function getRatingForOrder(
   return queryOne<RatingRow>("SELECT * FROM ratings WHERE order_id = $1", [
     orderId,
   ]);
+}
+
+export interface RatingWithZones extends RatingRow {
+  zona_preuzimanja: string;
+  zona_isporuke: string;
+}
+
+export async function listRatingsForCourier(
+  courierId: string
+): Promise<RatingWithZones[]> {
+  return query<RatingWithZones>(
+    `SELECT r.*, s.zona_preuzimanja, s.zona_isporuke
+     FROM ratings r
+     JOIN orders o ON o.id = r.order_id
+     JOIN shipments s ON s.id = o.shipment_id
+     WHERE o.courier_id = $1
+     ORDER BY r.created_at DESC`,
+    [courierId]
+  );
 }
 
 export async function createRating(input: {

@@ -1,4 +1,4 @@
-import { query, queryOne } from "../db";
+import { pool, query, queryOne } from "../db";
 import type {
   ShipmentRow,
   ShipmentStatus,
@@ -69,6 +69,45 @@ export async function updateShipmentStatus(
   status: ShipmentStatus
 ): Promise<void> {
   await query("UPDATE shipments SET status = $1 WHERE id = $2", [status, id]);
+}
+
+/**
+ * Client cancels their own shipment — only allowed before a courier has
+ * been chosen (no order exists yet). Once an order exists, cancelOrder
+ * (in queries/orders.ts) is the right call instead.
+ */
+export async function cancelShipment(
+  shipmentId: string,
+  clientId: string
+): Promise<void> {
+  const client = await pool.connect();
+  try {
+    await client.query("BEGIN");
+
+    const res = await client.query<ShipmentRow>(
+      "SELECT * FROM shipments WHERE id = $1 FOR UPDATE",
+      [shipmentId]
+    );
+    const shipment = res.rows[0];
+    if (!shipment) throw new Error("Pošiljka nije pronađena");
+    if (shipment.client_id !== clientId) {
+      throw new Error("Nemate pravo da otkažete ovu pošiljku");
+    }
+    if (shipment.status !== "OTVORENA" && shipment.status !== "PONUDE_STIGLE") {
+      throw new Error("Pošiljka se više ne može otkazati u ovom statusu");
+    }
+
+    await client.query("UPDATE shipments SET status = 'OTKAZANA' WHERE id = $1", [
+      shipmentId,
+    ]);
+
+    await client.query("COMMIT");
+  } catch (err) {
+    await client.query("ROLLBACK");
+    throw err;
+  } finally {
+    client.release();
+  }
 }
 
 export const MANUAL_REQUEST_WINDOW_MINUTES = 15;

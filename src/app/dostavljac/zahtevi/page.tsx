@@ -6,6 +6,7 @@ import {
 import { ZONE_LABELS } from "@/lib/zones";
 import { SHIPMENT_TYPE_LABELS, TERMIN_LABELS, formatMoney } from "@/lib/labels";
 import { ManualOfferForm } from "@/components/ManualOfferForm";
+import { AutoRefresh } from "@/components/AutoRefresh";
 
 function minutesLeft(createdAt: string): number {
   const deadline = new Date(createdAt).getTime() + MANUAL_REQUEST_WINDOW_MINUTES * 60_000;
@@ -20,6 +21,7 @@ export default async function ZahteviPage() {
 
   return (
     <div className="space-y-6">
+      <AutoRefresh intervalMs={20000} />
       <div>
         <h1 className="text-2xl font-semibold">Zahtevi za ponude</h1>
         <p className="mt-1 text-sm text-neutral-600">

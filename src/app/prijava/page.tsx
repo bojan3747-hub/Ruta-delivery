@@ -8,6 +8,7 @@ export default async function PrijavaPage({
 }) {
   const params = await searchParams;
   const aktivirano = params.aktivirano === "1";
+  const resetovano = params.resetovano === "1";
 
   return (
     <div className="mx-auto max-w-sm space-y-6">
@@ -15,6 +16,11 @@ export default async function PrijavaPage({
       {aktivirano && (
         <p className="rounded-md bg-emerald-50 px-3 py-2 text-sm text-emerald-800 border border-emerald-200">
           Nalog je aktiviran. Prijavite se svojim emailom i lozinkom.
+        </p>
+      )}
+      {resetovano && (
+        <p className="rounded-md bg-emerald-50 px-3 py-2 text-sm text-emerald-800 border border-emerald-200">
+          Lozinka je promenjena. Prijavite se novom lozinkom.
         </p>
       )}
       <LoginForm />

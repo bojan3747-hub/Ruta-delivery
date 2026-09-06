@@ -2,7 +2,8 @@
 
 import { redirect } from "next/navigation";
 import { getCurrentUser } from "../auth";
-import { createShipment } from "../queries/shipments";
+import { revalidatePath } from "next/cache";
+import { cancelShipment, createShipment } from "../queries/shipments";
 import { createAutoOffers } from "../queries/offers";
 import type { ShipmentType, TerminType, Zone } from "../types";
 import type { ActionState } from "./auth-actions";
@@ -66,4 +67,23 @@ export async function createShipmentAction(
   }
 
   redirect(`/klijent/posiljke/${shipment.id}`);
+}
+
+export async function cancelShipmentAction(
+  shipmentId: string
+): Promise<{ error?: string }> {
+  const user = await getCurrentUser();
+  if (!user || user.role !== "CLIENT" || !user.companyId) {
+    return { error: "Morate biti prijavljeni kao klijent." };
+  }
+
+  try {
+    await cancelShipment(shipmentId, user.companyId);
+  } catch (err) {
+    return { error: err instanceof Error ? err.message : "Greška." };
+  }
+
+  revalidatePath(`/klijent/posiljke/${shipmentId}`);
+  revalidatePath("/klijent");
+  return {};
 }

@@ -1,15 +1,23 @@
 "use client";
 
-import Link from "next/link";
 import { useActionState } from "react";
-import { loginAction, type ActionState } from "@/lib/actions/auth-actions";
+import { requestPasswordResetAction } from "@/lib/actions/auth-actions";
+import type { ActionState } from "@/lib/actions/auth-actions";
 import { FormMessage } from "./FormMessage";
 import { SubmitButton } from "./SubmitButton";
 
 const initialState: ActionState = {};
 
-export function LoginForm() {
-  const [state, formAction] = useActionState(loginAction, initialState);
+export function ForgotPasswordForm() {
+  const [state, formAction] = useActionState(requestPasswordResetAction, initialState);
+
+  if (state.success) {
+    return (
+      <p className="rounded-md bg-emerald-50 px-3 py-2 text-sm text-emerald-800 border border-emerald-200">
+        {state.message}
+      </p>
+    );
+  }
 
   return (
     <form action={formAction} className="space-y-4">
@@ -23,23 +31,9 @@ export function LoginForm() {
           className="mt-1 w-full rounded-md border border-black/15 px-3 py-2 text-sm"
         />
       </div>
-      <div>
-        <label className="block text-sm font-medium">Lozinka</label>
-        <input
-          type="password"
-          name="password"
-          required
-          className="mt-1 w-full rounded-md border border-black/15 px-3 py-2 text-sm"
-        />
-      </div>
       <SubmitButton className="w-full rounded-md bg-emerald-700 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-800 disabled:opacity-50">
-        Prijavi se
+        Pošalji zahtev
       </SubmitButton>
-      <p className="text-center text-sm">
-        <Link href="/zaboravljena-lozinka" className="text-emerald-700 hover:underline">
-          Zaboravili ste lozinku?
-        </Link>
-      </p>
     </form>
   );
 }
