@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { listCouriersForOperator } from "@/lib/queries/couriers";
 import { CreatePreApprovedCourierForm } from "@/components/CreatePreApprovedCourierForm";
+import { BulkImportCouriersForm } from "@/components/BulkImportCouriersForm";
 import { CourierStatusButton } from "@/components/CourierStatusButton";
 import { StatusBadge } from "@/components/StatusBadge";
 import { VEHICLE_TYPE_LABELS } from "@/lib/labels";
@@ -27,6 +28,10 @@ export default async function DostavljaciPage() {
 
       <div className="rounded-lg border border-black/10 bg-white p-5">
         <CreatePreApprovedCourierForm />
+      </div>
+
+      <div className="rounded-lg border border-black/10 bg-white p-5">
+        <BulkImportCouriersForm />
       </div>
 
       <ul className="divide-y divide-black/10 rounded-lg border border-black/10 bg-white">
