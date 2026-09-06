@@ -8,7 +8,17 @@ import type { Zone } from "@/lib/types";
 export default async function KlijentOcenePage() {
   const user = await getCurrentUser();
   const company = user?.companyId ? await getCompanyById(user.companyId) : null;
-  if (!company) return null;
+
+  if (!company) {
+    return (
+      <div className="space-y-6">
+        <h1 className="text-2xl font-semibold">Ocene o vama</h1>
+        <p className="rounded-lg border border-dashed border-black/15 p-8 text-center text-neutral-500">
+          Podaci o firmi nisu pronađeni. Pokušajte da se ponovo prijavite.
+        </p>
+      </div>
+    );
+  }
 
   const ratings = await listRatingsForCompany(company.id);
 
