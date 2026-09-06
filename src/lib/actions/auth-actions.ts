@@ -61,12 +61,16 @@ export async function registerClientAction(
   const naziv = str(formData, "naziv");
   const pib = str(formData, "pib");
   const adresa = str(formData, "adresa");
+  const uslovi = formData.get("uslovi") === "on";
 
   if (!email || !password || !ime || !telefon || !naziv) {
     return { error: "Popunite sva obavezna polja." };
   }
   if (password.length < 6) {
     return { error: "Lozinka mora imati bar 6 karaktera." };
+  }
+  if (!uslovi) {
+    return { error: "Morate prihvatiti Opšte uslove korišćenja." };
   }
 
   const existing = await queryOne("SELECT id FROM users WHERE email = $1", [

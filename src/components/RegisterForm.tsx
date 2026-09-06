@@ -4,6 +4,7 @@ import { useActionState } from "react";
 import { registerClientAction, type ActionState } from "@/lib/actions/auth-actions";
 import { FormMessage } from "./FormMessage";
 import { SubmitButton } from "./SubmitButton";
+import { TermsCheckbox } from "./TermsCheckbox";
 
 const initialState: ActionState = {};
 
@@ -62,6 +63,8 @@ export function RegisterForm() {
           />
         </div>
       </fieldset>
+
+      <TermsCheckbox />
 
       <SubmitButton className="w-full rounded-md bg-emerald-700 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-800 disabled:opacity-50">
         Registruj firmu

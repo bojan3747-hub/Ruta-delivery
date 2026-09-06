@@ -32,6 +32,7 @@ export async function activateCourierAction(
   const tipVozila = str(formData, "tipVozila") as VehicleType;
   const nosivostKg = Number(str(formData, "nosivostKg"));
   const zones = selectedZones(formData);
+  const uslovi = formData.get("uslovi") === "on";
 
   if (!token) return { error: "Nevažeći link za aktivaciju." };
   if (!email || !password || !telefon || !pib || !tipVozila) {
@@ -45,6 +46,9 @@ export async function activateCourierAction(
   }
   if (!Number.isFinite(nosivostKg) || nosivostKg <= 0) {
     return { error: "Unesite validnu nosivost vozila (kg)." };
+  }
+  if (!uslovi) {
+    return { error: "Morate prihvatiti Opšte uslove korišćenja." };
   }
 
   const courier = await getCourierByToken(token);

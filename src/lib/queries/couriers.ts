@@ -75,8 +75,8 @@ export async function activateCourier(input: {
     }
 
     const userResult = await client.query<UserRow>(
-      `INSERT INTO users (email, password_hash, role, ime, telefon)
-       VALUES ($1, $2, 'COURIER', $3, $4)
+      `INSERT INTO users (email, password_hash, role, ime, telefon, uslovi_prihvaceni_at)
+       VALUES ($1, $2, 'COURIER', $3, $4, now())
        RETURNING *`,
       [
         input.email.toLowerCase().trim(),

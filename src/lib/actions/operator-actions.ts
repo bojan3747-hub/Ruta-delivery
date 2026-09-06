@@ -5,6 +5,7 @@ import { getCurrentUser } from "../auth";
 import { createPreApprovedCourier } from "../queries/couriers";
 import { setCommissionPercent } from "../queries/commission";
 import { generateInvoicesForPeriod, setInvoiceStatus } from "../queries/invoices";
+import { uploadOpstiUslovi } from "../queries/opsti-uslovi";
 import type { ActionState } from "./auth-actions";
 
 function str(formData: FormData, key: string): string {
@@ -94,4 +95,30 @@ export async function markInvoicePaidAction(invoiceId: string): Promise<{ error?
   await setInvoiceStatus(invoiceId, "NAPLACENO");
   revalidatePath("/operater/provizija");
   return {};
+}
+
+export async function uploadOpstiUsloviAction(
+  _prev: ActionState,
+  formData: FormData
+): Promise<ActionState> {
+  try {
+    await requireOperator();
+  } catch (err) {
+    return { error: err instanceof Error ? err.message : "Greška." };
+  }
+
+  const file = formData.get("pdf");
+  if (!(file instanceof File) || file.size === 0) {
+    return { error: "Izaberite PDF fajl." };
+  }
+  if (file.type !== "application/pdf") {
+    return { error: "Fajl mora biti PDF." };
+  }
+
+  const buffer = Buffer.from(await file.arrayBuffer());
+  await uploadOpstiUslovi(file.name, buffer);
+
+  revalidatePath("/operater/opsti-uslovi");
+  revalidatePath("/opsti-uslovi");
+  return { success: true };
 }

@@ -76,8 +76,13 @@ CREATE TABLE IF NOT EXISTS users (
   role          role NOT NULL,
   ime           TEXT NOT NULL,
   telefon       TEXT,
+  uslovi_prihvaceni_at TIMESTAMPTZ,
   created_at    TIMESTAMPTZ NOT NULL DEFAULT now()
 );
+
+-- Dodato posle prvog izdanja; ALTER (pored kolone gore) da bi stiglo i na
+-- baze koje već imaju tabelu users.
+ALTER TABLE users ADD COLUMN IF NOT EXISTS uslovi_prihvaceni_at TIMESTAMPTZ;
 
 CREATE TABLE IF NOT EXISTS companies (
   id         UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -208,6 +213,17 @@ CREATE TABLE IF NOT EXISTS commission_invoices (
   created_at         TIMESTAMPTZ NOT NULL DEFAULT now(),
   placeno_at         TIMESTAMPTZ,
   UNIQUE (courier_id, period_start)
+);
+
+-- Opšti uslovi korišćenja kao PDF. Svaki upload operatera dodaje novi red
+-- (istorija se čuva); "važeći" dokument je uvek onaj sa najnovijim
+-- created_at. Fajl se čuva direktno u bazi (bytea) — nema potrebe za
+-- posebnim cloud storage nalogom za ovako mali, retko menjan fajl.
+CREATE TABLE IF NOT EXISTS opsti_uslovi_dokumenti (
+  id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  naziv_fajla TEXT NOT NULL,
+  sadrzaj     BYTEA NOT NULL,
+  created_at  TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
 CREATE INDEX IF NOT EXISTS idx_shipments_client ON shipments(client_id);

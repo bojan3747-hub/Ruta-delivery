@@ -17,8 +17,8 @@ export async function createCompanyAccount(input: {
 
     const passwordHash = await hashPassword(input.password);
     const userResult = await client.query<UserRow>(
-      `INSERT INTO users (email, password_hash, role, ime, telefon)
-       VALUES ($1, $2, 'CLIENT', $3, $4)
+      `INSERT INTO users (email, password_hash, role, ime, telefon, uslovi_prihvaceni_at)
+       VALUES ($1, $2, 'CLIENT', $3, $4, now())
        RETURNING *`,
       [input.email.toLowerCase().trim(), passwordHash, input.ime, input.telefon]
     );

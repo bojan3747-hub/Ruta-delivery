@@ -56,6 +56,7 @@ export interface UserRow {
   role: Role;
   ime: string;
   telefon: string | null;
+  uslovi_prihvaceni_at: string | null;
   created_at: string;
 }
 
@@ -152,6 +153,12 @@ export interface CommissionSettingRow {
   id: number;
   procenat: string;
   updated_at: string;
+}
+
+export interface OpstiUsloviMeta {
+  id: string;
+  naziv_fajla: string;
+  created_at: string;
 }
 
 export interface CommissionInvoiceRow {
