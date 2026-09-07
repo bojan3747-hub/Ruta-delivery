@@ -120,19 +120,23 @@ export async function cancelShipment(
 export const MANUAL_REQUEST_WINDOW_MINUTES = 15;
 
 /**
- * Open non-standard shipments a courier can still send a manual offer for
- * (KAN-9): must cover both zones, the courier hasn't already responded, the
- * shipment hasn't already been assigned, and the courier's 15-minute
- * response window (from when the request went out) hasn't passed yet.
+ * Open shipments a courier can still send an offer for (Faza 4): every
+ * standard shipment stays visible until someone offers (no deadline —
+ * we don't want a shipment to silently become unreachable), while
+ * non-standard shipments keep the original 15-minute response window
+ * (KAN-9). Either way: must cover both zones, the courier hasn't already
+ * responded, and the shipment hasn't already been assigned.
  */
-export async function listOpenManualRequestsForCourier(
+export async function listOpenRequestsForCourier(
   courierId: string
 ): Promise<ShipmentRow[]> {
   return query<ShipmentRow>(
     `SELECT s.* FROM shipments s
-     WHERE s.nestandardna = true
-       AND s.status = 'OTVORENA'
-       AND s.created_at > now() - interval '${MANUAL_REQUEST_WINDOW_MINUTES} minutes'
+     WHERE s.status = 'OTVORENA'
+       AND (
+         s.nestandardna = false
+         OR s.created_at > now() - interval '${MANUAL_REQUEST_WINDOW_MINUTES} minutes'
+       )
        AND EXISTS (SELECT 1 FROM courier_zones cz WHERE cz.courier_id = $1 AND cz.zone = s.zona_preuzimanja)
        AND EXISTS (SELECT 1 FROM courier_zones cz WHERE cz.courier_id = $1 AND cz.zone = s.zona_isporuke)
        AND NOT EXISTS (

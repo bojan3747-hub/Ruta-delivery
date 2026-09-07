@@ -7,7 +7,7 @@ import {
   updateCourierPricing,
 } from "../src/lib/queries/couriers";
 import { createShipment } from "../src/lib/queries/shipments";
-import { createAutoOffers } from "../src/lib/queries/offers";
+import { createManualOffer } from "../src/lib/queries/offers";
 import { hashPassword } from "../src/lib/auth";
 
 async function main() {
@@ -143,7 +143,14 @@ async function main() {
     napomena: "Pozvati pre dolaska.",
     deklarisanaVrednost: 15000,
   });
-  await createAutoOffers(standardna);
+  // Faza 4: kuriri sada šalju ponude ručno (i za standardne pošiljke), pa
+  // demo podaci simuliraju da je Brzi Kombi Nikola već ponudio.
+  await createManualOffer({
+    shipmentId: standardna.id,
+    courierId: kombiNikola.id,
+    cena: 1800,
+    procenjenoVremeMin: 35,
+  });
 
   await createShipment({
     clientId: klijent2.id,

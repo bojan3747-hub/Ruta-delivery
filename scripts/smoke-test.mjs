@@ -51,16 +51,10 @@ async function main() {
     shipmentUrl = client.url();
   });
 
-  await step("auto-offer is visible", async () => {
-    await client.waitForSelector("text=Prihvati ponudu", { timeout: 5000 });
-  });
-
-  await step("client accepts offer", async () => {
-    await client.click("text=Prihvati ponudu");
-    await client.waitForSelector("text=Praćenje isporuke", { timeout: 5000 });
-  });
-
-  // ---- Courier flow: login, advance order status ----
+  // ---- Courier flow: login, send manual offer for the standard shipment ----
+  // (Faza 4: standard shipments no longer auto-offer — every courier in the
+  // zone sees the request and sends their own offer, price prefilled from
+  // their price list but editable.)
   const courierCtx = await browser.newContext();
   const courier = await courierCtx.newPage();
 
@@ -70,6 +64,28 @@ async function main() {
     await courier.fill('input[name="password"]', "lozinka123");
     await courier.click('button[type="submit"]');
     await courier.waitForURL(`${BASE}/dostavljac`);
+  });
+
+  await step("courier sees standard request and sends an offer", async () => {
+    await courier.goto(`${BASE}/dostavljac/zahtevi`);
+    await courier.waitForSelector("text=Standardna", { timeout: 5000 });
+    const li = courier.locator("li", { hasText: "Standardna" }).first();
+    await li.locator('input[name="cena"]').fill("1500");
+    await li.locator('input[name="procenjenoVremeMin"]').fill("40");
+    await li.locator('button:has-text("Pošalji ponudu")').click();
+    await courier.waitForSelector("text=Ponuda je poslata klijentu.", {
+      timeout: 5000,
+    });
+  });
+
+  await step("offer is visible to client", async () => {
+    await client.goto(shipmentUrl);
+    await client.waitForSelector("text=Prihvati ponudu", { timeout: 5000 });
+  });
+
+  await step("client accepts offer", async () => {
+    await client.click("text=Prihvati ponudu");
+    await client.waitForSelector("text=Praćenje isporuke", { timeout: 5000 });
   });
 
   await step("courier sees active delivery and advances status", async () => {

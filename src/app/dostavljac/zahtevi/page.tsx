@@ -1,8 +1,10 @@
 import { getCurrentUser } from "@/lib/auth";
 import {
   MANUAL_REQUEST_WINDOW_MINUTES,
-  listOpenManualRequestsForCourier,
+  listOpenRequestsForCourier,
 } from "@/lib/queries/shipments";
+import { getCourierById } from "@/lib/queries/couriers";
+import { computeAutoQuote } from "@/lib/pricing";
 import { ZONE_LABELS } from "@/lib/zones";
 import { SHIPMENT_TYPE_LABELS, TERMIN_LABELS, formatMoney } from "@/lib/labels";
 import { ManualOfferForm } from "@/components/ManualOfferForm";
@@ -15,8 +17,9 @@ function minutesLeft(createdAt: string): number {
 
 export default async function ZahteviPage() {
   const user = await getCurrentUser();
+  const courier = user?.courierId ? await getCourierById(user.courierId) : null;
   const requests = user?.courierId
-    ? await listOpenManualRequestsForCourier(user.courierId)
+    ? await listOpenRequestsForCourier(user.courierId)
     : [];
 
   return (
@@ -25,9 +28,10 @@ export default async function ZahteviPage() {
       <div>
         <h1 className="text-2xl font-semibold">Zahtevi za ponude</h1>
         <p className="mt-1 text-sm text-neutral-600">
-          Nestandardne pošiljke (palete, krhka roba, veće količine) u vašim
-          zonama. Imate {MANUAL_REQUEST_WINDOW_MINUTES} minuta od prijema
-          zahteva da pošaljete ponudu.
+          Sve otvorene pošiljke (standardne i nestandardne) u vašim zonama za
+          koje još niste poslali ponudu. Standardne pošiljke ostaju vidljive
+          dok neko ne ponudi; za nestandardne imate{" "}
+          {MANUAL_REQUEST_WINDOW_MINUTES} minuta od prijema zahteva.
         </p>
       </div>
 
@@ -37,7 +41,9 @@ export default async function ZahteviPage() {
         </p>
       ) : (
         <ul className="space-y-4">
-          {requests.map((s) => (
+          {requests.map((s) => {
+            const quote = courier ? computeAutoQuote(courier, s) : null;
+            return (
             <li key={s.id} className="rounded-lg border border-black/10 bg-white p-4">
               <div className="flex flex-wrap items-start justify-between gap-2">
                 <div>
@@ -75,15 +81,26 @@ export default async function ZahteviPage() {
                     <p className="mt-1 text-sm text-neutral-700">{s.napomena}</p>
                   )}
                 </div>
-                <span className="whitespace-nowrap rounded-full bg-amber-100 px-2.5 py-0.5 text-xs font-medium text-amber-800">
-                  još ~{minutesLeft(s.created_at)} min
-                </span>
+                {s.nestandardna ? (
+                  <span className="whitespace-nowrap rounded-full bg-amber-100 px-2.5 py-0.5 text-xs font-medium text-amber-800">
+                    još ~{minutesLeft(s.created_at)} min
+                  </span>
+                ) : (
+                  <span className="whitespace-nowrap rounded-full bg-neutral-100 px-2.5 py-0.5 text-xs font-medium text-neutral-600">
+                    Standardna
+                  </span>
+                )}
               </div>
               <div className="mt-4 border-t border-black/10 pt-4">
-                <ManualOfferForm shipmentId={s.id} />
+                <ManualOfferForm
+                  shipmentId={s.id}
+                  defaultCena={quote?.cenaEur}
+                  defaultProcenjenoVremeMin={quote?.procenjenoVremeMin}
+                />
               </div>
             </li>
-          ))}
+            );
+          })}
         </ul>
       )}
     </div>

@@ -56,7 +56,7 @@ export async function sendManualOfferAction(
   }
 
   const shipment = await getShipmentById(shipmentId);
-  if (!shipment || shipment.status !== "OTVORENA" || !shipment.nestandardna) {
+  if (!shipment || shipment.status !== "OTVORENA") {
     return { error: "Ovaj zahtev više nije aktivan." };
   }
 
@@ -68,6 +68,9 @@ export async function sendManualOfferAction(
     napomena: napomena || undefined,
   });
 
-  revalidatePath("/dostavljac/zahtevi");
+  // Intentionally no revalidatePath here: the courier should see the
+  // "Ponuda je poslata klijentu." confirmation on THIS render first. The
+  // page's own AutoRefresh (every 20s) — or the next navigation — will
+  // naturally drop the request once it's no longer open for this courier.
   return { success: true };
 }

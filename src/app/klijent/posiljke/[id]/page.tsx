@@ -105,7 +105,7 @@ export default async function PosiljkaDetailPage({
             <p className="rounded-lg border border-dashed border-black/15 p-6 text-center text-sm text-neutral-500">
               {shipment.nestandardna
                 ? "Čekamo ponude dostavljača za ovu nestandardnu pošiljku (do 15 minuta po dostavljaču)."
-                : "Trenutno nema dostavljača koji pokrivaju obe zone i imaju slobodan kapacitet."}
+                : "Čekamo da neki od dostavljača u vašim zonama pošalje ponudu."}
             </p>
           ) : (
             <ul className="divide-y divide-black/10 rounded-lg border border-black/10 bg-white">

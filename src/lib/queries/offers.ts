@@ -1,6 +1,4 @@
 import { pool, query, queryOne } from "../db";
-import { computeAutoQuote } from "../pricing";
-import { findEligibleActiveCouriers } from "./couriers";
 import { updateShipmentStatus } from "./shipments";
 import type { OfferRow, ShipmentRow } from "../types";
 
@@ -9,39 +7,6 @@ export interface OfferWithCourier extends OfferRow {
   courier_tip_vozila: string | null;
   courier_ocena_prosek: string | null;
   courier_verifikovan: boolean;
-}
-
-/**
- * Runs the automatic-quote flow for a newly created standard shipment
- * (KAN-5): finds active couriers covering both zones with free capacity,
- * prices each one from their saved price list, and stores an offer per
- * courier.
- */
-export async function createAutoOffers(
-  shipment: ShipmentRow
-): Promise<number> {
-  const couriers = await findEligibleActiveCouriers(
-    shipment.zona_preuzimanja,
-    shipment.zona_isporuke
-  );
-
-  let created = 0;
-  for (const courier of couriers) {
-    const quote = computeAutoQuote(courier, shipment);
-    if (!quote) continue;
-    await query(
-      `INSERT INTO offers (shipment_id, courier_id, cena, procenjeno_vreme_min, tip, status)
-       VALUES ($1, $2, $3, $4, 'AUTOMATSKA', 'POSLATA')
-       ON CONFLICT (shipment_id, courier_id) DO NOTHING`,
-      [shipment.id, courier.id, quote.cenaEur, quote.procenjenoVremeMin]
-    );
-    created += 1;
-  }
-
-  if (created > 0) {
-    await updateShipmentStatus(shipment.id, "PONUDE_STIGLE");
-  }
-  return created;
 }
 
 export async function createManualOffer(input: {

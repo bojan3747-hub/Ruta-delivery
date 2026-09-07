@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { getCurrentUser } from "@/lib/auth";
 import { getCourierById, getCourierZones } from "@/lib/queries/couriers";
-import { listOpenManualRequestsForCourier } from "@/lib/queries/shipments";
+import { listOpenRequestsForCourier } from "@/lib/queries/shipments";
 import { listOrdersForCourier } from "@/lib/queries/orders";
 import { ZONE_LABELS } from "@/lib/zones";
 import { VEHICLE_TYPE_LABELS } from "@/lib/labels";
@@ -14,7 +14,7 @@ export default async function DostavljacPage() {
 
   const [zones, requests, activeOrders] = await Promise.all([
     getCourierZones(courier.id),
-    listOpenManualRequestsForCourier(courier.id),
+    listOpenRequestsForCourier(courier.id),
     listOrdersForCourier(courier.id),
   ]);
 

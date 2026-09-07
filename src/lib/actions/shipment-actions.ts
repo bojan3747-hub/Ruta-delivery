@@ -4,7 +4,6 @@ import { redirect } from "next/navigation";
 import { getCurrentUser } from "../auth";
 import { revalidatePath } from "next/cache";
 import { cancelShipment, createShipment } from "../queries/shipments";
-import { createAutoOffers } from "../queries/offers";
 import type { ShipmentType, TerminType, Zone } from "../types";
 import type { ActionState } from "./auth-actions";
 
@@ -79,10 +78,6 @@ export async function createShipmentAction(
     napomena: napomena || undefined,
     deklarisanaVrednost,
   });
-
-  if (!nestandardna) {
-    await createAutoOffers(shipment);
-  }
 
   redirect(`/klijent/posiljke/${shipment.id}`);
 }

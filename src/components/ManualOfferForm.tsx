@@ -8,7 +8,16 @@ import { SubmitButton } from "./SubmitButton";
 
 const initialState: ActionState = {};
 
-export function ManualOfferForm({ shipmentId }: { shipmentId: string }) {
+export function ManualOfferForm({
+  shipmentId,
+  defaultCena,
+  defaultProcenjenoVremeMin,
+}: {
+  shipmentId: string;
+  /** Predlog iz kurirovog cenovnika (ako je podešen) — i dalje izmenljivo. */
+  defaultCena?: number;
+  defaultProcenjenoVremeMin?: number;
+}) {
   const [state, formAction] = useActionState(sendManualOfferAction, initialState);
 
   if (state.success) {
@@ -23,6 +32,11 @@ export function ManualOfferForm({ shipmentId }: { shipmentId: string }) {
     <form action={formAction} className="space-y-3">
       <input type="hidden" name="shipmentId" value={shipmentId} />
       <FormMessage error={state.error} />
+      {defaultCena != null && (
+        <p className="text-xs text-neutral-500">
+          Predlog iz vašeg cenovnika — po potrebi izmenite pre slanja.
+        </p>
+      )}
       <div className="grid grid-cols-2 gap-3">
         <div>
           <label className="block text-xs font-medium text-neutral-600">
@@ -34,6 +48,7 @@ export function ManualOfferForm({ shipmentId }: { shipmentId: string }) {
             min="0"
             step="0.01"
             required
+            defaultValue={defaultCena}
             className="mt-1 w-full rounded-md border border-black/15 px-3 py-1.5 text-sm"
           />
         </div>
@@ -46,6 +61,7 @@ export function ManualOfferForm({ shipmentId }: { shipmentId: string }) {
             name="procenjenoVremeMin"
             min="1"
             required
+            defaultValue={defaultProcenjenoVremeMin}
             className="mt-1 w-full rounded-md border border-black/15 px-3 py-1.5 text-sm"
           />
         </div>
