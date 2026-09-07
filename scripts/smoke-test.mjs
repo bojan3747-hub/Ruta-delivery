@@ -35,10 +35,15 @@ async function main() {
   let shipmentUrl;
   await step("client creates standard shipment", async () => {
     await client.goto(`${BASE}/klijent/nova-posiljka`);
+    await client.fill('input[name="posiljalacIme"]', "Test Pošiljalac");
+    await client.fill('input[name="posiljalacTelefon"]', "+381600000001");
     await client.selectOption('select[name="zonaPreuzimanja"]', "STARI_GRAD");
-    await client.selectOption('select[name="zonaIsporuke"]', "NOVI_BEOGRAD");
     await client.fill('input[name="adresaPreuzimanja"]', "Testna 1");
+    await client.fill('input[name="primalacIme"]', "Test Primalac");
+    await client.fill('input[name="primalacTelefon"]', "+381600000002");
+    await client.selectOption('select[name="zonaIsporuke"]', "NOVI_BEOGRAD");
     await client.fill('input[name="adresaIsporuke"]', "Testna 2");
+    await client.fill('input[name="deklarisanaVrednost"]', "5000");
     await client.selectOption('select[name="tip"]', "MALI_PAKET");
     await client.selectOption('select[name="zeljeniTermin"]', "ODMAH");
     await client.click('button:has-text("Zatraži ponude")');

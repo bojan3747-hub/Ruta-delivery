@@ -156,6 +156,10 @@ CREATE TABLE IF NOT EXISTS shipments (
   zona_isporuke       zone NOT NULL,
   adresa_preuzimanja  TEXT NOT NULL,
   adresa_isporuke     TEXT NOT NULL,
+  posiljalac_ime      TEXT,
+  posiljalac_telefon  TEXT,
+  primalac_ime        TEXT,
+  primalac_telefon    TEXT,
   tip                 shipment_type NOT NULL,
   hitno               BOOLEAN NOT NULL DEFAULT false,
   nestandardna        BOOLEAN NOT NULL DEFAULT false,
@@ -166,6 +170,14 @@ CREATE TABLE IF NOT EXISTS shipments (
   status              shipment_status NOT NULL DEFAULT 'OTVORENA',
   created_at          TIMESTAMPTZ NOT NULL DEFAULT now()
 );
+
+-- Sender/receiver contact fields added post-launch (Faza 3) — ADD COLUMN
+-- IF NOT EXISTS so this stays safe to re-run against a database where the
+-- table above already existed without these columns.
+ALTER TABLE shipments ADD COLUMN IF NOT EXISTS posiljalac_ime TEXT;
+ALTER TABLE shipments ADD COLUMN IF NOT EXISTS posiljalac_telefon TEXT;
+ALTER TABLE shipments ADD COLUMN IF NOT EXISTS primalac_ime TEXT;
+ALTER TABLE shipments ADD COLUMN IF NOT EXISTS primalac_telefon TEXT;
 
 -- Added after the initial release; ALTER (not just the column above) so it
 -- also lands on databases that already have a shipments table.

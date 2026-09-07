@@ -162,6 +162,10 @@ model Shipment {
   zonaIsporuke        Zone
   adresaPreuzimanja   String
   adresaIsporuke      String
+  posiljalacIme       String?
+  posiljalacTelefon   String?
+  primalacIme         String?
+  primalacTelefon     String?
   tip                 ShipmentType
   hitno               Boolean        @default(false)
   nestandardna        Boolean        @default(false)

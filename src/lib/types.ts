@@ -110,6 +110,10 @@ export interface ShipmentRow {
   zona_isporuke: Zone;
   adresa_preuzimanja: string;
   adresa_isporuke: string;
+  posiljalac_ime: string | null;
+  posiljalac_telefon: string | null;
+  primalac_ime: string | null;
+  primalac_telefon: string | null;
   tip: ShipmentType;
   hitno: boolean;
   nestandardna: boolean;

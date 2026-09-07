@@ -25,6 +25,10 @@ export async function createShipmentAction(
   const zonaIsporuke = str(formData, "zonaIsporuke") as Zone;
   const adresaPreuzimanja = str(formData, "adresaPreuzimanja");
   const adresaIsporuke = str(formData, "adresaIsporuke");
+  const posiljalacIme = str(formData, "posiljalacIme");
+  const posiljalacTelefon = str(formData, "posiljalacTelefon");
+  const primalacIme = str(formData, "primalacIme");
+  const primalacTelefon = str(formData, "primalacTelefon");
   const tip = str(formData, "tip") as ShipmentType;
   const hitno = formData.get("hitno") === "on";
   const nestandardna = formData.get("nestandardna") === "on";
@@ -38,6 +42,10 @@ export async function createShipmentAction(
     !zonaIsporuke ||
     !adresaPreuzimanja ||
     !adresaIsporuke ||
+    !posiljalacIme ||
+    !posiljalacTelefon ||
+    !primalacIme ||
+    !primalacTelefon ||
     !tip ||
     !zeljeniTermin
   ) {
@@ -46,6 +54,12 @@ export async function createShipmentAction(
   if (!Number.isFinite(deklarisanaVrednost) || deklarisanaVrednost <= 0) {
     return { error: "Unesite validnu deklarisanu vrednost pošiljke (veću od 0)." };
   }
+  if (zeljeniTermin !== "ODMAH" && !terminDetalji) {
+    return {
+      error:
+        "Unesite tačno vreme/rok isporuke (npr. datum i sat) — dostavljaču mora biti jasno kada se očekuje preuzimanje.",
+    };
+  }
 
   const shipment = await createShipment({
     clientId: user.companyId,
@@ -53,6 +67,10 @@ export async function createShipmentAction(
     zonaIsporuke,
     adresaPreuzimanja,
     adresaIsporuke,
+    posiljalacIme,
+    posiljalacTelefon,
+    primalacIme,
+    primalacTelefon,
     tip,
     hitno,
     nestandardna,

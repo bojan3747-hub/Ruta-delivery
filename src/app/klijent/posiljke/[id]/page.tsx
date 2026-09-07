@@ -49,9 +49,22 @@ export default async function PosiljkaDetailPage({
         <h1 className="text-2xl font-semibold">
           {ZONE_LABELS[shipment.zona_preuzimanja]} → {ZONE_LABELS[shipment.zona_isporuke]}
         </h1>
-        <p className="mt-1 text-sm text-neutral-600">
-          {shipment.adresa_preuzimanja} → {shipment.adresa_isporuke}
-        </p>
+        <div className="mt-2 grid gap-x-4 gap-y-1 text-sm text-neutral-600 sm:grid-cols-2">
+          <p>
+            <span className="text-neutral-400">Pošiljalac:</span>{" "}
+            {shipment.posiljalac_ime ?? "—"}
+            {shipment.posiljalac_telefon ? ` · ${shipment.posiljalac_telefon}` : ""}
+            <br />
+            {shipment.adresa_preuzimanja}
+          </p>
+          <p>
+            <span className="text-neutral-400">Primalac:</span>{" "}
+            {shipment.primalac_ime ?? "—"}
+            {shipment.primalac_telefon ? ` · ${shipment.primalac_telefon}` : ""}
+            <br />
+            {shipment.adresa_isporuke}
+          </p>
+        </div>
       </div>
 
       <div className="flex flex-wrap items-center gap-2">

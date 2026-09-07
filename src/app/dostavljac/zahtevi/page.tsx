@@ -45,15 +45,32 @@ export default async function ZahteviPage() {
                     {ZONE_LABELS[s.zona_preuzimanja]} → {ZONE_LABELS[s.zona_isporuke]}
                   </p>
                   <p className="text-sm text-neutral-500">
-                    {SHIPMENT_TYPE_LABELS[s.tip]} · {TERMIN_LABELS[s.zeljeni_termin]}
-                    {s.termin_detalji ? ` (${s.termin_detalji})` : ""}
+                    {SHIPMENT_TYPE_LABELS[s.tip]}
                     {s.hitno ? " · Hitno" : ""}
+                  </p>
+                  <p className="mt-0.5 text-sm font-medium text-neutral-800">
+                    Rok isporuke: {TERMIN_LABELS[s.zeljeni_termin]}
+                    {s.termin_detalji ? ` — ${s.termin_detalji}` : ""}
                   </p>
                   {s.deklarisana_vrednost && (
                     <p className="mt-1 text-sm text-neutral-500">
                       Deklarisana vrednost: {formatMoney(s.deklarisana_vrednost)}
                     </p>
                   )}
+                  <div className="mt-2 grid gap-x-4 gap-y-0.5 text-sm text-neutral-600 sm:grid-cols-2">
+                    <p>
+                      <span className="text-neutral-400">Preuzimanje:</span>{" "}
+                      {s.adresa_preuzimanja}
+                      {s.posiljalac_ime ? ` — ${s.posiljalac_ime}` : ""}
+                      {s.posiljalac_telefon ? ` (${s.posiljalac_telefon})` : ""}
+                    </p>
+                    <p>
+                      <span className="text-neutral-400">Isporuka:</span>{" "}
+                      {s.adresa_isporuke}
+                      {s.primalac_ime ? ` — ${s.primalac_ime}` : ""}
+                      {s.primalac_telefon ? ` (${s.primalac_telefon})` : ""}
+                    </p>
+                  </div>
                   {s.napomena && (
                     <p className="mt-1 text-sm text-neutral-700">{s.napomena}</p>
                   )}

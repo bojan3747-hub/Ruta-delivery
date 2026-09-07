@@ -13,6 +13,10 @@ export async function createShipment(input: {
   zonaIsporuke: Zone;
   adresaPreuzimanja: string;
   adresaIsporuke: string;
+  posiljalacIme?: string;
+  posiljalacTelefon?: string;
+  primalacIme?: string;
+  primalacTelefon?: string;
   tip: ShipmentType;
   hitno: boolean;
   nestandardna: boolean;
@@ -24,9 +28,10 @@ export async function createShipment(input: {
   const row = await queryOne<ShipmentRow>(
     `INSERT INTO shipments (
        client_id, zona_preuzimanja, zona_isporuke, adresa_preuzimanja,
-       adresa_isporuke, tip, hitno, nestandardna, zeljeni_termin,
+       adresa_isporuke, posiljalac_ime, posiljalac_telefon, primalac_ime,
+       primalac_telefon, tip, hitno, nestandardna, zeljeni_termin,
        termin_detalji, napomena, deklarisana_vrednost
-     ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12)
+     ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16)
      RETURNING *`,
     [
       input.clientId,
@@ -34,6 +39,10 @@ export async function createShipment(input: {
       input.zonaIsporuke,
       input.adresaPreuzimanja,
       input.adresaIsporuke,
+      input.posiljalacIme ?? null,
+      input.posiljalacTelefon ?? null,
+      input.primalacIme ?? null,
+      input.primalacTelefon ?? null,
       input.tip,
       input.hitno,
       input.nestandardna,
