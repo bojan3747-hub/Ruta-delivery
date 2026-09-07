@@ -55,7 +55,10 @@ export function ManualOfferForm({ shipmentId }: { shipmentId: string }) {
         placeholder="Napomena (opciono)"
         className="w-full rounded-md border border-black/15 px-3 py-1.5 text-sm"
       />
-      <SubmitButton className="rounded-md bg-emerald-700 px-4 py-1.5 text-sm font-medium text-white hover:bg-emerald-800 disabled:opacity-50">
+      <SubmitButton
+        className="rounded-md bg-emerald-700 px-4 py-1.5 text-sm font-medium text-white hover:bg-emerald-800 disabled:opacity-50"
+        pendingLabel="Slanje..."
+      >
         Pošalji ponudu
       </SubmitButton>
     </form>

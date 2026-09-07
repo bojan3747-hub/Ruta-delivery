@@ -32,7 +32,10 @@ export function LoginForm() {
           className="mt-1 w-full rounded-md border border-black/15 px-3 py-2 text-sm"
         />
       </div>
-      <SubmitButton className="w-full rounded-md bg-emerald-700 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-800 disabled:opacity-50">
+      <SubmitButton
+        className="w-full rounded-md bg-emerald-700 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-800 disabled:opacity-50"
+        pendingLabel="Prijavljivanje..."
+      >
         Prijavi se
       </SubmitButton>
       <p className="text-center text-sm">

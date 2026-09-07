@@ -102,7 +102,7 @@ export function PricingForm({
         </div>
       </div>
 
-      <SubmitButton>Sačuvaj cenovnik</SubmitButton>
+      <SubmitButton pendingLabel="Čuvanje...">Sačuvaj cenovnik</SubmitButton>
     </form>
   );
 }
