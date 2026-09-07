@@ -223,7 +223,10 @@ export function ShipmentForm({
         <textarea name="napomena" rows={3} className={inputClass} />
       </div>
 
-      <SubmitButton className="w-full rounded-md bg-emerald-700 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-800 disabled:opacity-50">
+      <SubmitButton
+        className="w-full rounded-md bg-emerald-700 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-800 disabled:opacity-50"
+        pendingLabel="Slanje zahteva..."
+      >
         Zatraži ponude
       </SubmitButton>
     </form>

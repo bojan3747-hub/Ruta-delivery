@@ -6,8 +6,9 @@ import type { ButtonHTMLAttributes } from "react";
 export function SubmitButton({
   children,
   className,
+  pendingLabel = "Obrada...",
   ...rest
-}: ButtonHTMLAttributes<HTMLButtonElement>) {
+}: ButtonHTMLAttributes<HTMLButtonElement> & { pendingLabel?: string }) {
   const { pending } = useFormStatus();
   return (
     <button
@@ -19,7 +20,7 @@ export function SubmitButton({
       }
       {...rest}
     >
-      {pending ? "Sačuvavanje..." : children}
+      {pending ? pendingLabel : children}
     </button>
   );
 }

@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import "./globals.css";
 import { NavBar } from "@/components/NavBar";
+import { BackButton } from "@/components/BackButton";
 
 export const metadata: Metadata = {
   title: "Ruta-Dostava — dostava u Beogradu",
@@ -14,10 +16,19 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       <body className="min-h-full flex flex-col bg-neutral-50 text-neutral-900">
         <NavBar />
         <main className="mx-auto w-full max-w-5xl flex-1 px-4 py-8">
+          <BackButton />
           {children}
         </main>
         <footer className="border-t border-black/10 py-4 text-center text-xs text-black/40">
-          Ruta-Dostava — MVP prototip, Beograd
+          <p>Ruta-Dostava — MVP prototip, Beograd</p>
+          <p className="mt-1">
+            <Link
+              href="/dokumenti/politika-privatnosti.pdf"
+              className="underline hover:text-black/60"
+            >
+              Politika privatnosti
+            </Link>
+          </p>
         </footer>
       </body>
     </html>

@@ -66,7 +66,10 @@ export function RegisterForm() {
 
       <TermsCheckbox />
 
-      <SubmitButton className="w-full rounded-md bg-emerald-700 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-800 disabled:opacity-50">
+      <SubmitButton
+        className="w-full rounded-md bg-emerald-700 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-800 disabled:opacity-50"
+        pendingLabel="Registracija..."
+      >
         Registruj firmu
       </SubmitButton>
     </form>

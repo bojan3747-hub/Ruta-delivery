@@ -27,7 +27,7 @@ export function CommissionForm({ current }: { current: number }) {
           className="mt-1 w-32 rounded-md border border-black/15 px-3 py-2 text-sm"
         />
       </div>
-      <SubmitButton>Sačuvaj</SubmitButton>
+      <SubmitButton pendingLabel="Čuvanje...">Sačuvaj</SubmitButton>
       {state.success && (
         <p className="text-sm text-emerald-700">Sačuvano.</p>
       )}
