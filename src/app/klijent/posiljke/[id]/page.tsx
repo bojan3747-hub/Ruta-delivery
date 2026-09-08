@@ -10,8 +10,10 @@ import { ZONE_LABELS } from "@/lib/zones";
 import {
   ORDER_STATUS_LABELS,
   ORDER_STATUS_STEPS,
+  SHIPMENT_CONTENT_LABELS,
   SHIPMENT_STATUS_LABELS,
   SHIPMENT_TYPE_LABELS,
+  SPECIAL_CARGO_LABELS,
   TERMIN_LABELS,
   formatMoney,
 } from "@/lib/labels";
@@ -74,6 +76,12 @@ export default async function PosiljkaDetailPage({
         />
         <span className="text-sm text-neutral-500">
           {SHIPMENT_TYPE_LABELS[shipment.tip]}
+          {shipment.sadrzaj_posiljke
+            ? ` · ${SHIPMENT_CONTENT_LABELS[shipment.sadrzaj_posiljke]}`
+            : ""}
+          {shipment.posebna_kategorija_tereta
+            ? ` · ${SPECIAL_CARGO_LABELS[shipment.posebna_kategorija_tereta]}`
+            : ""}
           {shipment.hitno ? " · Hitno" : ""}
           {shipment.nestandardna ? " · Nestandardna" : ""} ·{" "}
           {TERMIN_LABELS[shipment.zeljeni_termin]}

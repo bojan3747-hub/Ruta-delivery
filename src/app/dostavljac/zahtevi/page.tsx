@@ -6,7 +6,13 @@ import {
 import { getCourierById } from "@/lib/queries/couriers";
 import { computeAutoQuote } from "@/lib/pricing";
 import { ZONE_LABELS } from "@/lib/zones";
-import { SHIPMENT_TYPE_LABELS, TERMIN_LABELS, formatMoney } from "@/lib/labels";
+import {
+  SHIPMENT_CONTENT_LABELS,
+  SHIPMENT_TYPE_LABELS,
+  SPECIAL_CARGO_LABELS,
+  TERMIN_LABELS,
+  formatMoney,
+} from "@/lib/labels";
 import { ManualOfferForm } from "@/components/ManualOfferForm";
 import { AutoRefresh } from "@/components/AutoRefresh";
 
@@ -52,6 +58,12 @@ export default async function ZahteviPage() {
                   </p>
                   <p className="text-sm text-neutral-500">
                     {SHIPMENT_TYPE_LABELS[s.tip]}
+                    {s.sadrzaj_posiljke
+                      ? ` · ${SHIPMENT_CONTENT_LABELS[s.sadrzaj_posiljke]}`
+                      : ""}
+                    {s.posebna_kategorija_tereta
+                      ? ` · ${SPECIAL_CARGO_LABELS[s.posebna_kategorija_tereta]}`
+                      : ""}
                     {s.hitno ? " · Hitno" : ""}
                   </p>
                   <p className="mt-0.5 text-sm font-medium text-neutral-800">

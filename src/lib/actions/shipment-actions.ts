@@ -4,7 +4,14 @@ import { redirect } from "next/navigation";
 import { getCurrentUser } from "../auth";
 import { revalidatePath } from "next/cache";
 import { cancelShipment, createShipment } from "../queries/shipments";
-import type { ShipmentType, TerminType, Zone } from "../types";
+import type {
+  ShipmentContentType,
+  ShipmentType,
+  SpecialCargoType,
+  TerminType,
+  Zone,
+} from "../types";
+import { SHIPMENT_CONTENT_LABELS, SPECIAL_CARGO_LABELS } from "../labels";
 import type { ActionState } from "./auth-actions";
 
 function str(formData: FormData, key: string): string {
@@ -29,6 +36,11 @@ export async function createShipmentAction(
   const primalacIme = str(formData, "primalacIme");
   const primalacTelefon = str(formData, "primalacTelefon");
   const tip = str(formData, "tip") as ShipmentType;
+  const sadrzajPosiljke = str(formData, "sadrzajPosiljke") as ShipmentContentType;
+  const posebnaKategorijaTeretaRaw = str(formData, "posebnaKategorijaTereta");
+  const posebnaKategorijaTereta = posebnaKategorijaTeretaRaw
+    ? (posebnaKategorijaTeretaRaw as SpecialCargoType)
+    : undefined;
   const hitno = formData.get("hitno") === "on";
   const nestandardna = formData.get("nestandardna") === "on";
   const zeljeniTermin = str(formData, "zeljeniTermin") as TerminType;
@@ -46,9 +58,16 @@ export async function createShipmentAction(
     !primalacIme ||
     !primalacTelefon ||
     !tip ||
+    !sadrzajPosiljke ||
     !zeljeniTermin
   ) {
     return { error: "Popunite sva obavezna polja." };
+  }
+  if (!(sadrzajPosiljke in SHIPMENT_CONTENT_LABELS)) {
+    return { error: "Izaberite validan sadržaj pošiljke." };
+  }
+  if (posebnaKategorijaTereta && !(posebnaKategorijaTereta in SPECIAL_CARGO_LABELS)) {
+    return { error: "Izaberite validnu posebnu kategoriju tereta." };
   }
   if (!Number.isFinite(deklarisanaVrednost) || deklarisanaVrednost <= 0) {
     return { error: "Unesite validnu deklarisanu vrednost pošiljke (veću od 0)." };
@@ -71,6 +90,8 @@ export async function createShipmentAction(
     primalacIme,
     primalacTelefon,
     tip,
+    sadrzajPosiljke,
+    posebnaKategorijaTereta,
     hitno,
     nestandardna,
     zeljeniTermin,

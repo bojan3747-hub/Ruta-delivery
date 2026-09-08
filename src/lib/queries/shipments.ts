@@ -1,8 +1,10 @@
 import { pool, query, queryOne } from "../db";
 import type {
+  ShipmentContentType,
   ShipmentRow,
   ShipmentStatus,
   ShipmentType,
+  SpecialCargoType,
   TerminType,
   Zone,
 } from "../types";
@@ -18,6 +20,8 @@ export async function createShipment(input: {
   primalacIme?: string;
   primalacTelefon?: string;
   tip: ShipmentType;
+  sadrzajPosiljke: ShipmentContentType;
+  posebnaKategorijaTereta?: SpecialCargoType;
   hitno: boolean;
   nestandardna: boolean;
   zeljeniTermin: TerminType;
@@ -29,9 +33,10 @@ export async function createShipment(input: {
     `INSERT INTO shipments (
        client_id, zona_preuzimanja, zona_isporuke, adresa_preuzimanja,
        adresa_isporuke, posiljalac_ime, posiljalac_telefon, primalac_ime,
-       primalac_telefon, tip, hitno, nestandardna, zeljeni_termin,
-       termin_detalji, napomena, deklarisana_vrednost
-     ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16)
+       primalac_telefon, tip, sadrzaj_posiljke, posebna_kategorija_tereta,
+       hitno, nestandardna, zeljeni_termin, termin_detalji, napomena,
+       deklarisana_vrednost
+     ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18)
      RETURNING *`,
     [
       input.clientId,
@@ -44,6 +49,8 @@ export async function createShipment(input: {
       input.primalacIme ?? null,
       input.primalacTelefon ?? null,
       input.tip,
+      input.sadrzajPosiljke,
+      input.posebnaKategorijaTereta ?? null,
       input.hitno,
       input.nestandardna,
       input.zeljeniTermin,

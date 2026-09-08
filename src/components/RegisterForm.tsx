@@ -5,6 +5,7 @@ import { registerClientAction, type ActionState } from "@/lib/actions/auth-actio
 import { FormMessage } from "./FormMessage";
 import { SubmitButton } from "./SubmitButton";
 import { TermsCheckbox } from "./TermsCheckbox";
+import { StreetNumberFields } from "./StreetNumberFields";
 
 const initialState: ActionState = {};
 
@@ -30,8 +31,11 @@ export function RegisterForm() {
             <input name="pib" className={inputClass} />
           </div>
           <div>
-            <label className="block text-sm font-medium">Adresa</label>
-            <input name="adresa" className={inputClass} />
+            <StreetNumberFields
+              name="adresa"
+              label="Adresa"
+              inputClass={inputClass}
+            />
           </div>
         </div>
       </fieldset>

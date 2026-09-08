@@ -27,6 +27,58 @@ export type ShipmentType =
   | "SREDNJI_PAKET"
   | "VELIKI_PAKET";
 
+// Faza 5: "Sadržaj pošiljke" — po uzoru na Bex Express dropdown
+// (bexexpress.rs/najava, polje "Sadržaj", skinuto 2026-09-08). Obavezno
+// polje za nove pošiljke; nullable u bazi jer starije pošiljke nemaju
+// vrednost.
+export type ShipmentContentType =
+  | "AUTO_DELOVI_I_OPREMA"
+  | "BEBI_OPREMA_I_DECIJE_STVARI"
+  | "BELA_TEHNIKA"
+  | "DOKUMENT"
+  | "DVORISTE_I_BASTA"
+  | "ELEKTRONIKA_I_KOMPONENTE"
+  | "GALANTERIJA"
+  | "GARDEROBA"
+  | "GRADJEVINSKA_I_ELEKTRO_OPREMA_I_MATERIJAL"
+  | "IGRACKE_I_IGRE"
+  | "KNJIGE"
+  | "KOMPJUTERI"
+  | "KOZMETIKA_I_OPREMA"
+  | "KUCNI_APARATI"
+  | "LOV_I_RIBOLOV"
+  | "MOBILNI_TELEFONI"
+  | "MUZICKI_INSTRUMENTI"
+  | "NAMESTAJ"
+  | "OBUCA"
+  | "POLJOPRIVREDA_I_OPREMA"
+  | "SPORTSKA_OPREMA"
+  | "CASOPIS"
+  | "SKOLSKI_PRIBOR_I_KANCELARIJSKA_OPREMA";
+
+// Faza 5: "Posebna kategorija tereta" — opciono, dodatno polje pored
+// postojećeg veličinskog "Tip pošiljke". Spisak po uzoru na Bex Express
+// dropdown "Tip pošiljke" (bexexpress.rs/najava, skinuto 2026-09-08),
+// bez stavke "Standardna" jer to kod nas znači da polje ostaje prazno.
+export type SpecialCargoType =
+  | "BACVA_209L"
+  | "KURIRSKA_LISTA_DOSTAVA"
+  | "KURIR_DAN"
+  | "BICIKL"
+  | "EURO_PALETA_CELA"
+  | "TELEVIZOR_DO_55_INCA"
+  | "GUMA_PUTNICKA"
+  | "GUMA_POLUTERETNA"
+  | "GUMA_TERETNA"
+  | "MENJAC_MANJI"
+  | "MENJAC_AUTOMATSKI"
+  | "MOTOR_AUTO"
+  | "TRAKTORSKA_GUMA"
+  | "TRAKTORSKA_GUMA_SA_FELNOM"
+  | "GUMA_PUTNICKA_SA_FELNOM"
+  | "GUMA_POLUTERETNA_SA_FELNOM"
+  | "GUMA_TERETNA_SA_FELNOM";
+
 export type TerminType = "ODMAH" | "DANAS_DO" | "ZAKAZANO";
 
 export type ShipmentStatus =
@@ -115,6 +167,8 @@ export interface ShipmentRow {
   primalac_ime: string | null;
   primalac_telefon: string | null;
   tip: ShipmentType;
+  sadrzaj_posiljke: ShipmentContentType | null;
+  posebna_kategorija_tereta: SpecialCargoType | null;
   hitno: boolean;
   nestandardna: boolean;
   zeljeni_termin: TerminType;

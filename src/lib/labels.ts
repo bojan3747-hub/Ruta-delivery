@@ -2,8 +2,10 @@ import type {
   InvoiceStatus,
   OfferStatus,
   OrderStatus,
+  ShipmentContentType,
   ShipmentStatus,
   ShipmentType,
+  SpecialCargoType,
   TerminType,
   VehicleType,
 } from "./types";
@@ -13,6 +15,58 @@ export const SHIPMENT_TYPE_LABELS: Record<ShipmentType, string> = {
   MALI_PAKET: "Mali paket",
   SREDNJI_PAKET: "Srednji paket",
   VELIKI_PAKET: "Veliki paket",
+};
+
+// Faza 5 — spisak preuzet sa bexexpress.rs/najava, polje "Sadržaj" (2026-09-08).
+export const SHIPMENT_CONTENT_LABELS: Record<ShipmentContentType, string> = {
+  AUTO_DELOVI_I_OPREMA: "Auto delovi i oprema",
+  BEBI_OPREMA_I_DECIJE_STVARI: "Bebi oprema i dečje stvari",
+  BELA_TEHNIKA: "Bela tehnika",
+  DOKUMENT: "Dokument",
+  DVORISTE_I_BASTA: "Dvorište i bašta",
+  ELEKTRONIKA_I_KOMPONENTE: "Elektronika i komponente",
+  GALANTERIJA: "Galanterija",
+  GARDEROBA: "Garderoba",
+  GRADJEVINSKA_I_ELEKTRO_OPREMA_I_MATERIJAL:
+    "Građevinska i elektro oprema i materijal",
+  IGRACKE_I_IGRE: "Igračke i igre",
+  KNJIGE: "Knjige",
+  KOMPJUTERI: "Kompjuteri",
+  KOZMETIKA_I_OPREMA: "Kozmetika i oprema",
+  KUCNI_APARATI: "Kućni aparati",
+  LOV_I_RIBOLOV: "Lov i ribolov",
+  MOBILNI_TELEFONI: "Mobilni telefoni",
+  MUZICKI_INSTRUMENTI: "Muzički instrumenti",
+  NAMESTAJ: "Nameštaj",
+  OBUCA: "Obuća",
+  POLJOPRIVREDA_I_OPREMA: "Poljoprivreda i oprema",
+  SPORTSKA_OPREMA: "Sportska oprema",
+  CASOPIS: "Časopis",
+  SKOLSKI_PRIBOR_I_KANCELARIJSKA_OPREMA: "Školski pribor i kancelarijska oprema",
+};
+
+// Faza 5 — spisak preuzet sa bexexpress.rs/najava, polje "Tip pošiljke"
+// (2026-09-08), bez stavke "Standardna" (kod nas to znači prazno polje).
+// Ovo je NAMERNO odvojeno od SHIPMENT_TYPE_LABELS: Bex-ov spisak su
+// posebne/vangabaritne kategorije tereta, ne veličina paketa.
+export const SPECIAL_CARGO_LABELS: Record<SpecialCargoType, string> = {
+  BACVA_209L: "Bačva 209 L",
+  KURIRSKA_LISTA_DOSTAVA: "Kurirska lista dostava",
+  KURIR_DAN: "Kurir dan",
+  BICIKL: "Bicikl",
+  EURO_PALETA_CELA: "Euro paleta - cela",
+  TELEVIZOR_DO_55_INCA: "Televizor do 55 inča",
+  GUMA_PUTNICKA: "Guma putnička",
+  GUMA_POLUTERETNA: "Guma poluteretna",
+  GUMA_TERETNA: "Guma teretna",
+  MENJAC_MANJI: "Menjač manji",
+  MENJAC_AUTOMATSKI: "Menjač automatski",
+  MOTOR_AUTO: "Motor - auto",
+  TRAKTORSKA_GUMA: "Traktorska guma",
+  TRAKTORSKA_GUMA_SA_FELNOM: "Traktorska guma sa felnom",
+  GUMA_PUTNICKA_SA_FELNOM: "Guma putnička sa felnom",
+  GUMA_POLUTERETNA_SA_FELNOM: "Guma poluteretna sa felnom",
+  GUMA_TERETNA_SA_FELNOM: "Guma teretna sa felnom",
 };
 
 export const TERMIN_LABELS: Record<TerminType, string> = {

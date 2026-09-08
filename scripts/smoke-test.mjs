@@ -38,13 +38,18 @@ async function main() {
     await client.fill('input[name="posiljalacIme"]', "Test Pošiljalac");
     await client.fill('input[name="posiljalacTelefon"]', "+381600000001");
     await client.selectOption('select[name="zonaPreuzimanja"]', "STARI_GRAD");
-    await client.fill('input[name="adresaPreuzimanja"]', "Testna 1");
+    // Faza 5: adresa je sad dva vidljiva polja (ulica + broj) koja se
+    // spajaju u skriveno input[name="adresaPreuzimanja"] pre slanja.
+    await client.fill('input[name="adresaPreuzimanjaUlica"]', "Testna");
+    await client.fill('input[name="adresaPreuzimanjaBroj"]', "1");
     await client.fill('input[name="primalacIme"]', "Test Primalac");
     await client.fill('input[name="primalacTelefon"]', "+381600000002");
     await client.selectOption('select[name="zonaIsporuke"]', "NOVI_BEOGRAD");
-    await client.fill('input[name="adresaIsporuke"]', "Testna 2");
+    await client.fill('input[name="adresaIsporukeUlica"]', "Testna");
+    await client.fill('input[name="adresaIsporukeBroj"]', "2");
     await client.fill('input[name="deklarisanaVrednost"]', "5000");
     await client.selectOption('select[name="tip"]', "MALI_PAKET");
+    await client.selectOption('select[name="sadrzajPosiljke"]', "ELEKTRONIKA_I_KOMPONENTE");
     await client.selectOption('select[name="zeljeniTermin"]', "ODMAH");
     await client.click('button:has-text("Zatraži ponude")');
     await client.waitForURL(/\/klijent\/posiljke\//);

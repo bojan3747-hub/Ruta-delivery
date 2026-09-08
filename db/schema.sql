@@ -71,6 +71,32 @@ DO $$ BEGIN
   CREATE TYPE rating_direction AS ENUM ('KLIJENT_KA_DOSTAVLJACU', 'DOSTAVLJAC_KA_KLIJENTU');
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
+-- Faza 5: "Sadržaj pošiljke" — spisak preuzet sa Bex Express (bexexpress.rs/najava).
+DO $$ BEGIN
+  CREATE TYPE shipment_content AS ENUM (
+    'AUTO_DELOVI_I_OPREMA', 'BEBI_OPREMA_I_DECIJE_STVARI', 'BELA_TEHNIKA',
+    'DOKUMENT', 'DVORISTE_I_BASTA', 'ELEKTRONIKA_I_KOMPONENTE', 'GALANTERIJA',
+    'GARDEROBA', 'GRADJEVINSKA_I_ELEKTRO_OPREMA_I_MATERIJAL', 'IGRACKE_I_IGRE',
+    'KNJIGE', 'KOMPJUTERI', 'KOZMETIKA_I_OPREMA', 'KUCNI_APARATI',
+    'LOV_I_RIBOLOV', 'MOBILNI_TELEFONI', 'MUZICKI_INSTRUMENTI', 'NAMESTAJ',
+    'OBUCA', 'POLJOPRIVREDA_I_OPREMA', 'SPORTSKA_OPREMA', 'CASOPIS',
+    'SKOLSKI_PRIBOR_I_KANCELARIJSKA_OPREMA'
+  );
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- Faza 5: "Posebna kategorija tereta" (opciono, dodatno pored "tip") — spisak
+-- preuzet sa Bex Express "Tip pošiljke" dropdown-a, bez stavke "Standardna".
+DO $$ BEGIN
+  CREATE TYPE special_cargo_type AS ENUM (
+    'BACVA_209L', 'KURIRSKA_LISTA_DOSTAVA', 'KURIR_DAN', 'BICIKL',
+    'EURO_PALETA_CELA', 'TELEVIZOR_DO_55_INCA', 'GUMA_PUTNICKA',
+    'GUMA_POLUTERETNA', 'GUMA_TERETNA', 'MENJAC_MANJI', 'MENJAC_AUTOMATSKI',
+    'MOTOR_AUTO', 'TRAKTORSKA_GUMA', 'TRAKTORSKA_GUMA_SA_FELNOM',
+    'GUMA_PUTNICKA_SA_FELNOM', 'GUMA_POLUTERETNA_SA_FELNOM',
+    'GUMA_TERETNA_SA_FELNOM'
+  );
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
 -- ---------------------------------------------------------------------------
 -- Tables
 -- ---------------------------------------------------------------------------
@@ -182,6 +208,13 @@ ALTER TABLE shipments ADD COLUMN IF NOT EXISTS primalac_telefon TEXT;
 -- Added after the initial release; ALTER (not just the column above) so it
 -- also lands on databases that already have a shipments table.
 ALTER TABLE shipments ADD COLUMN IF NOT EXISTS deklarisana_vrednost NUMERIC(10, 2);
+
+-- Faza 5: nullable at the DB level (postojeće pošiljke nemaju vrednost) —
+-- "Sadržaj pošiljke" je obavezno polje samo na nivou forme/server akcije za
+-- NOVE pošiljke, ne kao NOT NULL ovde (izbegava migraciju postojećih redova).
+-- "Posebna kategorija tereta" je uvek opciono.
+ALTER TABLE shipments ADD COLUMN IF NOT EXISTS sadrzaj_posiljke shipment_content;
+ALTER TABLE shipments ADD COLUMN IF NOT EXISTS posebna_kategorija_tereta special_cargo_type;
 -- fotografija_url je bila neiskorišćena kolona (nikad povezana ni sa jednim
 -- ekranom) — foto-dokaz o isporuci sada čuva zasebna tabela ispod, po istom
 -- obrascu kao opsti_uslovi_dokumenti (da SELECT * na shipments ne vuče BYTEA).

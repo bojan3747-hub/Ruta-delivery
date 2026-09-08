@@ -6,6 +6,7 @@ import type { ActionState } from "@/lib/actions/auth-actions";
 import { ZONES, ZONE_LABELS } from "@/lib/zones";
 import { FormMessage } from "./FormMessage";
 import { SubmitButton } from "./SubmitButton";
+import { StreetNumberFields } from "./StreetNumberFields";
 
 const initialState: ActionState = {};
 const inputClass = "mt-1 w-full rounded-md border border-black/15 px-3 py-2 text-sm";
@@ -16,7 +17,7 @@ export function SavedAddressForm() {
   return (
     <form action={formAction} className="space-y-3">
       <FormMessage error={state.error} />
-      <div className="grid gap-3 sm:grid-cols-3">
+      <div className="grid gap-3 sm:grid-cols-4">
         <div>
           <label className="block text-sm font-medium">Naziv *</label>
           <input
@@ -26,9 +27,13 @@ export function SavedAddressForm() {
             className={inputClass}
           />
         </div>
-        <div>
-          <label className="block text-sm font-medium">Adresa *</label>
-          <input name="adresa" required className={inputClass} />
+        <div className="sm:col-span-2">
+          <StreetNumberFields
+            name="adresa"
+            label="Adresa *"
+            required
+            inputClass={inputClass}
+          />
         </div>
         <div>
           <label className="block text-sm font-medium">Zona *</label>

@@ -1,12 +1,23 @@
 "use client";
 
-import { useActionState, useState, type Dispatch, type SetStateAction } from "react";
+import {
+  useActionState,
+  useState,
+  type Dispatch,
+  type ReactNode,
+  type SetStateAction,
+} from "react";
 import {
   createShipmentAction,
 } from "@/lib/actions/shipment-actions";
 import type { ActionState } from "@/lib/actions/auth-actions";
 import { ZONES, ZONE_LABELS } from "@/lib/zones";
-import { SHIPMENT_TYPE_LABELS, TERMIN_LABELS } from "@/lib/labels";
+import {
+  SHIPMENT_CONTENT_LABELS,
+  SHIPMENT_TYPE_LABELS,
+  SPECIAL_CARGO_LABELS,
+  TERMIN_LABELS,
+} from "@/lib/labels";
 import { FormMessage } from "./FormMessage";
 import { SubmitButton } from "./SubmitButton";
 import { AddressPicker } from "./AddressPicker";
@@ -15,6 +26,29 @@ import type { SavedAddressRow } from "@/lib/types";
 const initialState: ActionState = {};
 const inputClass =
   "mt-1 w-full rounded-md border border-black/15 px-3 py-2 text-sm";
+
+// Faza 5, opcija C ("Neutralna + akcenat"): sve tri sekcije forme dobijaju
+// istu neutralno sivu pozadinu/traku, a boja se koristi samo na maloj
+// tački pored naslova radi brzog vizuelnog razlikovanja. Vidi
+// forma-vizuelni-predlozi.html / forma-boje-predlozi.html (poslati u chat
+// 2026-09-08) — ovo su tačne boje koje je korisnik izabrao.
+const sectionClass =
+  "space-y-4 rounded-lg border-l-4 border-neutral-300 bg-neutral-50 p-5";
+
+function SectionHeading({
+  dotClassName,
+  children,
+}: {
+  dotClassName: string;
+  children: ReactNode;
+}) {
+  return (
+    <h2 className="flex items-center gap-2 pb-1 text-xs font-semibold uppercase tracking-wide text-neutral-600">
+      <span className={`h-2 w-2 shrink-0 rounded-full ${dotClassName}`} />
+      {children}
+    </h2>
+  );
+}
 
 export function ShipmentForm({
   savedAddresses = [],
@@ -56,10 +90,10 @@ export function ShipmentForm({
     <form action={formAction} className="space-y-8">
       <FormMessage error={state.error} />
 
-      <section className="space-y-4">
-        <h2 className="border-b border-black/10 pb-2 text-sm font-semibold uppercase tracking-wide text-neutral-500">
+      <section className={sectionClass}>
+        <SectionHeading dotClassName="bg-emerald-700">
           Podaci o pošiljaocu
-        </h2>
+        </SectionHeading>
 
         <div className="grid gap-4 sm:grid-cols-2">
           <div>
@@ -139,10 +173,10 @@ export function ShipmentForm({
         )}
       </section>
 
-      <section className="space-y-4">
-        <h2 className="border-b border-black/10 pb-2 text-sm font-semibold uppercase tracking-wide text-neutral-500">
+      <section className={sectionClass}>
+        <SectionHeading dotClassName="bg-blue-600">
           Podaci o primaocu
-        </h2>
+        </SectionHeading>
 
         <div className="grid gap-4 sm:grid-cols-2">
           <div>
@@ -207,10 +241,10 @@ export function ShipmentForm({
         />
       </section>
 
-      <section className="space-y-4">
-        <h2 className="border-b border-black/10 pb-2 text-sm font-semibold uppercase tracking-wide text-neutral-500">
+      <section className={sectionClass}>
+        <SectionHeading dotClassName="bg-amber-700">
           Podaci o pošiljci
-        </h2>
+        </SectionHeading>
 
         <div>
           <label className="block text-sm font-medium">
@@ -241,6 +275,39 @@ export function ShipmentForm({
               </option>
             ))}
           </select>
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium">Sadržaj pošiljke *</label>
+          <select name="sadrzajPosiljke" required className={inputClass} defaultValue="">
+            <option value="" disabled>
+              Izaberite sadržaj
+            </option>
+            {Object.entries(SHIPMENT_CONTENT_LABELS).map(([value, label]) => (
+              <option key={value} value={value}>
+                {label}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium">
+            Posebna kategorija tereta (opciono)
+          </label>
+          <select name="posebnaKategorijaTereta" className={inputClass} defaultValue="">
+            <option value="">Nije posebna kategorija</option>
+            {Object.entries(SPECIAL_CARGO_LABELS).map(([value, label]) => (
+              <option key={value} value={value}>
+                {label}
+              </option>
+            ))}
+          </select>
+          <p className="mt-1 text-xs text-neutral-500">
+            Popunite samo ako pošiljka spada u neku od posebnih kategorija
+            tereta (gume, delovi vozila, palete i sl.) — utiče na cenu i
+            način transporta.
+          </p>
         </div>
 
         <div className="flex flex-wrap gap-6">
