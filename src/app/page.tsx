@@ -1,5 +1,4 @@
 import Link from "next/link";
-import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth";
 
 const ROLE_HOME: Record<string, string> = {
@@ -8,9 +7,24 @@ const ROLE_HOME: Record<string, string> = {
   OPERATOR: "/operater",
 };
 
+const ROLE_LABELS: Record<string, string> = {
+  CLIENT: "Klijent",
+  COURIER: "Dostavljač",
+  OPERATOR: "Operater",
+};
+
+const ROLE_PANEL_LABELS: Record<string, string> = {
+  CLIENT: "Idi na klijentski panel",
+  COURIER: "Idi na dostavljački panel",
+  OPERATOR: "Idi na operaterski panel",
+};
+
 export default async function HomePage() {
+  // Landing page je ista za sve, ali ko je već ulogovan vidi drugačiju
+  // dugmad u hero sekciji (vidi niže) umesto automatskog redirekta —
+  // logo sada uvek vodi na "/", pa se ovde ulogovani korisnici mogu
+  // vratiti, a odavde nazad u svoj panel.
   const user = await getCurrentUser();
-  if (user) redirect(ROLE_HOME[user.role]);
 
   return (
     <div className="space-y-16">
@@ -28,20 +42,34 @@ export default async function HomePage() {
           proverenih kombi prevoznika i kurirskih službi, pratite isporuku —
           sve na jednom mestu.
         </p>
-        <div className="flex justify-center gap-3 pt-2">
-          <Link
-            href="/registracija"
-            className="rounded-md bg-emerald-700 px-5 py-2.5 text-sm font-medium text-white hover:bg-emerald-800"
-          >
-            Registrujte firmu
-          </Link>
-          <Link
-            href="/prijava"
-            className="rounded-md border border-[#1e3a5f] px-5 py-2.5 text-sm font-medium text-[#1e3a5f] hover:bg-[#1e3a5f]/5"
-          >
-            Prijavite se
-          </Link>
-        </div>
+        {user ? (
+          <div className="flex flex-col items-center gap-2 pt-2">
+            <Link
+              href={ROLE_HOME[user.role]}
+              className="rounded-md bg-emerald-700 px-5 py-2.5 text-sm font-medium text-white hover:bg-emerald-800"
+            >
+              {ROLE_PANEL_LABELS[user.role]}
+            </Link>
+            <span className="text-xs text-neutral-500">
+              Ulogovani ste kao {user.ime} · {ROLE_LABELS[user.role]}
+            </span>
+          </div>
+        ) : (
+          <div className="flex justify-center gap-3 pt-2">
+            <Link
+              href="/registracija"
+              className="rounded-md bg-emerald-700 px-5 py-2.5 text-sm font-medium text-white hover:bg-emerald-800"
+            >
+              Registrujte firmu
+            </Link>
+            <Link
+              href="/prijava"
+              className="rounded-md border border-[#1e3a5f] px-5 py-2.5 text-sm font-medium text-[#1e3a5f] hover:bg-[#1e3a5f]/5"
+            >
+              Prijavite se
+            </Link>
+          </div>
+        )}
       </section>
 
       <section className="space-y-6">

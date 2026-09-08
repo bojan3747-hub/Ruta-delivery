@@ -8,12 +8,6 @@ const ROLE_LABELS: Record<string, string> = {
   OPERATOR: "Operater",
 };
 
-const ROLE_HOME: Record<string, string> = {
-  CLIENT: "/klijent",
-  COURIER: "/dostavljac",
-  OPERATOR: "/operater",
-};
-
 export async function NavBar() {
   const user = await getCurrentUser();
 
@@ -21,7 +15,7 @@ export async function NavBar() {
     <header className="border-b border-black/10 bg-white">
       <div className="mx-auto flex max-w-5xl items-center justify-between px-4 py-3">
         <Link
-          href={user ? ROLE_HOME[user.role] : "/"}
+          href="/"
           className="flex items-center gap-2 text-lg tracking-tight"
         >
           <svg width="22" height="22" viewBox="0 0 64 64" fill="none" aria-hidden="true">
