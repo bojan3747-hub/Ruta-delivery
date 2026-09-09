@@ -58,6 +58,10 @@ export function StreetNumberFields({
           className={`${bareInputClass} w-20`}
         />
       </div>
+      <p className="mt-1 text-xs text-neutral-400">
+        Ostavite polje Broj prazno ako je kućni broj već deo teksta u polju
+        Ulica.
+      </p>
     </div>
   );
 }

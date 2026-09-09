@@ -20,6 +20,17 @@ interface Suggestion {
  * kombinovanog stringa, pa ne želimo da force-ujemo dupli unos. Ako se
  * polje Broj ne popuni, šalje se samo uneta ulica — nepromenjeno u odnosu
  * na raniji format jednog polja.
+ *
+ * BAGFIX (prijavio korisnik, 2026-09-09): klik na predlog iz autocomplete
+ * liste je ranije SAMO markirao predlog za mapu, ne i menjao tekst u polju
+ * Ulica — ako je korisnik kliknuo pre nego što je dovršio kucanje, u polju
+ * je ostajao nedovršen tekst (npr. "jovana be" umesto pune ulice). Dodatno,
+ * kad predlog već sadrži kućni broj (has_housenumber), a korisnik je ISTO
+ * TAKO popunio odvojeno polje Broj, broj se duplirao u finalnoj adresi
+ * (npr. "Ulica 16 16"). Sad klik na predlog upisuje pun, tačan tekst u
+ * Ulicu, i prazni Broj SAMO kad predlog već nosi kućni broj (kad ne nosi,
+ * već uneti Broj ostaje netaknut — ista logika kao pre, samo primenjena
+ * selektivno).
  */
 export function AddressPicker({
   name,
@@ -118,9 +129,16 @@ export function AddressPicker({
                     type="button"
                     onMouseDown={() => {
                       setSelected(s);
-                      // Ne prepisujemo uneti tekst predlogom — ako korisnik unese
-                      // broj koji baza nema, taj broj ostaje sačuvan u polju.
-                      setResolvedQuery(query);
+                      // Upisujemo pun, tačan tekst predloga u polje — vidi
+                      // BAGFIX napomenu u komentaru iznad komponente.
+                      setQuery(s.display_name);
+                      setResolvedQuery(s.display_name);
+                      // Predlog već sadrži kućni broj -> praznimo Broj da
+                      // izbegnemo dupliranje (npr. "Ulica 16" + "16").
+                      // Ako predlog NE sadrži broj, već uneti Broj ostaje.
+                      if (s.has_housenumber) {
+                        setBroj("");
+                      }
                       setSuggestions([]);
                       setOpen(false);
                     }}
@@ -142,6 +160,10 @@ export function AddressPicker({
           className={`w-20 ${baseInputClass}`}
         />
       </div>
+      <p className="mt-1 text-xs text-neutral-400">
+        Ostavite polje Broj prazno ako je kućni broj već deo teksta u polju
+        Ulica.
+      </p>
 
       {selected && token && (
         <>
