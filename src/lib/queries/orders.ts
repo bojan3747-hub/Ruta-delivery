@@ -2,13 +2,43 @@ import { pool, query, queryOne } from "../db";
 import type { OrderRow, OrderStatus, ShipmentRow } from "../types";
 import { getActiveCommissionPercent } from "./commission";
 
+/**
+ * Puni skup podataka o pošiljci koji prati porudžbinu na svakom mestu gde
+ * se porudžbina prikazuje — korisnik je prijavio da su detalji pošiljke
+ * (sadržaj, pošiljalac/primalac, rok, napomena...) bili vidljivi SAMO dok
+ * je zahtev otvoren (na /dostavljac/zahtevi), a nestajali čim dostavljač
+ * prihvati/pošalje ponudu i zahtev postane porudžbina — na
+ * /dostavljac/aktivne i kod operatera. Ovaj isti string se koristi u SVIM
+ * upitima ispod da bi ostali sinhronizovani; dodavanje novog polja ovde ga
+ * automatski provuče svuda.
+ */
+const SHIPMENT_DETAIL_COLUMNS = `
+  s.zona_preuzimanja, s.zona_isporuke, s.adresa_preuzimanja, s.adresa_isporuke,
+  s.posiljalac_ime, s.posiljalac_telefon, s.primalac_ime, s.primalac_telefon,
+  s.tip, s.sadrzaj_posiljke, s.posebna_kategorija_tereta, s.hitno,
+  s.nestandardna, s.zeljeni_termin, s.termin_detalji, s.napomena,
+  s.deklarisana_vrednost, s.udaljenost_km
+`;
+
 export interface OrderWithShipment extends OrderRow {
   zona_preuzimanja: ShipmentRow["zona_preuzimanja"];
   zona_isporuke: ShipmentRow["zona_isporuke"];
   adresa_preuzimanja: string;
   adresa_isporuke: string;
+  posiljalac_ime: ShipmentRow["posiljalac_ime"];
+  posiljalac_telefon: ShipmentRow["posiljalac_telefon"];
+  primalac_ime: ShipmentRow["primalac_ime"];
+  primalac_telefon: ShipmentRow["primalac_telefon"];
   tip: ShipmentRow["tip"];
+  sadrzaj_posiljke: ShipmentRow["sadrzaj_posiljke"];
+  posebna_kategorija_tereta: ShipmentRow["posebna_kategorija_tereta"];
+  hitno: ShipmentRow["hitno"];
+  nestandardna: ShipmentRow["nestandardna"];
+  zeljeni_termin: ShipmentRow["zeljeni_termin"];
+  termin_detalji: ShipmentRow["termin_detalji"];
+  napomena: ShipmentRow["napomena"];
   deklarisana_vrednost: ShipmentRow["deklarisana_vrednost"];
+  udaljenost_km: ShipmentRow["udaljenost_km"];
   courier_naziv: string;
   courier_telefon: string;
   client_naziv?: string;
@@ -44,8 +74,7 @@ export async function listOrdersForClient(
   clientId: string
 ): Promise<OrderWithShipment[]> {
   return query<OrderWithShipment>(
-    `SELECT o.*, s.zona_preuzimanja, s.zona_isporuke, s.adresa_preuzimanja,
-            s.adresa_isporuke, s.tip, s.deklarisana_vrednost, c.naziv AS courier_naziv, c.telefon AS courier_telefon
+    `SELECT o.*, ${SHIPMENT_DETAIL_COLUMNS}, c.naziv AS courier_naziv, c.telefon AS courier_telefon
      FROM orders o
      JOIN shipments s ON s.id = o.shipment_id
      JOIN couriers c ON c.id = o.courier_id
@@ -59,8 +88,7 @@ export async function listOrdersForCourier(
   courierId: string
 ): Promise<OrderWithShipment[]> {
   return query<OrderWithShipment>(
-    `SELECT o.*, s.zona_preuzimanja, s.zona_isporuke, s.adresa_preuzimanja,
-            s.adresa_isporuke, s.tip, s.deklarisana_vrednost, c.naziv AS courier_naziv, c.telefon AS courier_telefon,
+    `SELECT o.*, ${SHIPMENT_DETAIL_COLUMNS}, c.naziv AS courier_naziv, c.telefon AS courier_telefon,
             u.ime AS client_kontakt_ime, u.telefon AS client_telefon
      FROM orders o
      JOIN shipments s ON s.id = o.shipment_id
@@ -85,8 +113,7 @@ export async function listCompletedOrdersForCourier(
   courierId: string
 ): Promise<CompletedOrderForCourier[]> {
   return query<CompletedOrderForCourier>(
-    `SELECT o.*, s.zona_preuzimanja, s.zona_isporuke, s.adresa_preuzimanja,
-            s.adresa_isporuke, s.tip, s.deklarisana_vrednost, c.naziv AS courier_naziv, c.telefon AS courier_telefon,
+    `SELECT o.*, ${SHIPMENT_DETAIL_COLUMNS}, c.naziv AS courier_naziv, c.telefon AS courier_telefon,
             comp.naziv AS client_naziv, r.ocena AS client_rating_ocena, r.komentar AS client_rating_komentar,
             (sf.id IS NOT NULL) AS has_fotografija
      FROM orders o
@@ -106,8 +133,7 @@ export async function listAllOrdersForOperator(): Promise<
   OrderWithShipment[]
 > {
   return query<OrderWithShipment>(
-    `SELECT o.*, s.zona_preuzimanja, s.zona_isporuke, s.adresa_preuzimanja,
-            s.adresa_isporuke, s.tip, s.deklarisana_vrednost, c.naziv AS courier_naziv, c.telefon AS courier_telefon,
+    `SELECT o.*, ${SHIPMENT_DETAIL_COLUMNS}, c.naziv AS courier_naziv, c.telefon AS courier_telefon,
             comp.naziv AS client_naziv
      FROM orders o
      JOIN shipments s ON s.id = o.shipment_id
@@ -117,16 +143,11 @@ export async function listAllOrdersForOperator(): Promise<
   );
 }
 
-export interface OrderDetailForOperator extends OrderWithShipment {
-  napomena: string | null;
-}
-
 export async function getOrderDetailForOperator(
   orderId: string
-): Promise<OrderDetailForOperator | null> {
-  return queryOne<OrderDetailForOperator>(
-    `SELECT o.*, s.zona_preuzimanja, s.zona_isporuke, s.adresa_preuzimanja,
-            s.adresa_isporuke, s.tip, s.deklarisana_vrednost, s.napomena,
+): Promise<OrderWithShipment | null> {
+  return queryOne<OrderWithShipment>(
+    `SELECT o.*, ${SHIPMENT_DETAIL_COLUMNS},
             c.naziv AS courier_naziv, c.telefon AS courier_telefon,
             comp.naziv AS client_naziv, u.ime AS client_kontakt_ime, u.telefon AS client_telefon
      FROM orders o

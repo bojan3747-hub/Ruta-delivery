@@ -1,7 +1,14 @@
 import { getCurrentUser } from "@/lib/auth";
 import { listCompletedOrdersForCourier, listOrdersForCourier } from "@/lib/queries/orders";
 import { ZONE_LABELS } from "@/lib/zones";
-import { ORDER_STATUS_LABELS, SHIPMENT_TYPE_LABELS, formatMoney } from "@/lib/labels";
+import {
+  ORDER_STATUS_LABELS,
+  SHIPMENT_CONTENT_LABELS,
+  SHIPMENT_TYPE_LABELS,
+  SPECIAL_CARGO_LABELS,
+  TERMIN_LABELS,
+  formatMoney,
+} from "@/lib/labels";
 import { StatusBadge } from "@/components/StatusBadge";
 import { AdvanceOrderButton } from "@/components/AdvanceOrderButton";
 import { CancelOrderButton } from "@/components/CancelOrderButton";
@@ -34,14 +41,40 @@ export default async function AktivneIsporukePage() {
                     {ZONE_LABELS[o.zona_preuzimanja]} → {ZONE_LABELS[o.zona_isporuke]}
                   </p>
                   <p className="text-sm text-neutral-500">
-                    {o.adresa_preuzimanja} → {o.adresa_isporuke}
+                    {SHIPMENT_TYPE_LABELS[o.tip]}
+                    {o.sadrzaj_posiljke
+                      ? ` · ${SHIPMENT_CONTENT_LABELS[o.sadrzaj_posiljke]}`
+                      : ""}
+                    {o.posebna_kategorija_tereta
+                      ? ` · ${SPECIAL_CARGO_LABELS[o.posebna_kategorija_tereta]}`
+                      : ""}
+                    {o.hitno ? " · Hitno" : ""} · {formatMoney(o.cena)}
                   </p>
-                  <p className="mt-1 text-sm text-neutral-500">
-                    {SHIPMENT_TYPE_LABELS[o.tip]} · {formatMoney(o.cena)}
+                  <p className="mt-1 text-sm font-medium text-neutral-800">
+                    Rok isporuke: {TERMIN_LABELS[o.zeljeni_termin]}
+                    {o.termin_detalji ? ` — ${o.termin_detalji}` : ""}
+                    {o.udaljenost_km ? ` · ~${Number(o.udaljenost_km)} km` : ""}
                   </p>
+                  <div className="mt-2 grid gap-x-4 gap-y-0.5 text-sm text-neutral-600 sm:grid-cols-2">
+                    <p>
+                      <span className="text-neutral-400">Preuzimanje:</span>{" "}
+                      {o.adresa_preuzimanja}
+                      {o.posiljalac_ime ? ` — ${o.posiljalac_ime}` : ""}
+                      {o.posiljalac_telefon ? ` (${o.posiljalac_telefon})` : ""}
+                    </p>
+                    <p>
+                      <span className="text-neutral-400">Isporuka:</span>{" "}
+                      {o.adresa_isporuke}
+                      {o.primalac_ime ? ` — ${o.primalac_ime}` : ""}
+                      {o.primalac_telefon ? ` (${o.primalac_telefon})` : ""}
+                    </p>
+                  </div>
+                  {o.napomena && (
+                    <p className="mt-1 text-sm text-neutral-700">{o.napomena}</p>
+                  )}
                   {o.client_telefon && (
                     <p className="mt-1 text-sm text-neutral-500">
-                      Kontakt: {o.client_kontakt_ime} · {o.client_telefon}
+                      Kontakt firme: {o.client_kontakt_ime} · {o.client_telefon}
                     </p>
                   )}
                   {o.deklarisana_vrednost && (
@@ -73,9 +106,16 @@ export default async function AktivneIsporukePage() {
                       {ZONE_LABELS[o.zona_preuzimanja]} → {ZONE_LABELS[o.zona_isporuke]}
                     </p>
                     <p className="text-neutral-500">
-                      Klijent: {o.client_naziv} · {formatMoney(o.cena)}
+                      Klijent: {o.client_naziv} ·{" "}
+                      {o.adresa_preuzimanja} → {o.adresa_isporuke} ·{" "}
+                      {formatMoney(o.cena)}
                       {o.provizija ? ` · Provizija: ${formatMoney(o.provizija)}` : ""}
                     </p>
+                    {o.sadrzaj_posiljke && (
+                      <p className="text-neutral-500">
+                        {SHIPMENT_CONTENT_LABELS[o.sadrzaj_posiljke]}
+                      </p>
+                    )}
                   </div>
                   {o.has_fotografija && (
                     <a

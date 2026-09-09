@@ -6,7 +6,10 @@ import { hasShipmentFotografija } from "@/lib/queries/shipment-fotografije";
 import { ZONE_LABELS } from "@/lib/zones";
 import {
   ORDER_STATUS_LABELS,
+  SHIPMENT_CONTENT_LABELS,
   SHIPMENT_TYPE_LABELS,
+  SPECIAL_CARGO_LABELS,
+  TERMIN_LABELS,
   formatMoney,
   formatDateTime,
 } from "@/lib/labels";
@@ -44,15 +47,40 @@ export default async function OperaterPorudzbinaDetailPage({
 
       <div className="rounded-lg border border-black/10 bg-white p-4 text-sm space-y-1">
         <p>
-          <span className="text-neutral-500">Preuzimanje:</span> {order.adresa_preuzimanja}
+          <span className="text-neutral-500">Preuzimanje:</span>{" "}
+          {order.adresa_preuzimanja}
+          {order.posiljalac_ime ? ` — ${order.posiljalac_ime}` : ""}
+          {order.posiljalac_telefon ? ` (${order.posiljalac_telefon})` : ""}
         </p>
         <p>
-          <span className="text-neutral-500">Isporuka:</span> {order.adresa_isporuke}
+          <span className="text-neutral-500">Isporuka:</span>{" "}
+          {order.adresa_isporuke}
+          {order.primalac_ime ? ` — ${order.primalac_ime}` : ""}
+          {order.primalac_telefon ? ` (${order.primalac_telefon})` : ""}
         </p>
         <p>
           <span className="text-neutral-500">Tip pošiljke:</span>{" "}
           {SHIPMENT_TYPE_LABELS[order.tip]}
+          {order.sadrzaj_posiljke
+            ? ` · ${SHIPMENT_CONTENT_LABELS[order.sadrzaj_posiljke]}`
+            : ""}
+          {order.posebna_kategorija_tereta
+            ? ` · ${SPECIAL_CARGO_LABELS[order.posebna_kategorija_tereta]}`
+            : ""}
+          {order.hitno ? " · Hitno" : ""}
+          {order.nestandardna ? " · Nestandardna" : ""}
         </p>
+        <p>
+          <span className="text-neutral-500">Rok isporuke:</span>{" "}
+          {TERMIN_LABELS[order.zeljeni_termin]}
+          {order.termin_detalji ? ` — ${order.termin_detalji}` : ""}
+        </p>
+        {order.udaljenost_km && (
+          <p>
+            <span className="text-neutral-500">Udaljenost:</span>{" "}
+            ~{Number(order.udaljenost_km)} km
+          </p>
+        )}
         {order.deklarisana_vrednost && (
           <p>
             <span className="text-neutral-500">Deklarisana vrednost:</span>{" "}
