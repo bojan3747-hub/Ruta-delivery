@@ -37,6 +37,18 @@ export default async function KlijentPage({
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-semibold">Moje pošiljke</h1>
         <div className="flex items-center gap-3">
+          {allShipments.length > 0 && (
+            <a
+              href={
+                activeFilter === "SVE"
+                  ? "/api/klijent/izvoz"
+                  : `/api/klijent/izvoz?status=${activeFilter}`
+              }
+              className="text-sm text-emerald-700 hover:underline"
+            >
+              Izvezi u Excel
+            </a>
+          )}
           <Link
             href="/klijent/adrese"
             className="text-sm text-emerald-700 hover:underline"

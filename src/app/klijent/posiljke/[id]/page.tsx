@@ -86,6 +86,9 @@ export default async function PosiljkaDetailPage({
           {shipment.nestandardna ? " · Nestandardna" : ""} ·{" "}
           {TERMIN_LABELS[shipment.zeljeni_termin]}
           {shipment.termin_detalji ? ` (${shipment.termin_detalji})` : ""}
+          {shipment.udaljenost_km
+            ? ` · ~${Number(shipment.udaljenost_km)} km`
+            : ""}
         </span>
       </div>
 

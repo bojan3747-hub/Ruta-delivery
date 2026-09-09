@@ -70,6 +70,12 @@ export default async function ZahteviPage() {
                     Rok isporuke: {TERMIN_LABELS[s.zeljeni_termin]}
                     {s.termin_detalji ? ` — ${s.termin_detalji}` : ""}
                   </p>
+                  {quote && (
+                    <p className="text-sm text-neutral-500">
+                      Udaljenost: ~{quote.distanceKm} km
+                      {s.udaljenost_km == null ? " (procena po zonama)" : ""}
+                    </p>
+                  )}
                   {s.deklarisana_vrednost && (
                     <p className="mt-1 text-sm text-neutral-500">
                       Deklarisana vrednost: {formatMoney(s.deklarisana_vrednost)}

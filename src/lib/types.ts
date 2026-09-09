@@ -175,6 +175,11 @@ export interface ShipmentRow {
   termin_detalji: string | null;
   napomena: string | null;
   deklarisana_vrednost: string | null;
+  preuzimanje_lat: number | null;
+  preuzimanje_lon: number | null;
+  isporuka_lat: number | null;
+  isporuka_lon: number | null;
+  udaljenost_km: string | null;
   status: ShipmentStatus;
   created_at: string;
 }

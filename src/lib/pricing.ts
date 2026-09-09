@@ -32,7 +32,7 @@ export function computeAutoQuote(
   >,
   shipment: Pick<
     ShipmentRow,
-    "zona_preuzimanja" | "zona_isporuke" | "tip" | "hitno"
+    "zona_preuzimanja" | "zona_isporuke" | "tip" | "hitno" | "udaljenost_km"
   >
 ): AutoQuote | null {
   if (
@@ -46,7 +46,13 @@ export function computeAutoQuote(
   const cenaPoKm = Number(courier.cena_po_km);
   const cenaPoKg = Number(courier.cena_po_kg);
   const minimalnaCena = Number(courier.minimalna_cena);
-  const km = distanceKm(shipment.zona_preuzimanja, shipment.zona_isporuke);
+  // Prava vozna udaljenost (Mapbox, računata pri kreiranju pošiljke) ima
+  // prednost kad postoji; procena po zonama je fallback za pošiljke kod
+  // kojih geokodiranje/ruting nije uspeo (vidi src/lib/geocode.ts).
+  const km =
+    shipment.udaljenost_km != null
+      ? Number(shipment.udaljenost_km)
+      : distanceKm(shipment.zona_preuzimanja, shipment.zona_isporuke);
   const tezinaKg = ASSUMED_WEIGHT_KG[shipment.tip];
 
   let cena = Math.max(minimalnaCena, cenaPoKm * km + cenaPoKg * tezinaKg);

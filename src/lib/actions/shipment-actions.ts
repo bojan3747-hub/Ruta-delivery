@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { getCurrentUser } from "../auth";
 import { revalidatePath } from "next/cache";
 import { cancelShipment, createShipment } from "../queries/shipments";
+import { computeRealRoute } from "../geocode";
 import type {
   ShipmentContentType,
   ShipmentType,
@@ -79,6 +80,13 @@ export async function createShipmentAction(
     };
   }
 
+  // Prava vozna udaljenost preko Mapbox-a (KAN: "prava ruta umesto procene
+  // po zonama") — best effort, nikad ne sme da blokira kreiranje pošiljke.
+  // Kad ne uspe (adresa nije prepoznata, mreža, itd.), realRoute je null i
+  // pošiljka se kreira bez tih podataka — cena/ETA padaju nazad na
+  // procenu po zonama (vidi src/lib/pricing.ts).
+  const realRoute = await computeRealRoute(adresaPreuzimanja, adresaIsporuke);
+
   const shipment = await createShipment({
     clientId: user.companyId,
     zonaPreuzimanja,
@@ -98,6 +106,11 @@ export async function createShipmentAction(
     terminDetalji: terminDetalji || undefined,
     napomena: napomena || undefined,
     deklarisanaVrednost,
+    preuzimanjeLat: realRoute?.preuzimanjeLat,
+    preuzimanjeLon: realRoute?.preuzimanjeLon,
+    isporukaLat: realRoute?.isporukaLat,
+    isporukaLon: realRoute?.isporukaLon,
+    udaljenostKm: realRoute?.udaljenostKm,
   });
 
   redirect(`/klijent/posiljke/${shipment.id}`);

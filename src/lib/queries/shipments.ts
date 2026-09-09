@@ -1,5 +1,6 @@
 import { pool, query, queryOne } from "../db";
 import type {
+  OrderStatus,
   ShipmentContentType,
   ShipmentRow,
   ShipmentStatus,
@@ -28,6 +29,14 @@ export async function createShipment(input: {
   terminDetalji?: string;
   napomena?: string;
   deklarisanaVrednost: number;
+  // Prava ruta (Mapbox), best-effort — vidi src/lib/geocode.ts. Kad
+  // geokodiranje/ruting ne uspe, sve ostaje undefined/null i cena/ETA
+  // padaju nazad na procenu po zonama (src/lib/pricing.ts).
+  preuzimanjeLat?: number;
+  preuzimanjeLon?: number;
+  isporukaLat?: number;
+  isporukaLon?: number;
+  udaljenostKm?: number;
 }): Promise<ShipmentRow> {
   const row = await queryOne<ShipmentRow>(
     `INSERT INTO shipments (
@@ -35,8 +44,10 @@ export async function createShipment(input: {
        adresa_isporuke, posiljalac_ime, posiljalac_telefon, primalac_ime,
        primalac_telefon, tip, sadrzaj_posiljke, posebna_kategorija_tereta,
        hitno, nestandardna, zeljeni_termin, termin_detalji, napomena,
-       deklarisana_vrednost
-     ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18)
+       deklarisana_vrednost, preuzimanje_lat, preuzimanje_lon, isporuka_lat,
+       isporuka_lon, udaljenost_km
+     ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,
+               $19,$20,$21,$22,$23)
      RETURNING *`,
     [
       input.clientId,
@@ -57,6 +68,11 @@ export async function createShipment(input: {
       input.terminDetalji ?? null,
       input.napomena ?? null,
       input.deklarisanaVrednost,
+      input.preuzimanjeLat ?? null,
+      input.preuzimanjeLon ?? null,
+      input.isporukaLat ?? null,
+      input.isporukaLon ?? null,
+      input.udaljenostKm ?? null,
     ]
   );
   if (!row) throw new Error("Kreiranje pošiljke nije uspelo");
@@ -75,6 +91,39 @@ export async function listShipmentsByClient(
   return query<ShipmentRow>(
     "SELECT * FROM shipments WHERE client_id = $1 ORDER BY created_at DESC",
     [clientId]
+  );
+}
+
+export interface ShipmentExportRow extends ShipmentRow {
+  order_cena: string | null;
+  order_status: OrderStatus | null;
+  courier_naziv: string | null;
+}
+
+/**
+ * Sve pošiljke klijenta, sa cenom/dostavljačem iz porudžbine kad postoji
+ * (LEFT JOIN — pošiljka bez izabrane ponude i dalje mora da se izveze).
+ * Koristi se za izvoz istorije pošiljki u Excel (KAN: "izvezi u Excel").
+ */
+export async function listShipmentsForExport(
+  clientId: string,
+  status?: ShipmentStatus
+): Promise<ShipmentExportRow[]> {
+  const params: unknown[] = [clientId];
+  let statusClause = "";
+  if (status) {
+    params.push(status);
+    statusClause = ` AND s.status = $${params.length}`;
+  }
+  return query<ShipmentExportRow>(
+    `SELECT s.*, o.cena AS order_cena, o.status AS order_status,
+            c.naziv AS courier_naziv
+     FROM shipments s
+     LEFT JOIN orders o ON o.shipment_id = s.id
+     LEFT JOIN couriers c ON c.id = o.courier_id
+     WHERE s.client_id = $1${statusClause}
+     ORDER BY s.created_at DESC`,
+    params
   );
 }
 

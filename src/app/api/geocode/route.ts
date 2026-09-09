@@ -1,18 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { toLatin } from "@/lib/cyrillic";
+import { BEOGRAD_BBOX, BEOGRAD_LAT, BEOGRAD_LON } from "@/lib/geocode";
 
 interface MapboxFeature {
   place_name: string;
   center: [number, number]; // [lon, lat]
   place_type: string[];
 }
-
-// Beograd — centar za proximity bias i geografski okvir pretrage.
-// RUTA-Dostava trenutno radi isključivo u Beogradu (sve zone u aplikaciji
-// su beogradske opštine), pa nema smisla vraćati adrese iz drugih gradova.
-const BEOGRAD_LON = 20.4573;
-const BEOGRAD_LAT = 44.7866;
-const BEOGRAD_BBOX = "20.15,44.60,20.75,44.95"; // minLon,minLat,maxLon,maxLat
 
 export async function GET(req: NextRequest) {
   const q = req.nextUrl.searchParams.get("q") ?? "";

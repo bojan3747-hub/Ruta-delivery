@@ -215,6 +215,19 @@ ALTER TABLE shipments ADD COLUMN IF NOT EXISTS deklarisana_vrednost NUMERIC(10, 
 -- "Posebna kategorija tereta" je uvek opciono.
 ALTER TABLE shipments ADD COLUMN IF NOT EXISTS sadrzaj_posiljke shipment_content;
 ALTER TABLE shipments ADD COLUMN IF NOT EXISTS posebna_kategorija_tereta special_cargo_type;
+
+-- Prava udaljenost/ruta (umesto ručne tabele zona) — koordinate obe adrese
+-- (dobijene geokodiranjem konačnog teksta adrese pri kreiranju pošiljke) i
+-- stvarna vozna udaljenost preko Mapbox Directions API-ja. Sve nullable:
+-- geokodiranje/ruting je best-effort mrežni poziv koji NIKAD ne sme da
+-- blokira kreiranje pošiljke — kad ne uspe (adresa nije prepoznata, mreža,
+-- itd.), kolone ostaju NULL i cena/ETA padaju nazad na procenu po zonama
+-- (vidi src/lib/pricing.ts).
+ALTER TABLE shipments ADD COLUMN IF NOT EXISTS preuzimanje_lat DOUBLE PRECISION;
+ALTER TABLE shipments ADD COLUMN IF NOT EXISTS preuzimanje_lon DOUBLE PRECISION;
+ALTER TABLE shipments ADD COLUMN IF NOT EXISTS isporuka_lat DOUBLE PRECISION;
+ALTER TABLE shipments ADD COLUMN IF NOT EXISTS isporuka_lon DOUBLE PRECISION;
+ALTER TABLE shipments ADD COLUMN IF NOT EXISTS udaljenost_km NUMERIC(6, 2);
 -- fotografija_url je bila neiskorišćena kolona (nikad povezana ni sa jednim
 -- ekranom) — foto-dokaz o isporuci sada čuva zasebna tabela ispod, po istom
 -- obrascu kao opsti_uslovi_dokumenti (da SELECT * na shipments ne vuče BYTEA).
