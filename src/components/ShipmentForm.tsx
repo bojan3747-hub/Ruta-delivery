@@ -69,6 +69,17 @@ export function ShipmentForm({
   const [zonaPreuzimanja, setZonaPreuzimanja] = useState("");
   const [zonaIsporuke, setZonaIsporuke] = useState("");
 
+  // Faza 8: sačuvane adrese sad imaju "tip" (Pošiljalac/Primalac/Oba) —
+  // dropdown pošiljaoca prikazuje samo POSILJALAC/OBA, dropdown primaoca
+  // samo PRIMALAC/OBA (adrese sačuvane pre ove izmene imaju podrazumevano
+  // OBA, pa ostaju vidljive na oba mesta kao i do sada).
+  const senderSavedAddresses = savedAddresses.filter(
+    (a) => a.tip === "POSILJALAC" || a.tip === "OBA"
+  );
+  const receiverSavedAddresses = savedAddresses.filter(
+    (a) => a.tip === "PRIMALAC" || a.tip === "OBA"
+  );
+
   const [pickupAddress, setPickupAddress] = useState({
     value: defaultSenderAddress,
     key: 0,
@@ -136,7 +147,7 @@ export function ShipmentForm({
           </select>
         </div>
 
-        {savedAddresses.length > 0 && (
+        {senderSavedAddresses.length > 0 && (
           <div>
             <label className="block text-sm font-medium">Sačuvana adresa preuzimanja</label>
             <select
@@ -150,7 +161,7 @@ export function ShipmentForm({
               <option value="" disabled>
                 Izaberite (opciono)
               </option>
-              {savedAddresses.map((a) => (
+              {senderSavedAddresses.map((a) => (
                 <option key={a.id} value={a.id}>
                   {a.naziv}
                 </option>
@@ -209,7 +220,7 @@ export function ShipmentForm({
           </select>
         </div>
 
-        {savedAddresses.length > 0 && (
+        {receiverSavedAddresses.length > 0 && (
           <div>
             <label className="block text-sm font-medium">Sačuvana adresa isporuke</label>
             <select
@@ -223,7 +234,7 @@ export function ShipmentForm({
               <option value="" disabled>
                 Izaberite (opciono)
               </option>
-              {savedAddresses.map((a) => (
+              {receiverSavedAddresses.map((a) => (
                 <option key={a.id} value={a.id}>
                   {a.naziv}
                 </option>
@@ -344,7 +355,7 @@ export function ShipmentForm({
           </p>
         </div>
 
-        {zeljeniTermin !== "ODMAH" && (
+        {zeljeniTermin === "DANAS_DO" && (
           <div>
             <label className="block text-sm font-medium">
               Tačan rok isporuke (datum/sat) *
@@ -352,9 +363,21 @@ export function ShipmentForm({
             <input
               name="terminDetalji"
               required
-              placeholder={
-                zeljeniTermin === "DANAS_DO" ? "npr. danas do 17h" : "npr. 8.9. do 12h"
-              }
+              placeholder="npr. danas do 17h"
+              className={inputClass}
+            />
+          </div>
+        )}
+
+        {zeljeniTermin === "ZAKAZANO" && (
+          <div>
+            <label className="block text-sm font-medium">
+              Datum i vreme željene isporuke *
+            </label>
+            <input
+              type="datetime-local"
+              name="terminDatumVreme"
+              required
               className={inputClass}
             />
           </div>

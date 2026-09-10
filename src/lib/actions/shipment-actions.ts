@@ -12,7 +12,7 @@ import type {
   TerminType,
   Zone,
 } from "../types";
-import { SHIPMENT_CONTENT_LABELS, SPECIAL_CARGO_LABELS } from "../labels";
+import { SHIPMENT_CONTENT_LABELS, SPECIAL_CARGO_LABELS, formatDateTime } from "../labels";
 import type { ActionState } from "./auth-actions";
 
 function str(formData: FormData, key: string): string {
@@ -45,7 +45,11 @@ export async function createShipmentAction(
   const hitno = formData.get("hitno") === "on";
   const nestandardna = formData.get("nestandardna") === "on";
   const zeljeniTermin = str(formData, "zeljeniTermin") as TerminType;
-  const terminDetalji = str(formData, "terminDetalji");
+  const terminDetaljiRaw = str(formData, "terminDetalji");
+  // Faza 8: "Zakazano" sad ima pravo polje datum+vreme (terminDatumVreme,
+  // <input type="datetime-local">) umesto slobodnog teksta — "Danas do"
+  // ostaje slobodan tekst (terminDetalji), nepromenjeno.
+  const terminDatumVremeRaw = str(formData, "terminDatumVreme");
   const napomena = str(formData, "napomena");
   const deklarisanaVrednost = Number(str(formData, "deklarisanaVrednost"));
 
@@ -73,11 +77,29 @@ export async function createShipmentAction(
   if (!Number.isFinite(deklarisanaVrednost) || deklarisanaVrednost <= 0) {
     return { error: "Unesite validnu deklarisanu vrednost pošiljke (veću od 0)." };
   }
-  if (zeljeniTermin !== "ODMAH" && !terminDetalji) {
-    return {
-      error:
-        "Unesite tačno vreme/rok isporuke (npr. datum i sat) — dostavljaču mora biti jasno kada se očekuje preuzimanje.",
-    };
+  let terminDetalji: string | undefined;
+  let terminDatumVreme: Date | undefined;
+
+  if (zeljeniTermin === "DANAS_DO") {
+    if (!terminDetaljiRaw) {
+      return {
+        error:
+          "Unesite tačno vreme/rok isporuke (npr. datum i sat) — dostavljaču mora biti jasno kada se očekuje preuzimanje.",
+      };
+    }
+    terminDetalji = terminDetaljiRaw;
+  } else if (zeljeniTermin === "ZAKAZANO") {
+    if (!terminDatumVremeRaw) {
+      return { error: "Unesite datum i vreme željene isporuke." };
+    }
+    const parsed = new Date(terminDatumVremeRaw);
+    if (Number.isNaN(parsed.getTime())) {
+      return { error: "Unesite validan datum i vreme isporuke." };
+    }
+    terminDatumVreme = parsed;
+    // termin_detalji se i dalje popunjava (formatiranim tekstom) da bi svi
+    // postojeći prikazi (klijent/dostavljač/operater) ostali nepromenjeni.
+    terminDetalji = formatDateTime(parsed.toISOString());
   }
 
   // Prava vozna udaljenost preko Mapbox-a (KAN: "prava ruta umesto procene
@@ -103,7 +125,8 @@ export async function createShipmentAction(
     hitno,
     nestandardna,
     zeljeniTermin,
-    terminDetalji: terminDetalji || undefined,
+    terminDetalji,
+    terminDatumVreme,
     napomena: napomena || undefined,
     deklarisanaVrednost,
     preuzimanjeLat: realRoute?.preuzimanjeLat,

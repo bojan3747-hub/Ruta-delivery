@@ -4,6 +4,7 @@ import { useActionState } from "react";
 import { createSavedAddressAction } from "@/lib/actions/saved-address-actions";
 import type { ActionState } from "@/lib/actions/auth-actions";
 import { ZONES, ZONE_LABELS } from "@/lib/zones";
+import { ADDRESS_TYPE_LABELS } from "@/lib/labels";
 import { FormMessage } from "./FormMessage";
 import { SubmitButton } from "./SubmitButton";
 import { StreetNumberFields } from "./StreetNumberFields";
@@ -47,6 +48,24 @@ export function SavedAddressForm() {
               </option>
             ))}
           </select>
+        </div>
+        <div>
+          <label className="block text-sm font-medium">Koristi se za *</label>
+          <select name="tip" required defaultValue="OBA" className={inputClass}>
+            {Object.entries(ADDRESS_TYPE_LABELS).map(([value, label]) => (
+              <option key={value} value={value}>
+                {label}
+              </option>
+            ))}
+          </select>
+        </div>
+        <div>
+          <label className="block text-sm font-medium">Poštanski broj</label>
+          <input
+            name="postanskiBroj"
+            placeholder="npr. 11000"
+            className={inputClass}
+          />
         </div>
       </div>
       <SubmitButton

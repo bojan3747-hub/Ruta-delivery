@@ -27,6 +27,9 @@ export async function createShipment(input: {
   nestandardna: boolean;
   zeljeniTermin: TerminType;
   terminDetalji?: string;
+  // Faza 8: pravi datum+vreme za termin "Zakazano" (vidi terminDetalji za
+  // formatiran tekst koji svi postojeći prikazi već koriste).
+  terminDatumVreme?: Date;
   napomena?: string;
   deklarisanaVrednost: number;
   // Prava ruta (Mapbox), best-effort — vidi src/lib/geocode.ts. Kad
@@ -45,9 +48,9 @@ export async function createShipment(input: {
        primalac_telefon, tip, sadrzaj_posiljke, posebna_kategorija_tereta,
        hitno, nestandardna, zeljeni_termin, termin_detalji, napomena,
        deklarisana_vrednost, preuzimanje_lat, preuzimanje_lon, isporuka_lat,
-       isporuka_lon, udaljenost_km
+       isporuka_lon, udaljenost_km, zakazano_datum_vreme
      ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,
-               $19,$20,$21,$22,$23)
+               $19,$20,$21,$22,$23,$24)
      RETURNING *`,
     [
       input.clientId,
@@ -73,6 +76,7 @@ export async function createShipment(input: {
       input.isporukaLat ?? null,
       input.isporukaLon ?? null,
       input.udaljenostKm ?? null,
+      input.terminDatumVreme ?? null,
     ]
   );
   if (!row) throw new Error("Kreiranje pošiljke nije uspelo");

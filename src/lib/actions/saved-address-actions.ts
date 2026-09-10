@@ -4,8 +4,10 @@ import { revalidatePath } from "next/cache";
 import { getCurrentUser } from "../auth";
 import { createSavedAddress, deleteSavedAddress } from "../queries/saved-addresses";
 import { ZONES } from "../zones";
-import type { Zone } from "../types";
+import type { AddressType, Zone } from "../types";
 import type { ActionState } from "./auth-actions";
+
+const ADDRESS_TYPES: AddressType[] = ["POSILJALAC", "PRIMALAC", "OBA"];
 
 function str(formData: FormData, key: string): string {
   return String(formData.get(key) ?? "").trim();
@@ -23,6 +25,8 @@ export async function createSavedAddressAction(
   const naziv = str(formData, "naziv");
   const adresa = str(formData, "adresa");
   const zona = str(formData, "zona") as Zone;
+  const tip = str(formData, "tip") as AddressType;
+  const postanskiBroj = str(formData, "postanskiBroj");
 
   if (!naziv || !adresa) {
     return { error: "Popunite naziv i adresu." };
@@ -30,8 +34,18 @@ export async function createSavedAddressAction(
   if (!ZONES.includes(zona)) {
     return { error: "Izaberite zonu." };
   }
+  if (!ADDRESS_TYPES.includes(tip)) {
+    return { error: "Izaberite za koga važi adresa." };
+  }
 
-  await createSavedAddress({ companyId: user.companyId, naziv, adresa, zona });
+  await createSavedAddress({
+    companyId: user.companyId,
+    naziv,
+    adresa,
+    zona,
+    tip,
+    postanskiBroj: postanskiBroj || undefined,
+  });
   revalidatePath("/klijent/adrese");
   revalidatePath("/klijent/nova-posiljka");
   return { success: true };

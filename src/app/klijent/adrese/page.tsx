@@ -1,6 +1,7 @@
 import { getCurrentUser } from "@/lib/auth";
 import { listSavedAddresses } from "@/lib/queries/saved-addresses";
 import { ZONE_LABELS } from "@/lib/zones";
+import { ADDRESS_TYPE_LABELS } from "@/lib/labels";
 import { SavedAddressForm } from "@/components/SavedAddressForm";
 import { DeleteSavedAddressButton } from "@/components/DeleteSavedAddressButton";
 
@@ -34,6 +35,8 @@ export default async function AdresarPage() {
                 <p className="font-medium">{a.naziv}</p>
                 <p className="text-sm text-neutral-500">
                   {a.adresa} · {ZONE_LABELS[a.zona]}
+                  {a.postanski_broj ? ` · ${a.postanski_broj}` : ""} ·{" "}
+                  {ADDRESS_TYPE_LABELS[a.tip]}
                 </p>
               </div>
               <DeleteSavedAddressButton addressId={a.id} />

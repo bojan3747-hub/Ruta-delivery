@@ -71,6 +71,12 @@ DO $$ BEGIN
   CREATE TYPE rating_direction AS ENUM ('KLIJENT_KA_DOSTAVLJACU', 'DOSTAVLJAC_KA_KLIJENTU');
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
+-- Faza 8: tip sačuvane adrese — za koga se koristi (filtrira dropdown u
+-- formi nove pošiljke na pošiljaoca/primaoca/oba).
+DO $$ BEGIN
+  CREATE TYPE address_type AS ENUM ('POSILJALAC', 'PRIMALAC', 'OBA');
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
 -- Faza 5: "Sadržaj pošiljke" — spisak preuzet sa Bex Express (bexexpress.rs/najava).
 DO $$ BEGIN
   CREATE TYPE shipment_content AS ENUM (
@@ -228,6 +234,14 @@ ALTER TABLE shipments ADD COLUMN IF NOT EXISTS preuzimanje_lon DOUBLE PRECISION;
 ALTER TABLE shipments ADD COLUMN IF NOT EXISTS isporuka_lat DOUBLE PRECISION;
 ALTER TABLE shipments ADD COLUMN IF NOT EXISTS isporuka_lon DOUBLE PRECISION;
 ALTER TABLE shipments ADD COLUMN IF NOT EXISTS udaljenost_km NUMERIC(6, 2);
+
+-- Faza 8: pravo polje datum+vreme za termin "Zakazano" (ranije je
+-- termin_detalji bio jedino slobodan tekst za sve termine osim "Odmah").
+-- Nullable, koristi se samo kad je zeljeni_termin = 'ZAKAZANO' — za
+-- "Danas do" ostaje termin_detalji kao slobodan tekst (nije menjano).
+-- termin_detalji se i dalje popunjava (formatiranim tekstom) i za
+-- "Zakazano", da bi svi postojeći prikazi ostali nepromenjeni.
+ALTER TABLE shipments ADD COLUMN IF NOT EXISTS zakazano_datum_vreme TIMESTAMPTZ;
 -- fotografija_url je bila neiskorišćena kolona (nikad povezana ni sa jednim
 -- ekranom) — foto-dokaz o isporuci sada čuva zasebna tabela ispod, po istom
 -- obrascu kao opsti_uslovi_dokumenti (da SELECT * na shipments ne vuče BYTEA).
@@ -249,6 +263,12 @@ CREATE TABLE IF NOT EXISTS saved_addresses (
   zona       zone NOT NULL,
   created_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
+
+-- Faza 8: tip (za koga važi adresa) + poštanski broj. Podrazumevano 'OBA'
+-- za tip, da postojeće sačuvane adrese (pre ove izmene) ostanu vidljive u
+-- oba dropdown-a (pošiljaoca i primaoca) kao i do sada, bez migracije.
+ALTER TABLE saved_addresses ADD COLUMN IF NOT EXISTS tip address_type NOT NULL DEFAULT 'OBA';
+ALTER TABLE saved_addresses ADD COLUMN IF NOT EXISTS postanski_broj TEXT;
 
 CREATE TABLE IF NOT EXISTS offers (
   id                    UUID PRIMARY KEY DEFAULT gen_random_uuid(),

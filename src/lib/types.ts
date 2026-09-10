@@ -81,6 +81,10 @@ export type SpecialCargoType =
 
 export type TerminType = "ODMAH" | "DANAS_DO" | "ZAKAZANO";
 
+// Faza 8: tip sačuvane adrese (za koga se koristi — filtrira dropdown u
+// formi nove pošiljke).
+export type AddressType = "POSILJALAC" | "PRIMALAC" | "OBA";
+
 export type ShipmentStatus =
   | "OTVORENA"
   | "PONUDE_STIGLE"
@@ -180,6 +184,10 @@ export interface ShipmentRow {
   isporuka_lat: number | null;
   isporuka_lon: number | null;
   udaljenost_km: string | null;
+  // Faza 8: pravi datum+vreme za termin "Zakazano" (vidi termin_detalji za
+  // formatiran tekst za prikaz — ova kolona je za buduću upotrebu, npr.
+  // sortiranje/podsetnike).
+  zakazano_datum_vreme: string | null;
   status: ShipmentStatus;
   created_at: string;
 }
@@ -251,5 +259,9 @@ export interface SavedAddressRow {
   naziv: string;
   adresa: string;
   zona: Zone;
+  // Faza 8: za koga važi adresa (filtrira dropdown u formi nove pošiljke) i
+  // opcioni poštanski broj.
+  tip: AddressType;
+  postanski_broj: string | null;
   created_at: string;
 }

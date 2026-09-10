@@ -1,4 +1,5 @@
 import type {
+  AddressType,
   InvoiceStatus,
   OfferStatus,
   OrderStatus,
@@ -10,11 +11,25 @@ import type {
   VehicleType,
 } from "./types";
 
+// Faza 8: kg pragovi po korisnikovoj odluci (2026-09-10) — "Mali do 5kg,
+// Srednji 5–15kg, Veliki preko 15kg". Ovo je namerno SAMO promena teksta
+// ovde (ne šema baze) — postojeći `shipment_type` enum i sva logika oko
+// njega ostaju nepromenjeni, ovo samo pojašnjava korisniku šta koja
+// kategorija znači pri izboru u formi.
 export const SHIPMENT_TYPE_LABELS: Record<ShipmentType, string> = {
   DOKUMENT: "Dokument",
-  MALI_PAKET: "Mali paket",
-  SREDNJI_PAKET: "Srednji paket",
-  VELIKI_PAKET: "Veliki paket",
+  MALI_PAKET: "Mali paket (do 5 kg)",
+  SREDNJI_PAKET: "Srednji paket (5–15 kg)",
+  VELIKI_PAKET: "Veliki paket (preko 15 kg)",
+};
+
+// Faza 8: tip sačuvane adrese — da li se prikazuje u dropdown-u za
+// pošiljaoca, primaoca, ili oba (podrazumevano, radi kompatibilnosti sa
+// adresama sačuvanim pre ove izmene).
+export const ADDRESS_TYPE_LABELS: Record<AddressType, string> = {
+  POSILJALAC: "Pošiljalac",
+  PRIMALAC: "Primalac",
+  OBA: "Pošiljalac i primalac",
 };
 
 // Faza 5 — spisak preuzet sa bexexpress.rs/najava, polje "Sadržaj" (2026-09-08).

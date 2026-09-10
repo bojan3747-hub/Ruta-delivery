@@ -1,5 +1,5 @@
 import { query, queryOne } from "../db";
-import type { SavedAddressRow, Zone } from "../types";
+import type { AddressType, SavedAddressRow, Zone } from "../types";
 
 export async function listSavedAddresses(
   companyId: string
@@ -15,11 +15,20 @@ export async function createSavedAddress(input: {
   naziv: string;
   adresa: string;
   zona: Zone;
+  tip: AddressType;
+  postanskiBroj?: string;
 }): Promise<void> {
   await query(
-    `INSERT INTO saved_addresses (company_id, naziv, adresa, zona)
-     VALUES ($1, $2, $3, $4)`,
-    [input.companyId, input.naziv, input.adresa, input.zona]
+    `INSERT INTO saved_addresses (company_id, naziv, adresa, zona, tip, postanski_broj)
+     VALUES ($1, $2, $3, $4, $5, $6)`,
+    [
+      input.companyId,
+      input.naziv,
+      input.adresa,
+      input.zona,
+      input.tip,
+      input.postanskiBroj ?? null,
+    ]
   );
 }
 
