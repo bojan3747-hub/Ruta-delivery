@@ -3,6 +3,7 @@ import { listAllOrdersForOperator } from "@/lib/queries/orders";
 import { ZONE_LABELS } from "@/lib/zones";
 import { ORDER_STATUS_LABELS, formatMoney, formatDateTime } from "@/lib/labels";
 import { StatusBadge } from "@/components/StatusBadge";
+import { AutoRefresh } from "@/components/AutoRefresh";
 import type { OrderStatus } from "@/lib/types";
 
 const FILTERS: { value: OrderStatus | "SVE"; label: string }[] = [
@@ -37,6 +38,7 @@ export default async function OperaterPorudzbinePage({
 
   return (
     <div className="space-y-6">
+      <AutoRefresh intervalMs={20000} />
       <div>
         <h1 className="text-2xl font-semibold">Porudžbine</h1>
         <p className="mt-1 text-sm text-neutral-600">

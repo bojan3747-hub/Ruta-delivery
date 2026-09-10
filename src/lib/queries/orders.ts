@@ -89,7 +89,7 @@ export async function listOrdersForCourier(
 ): Promise<OrderWithShipment[]> {
   return query<OrderWithShipment>(
     `SELECT o.*, ${SHIPMENT_DETAIL_COLUMNS}, c.naziv AS courier_naziv, c.telefon AS courier_telefon,
-            u.ime AS client_kontakt_ime, u.telefon AS client_telefon
+            comp.naziv AS client_naziv, u.ime AS client_kontakt_ime, u.telefon AS client_telefon
      FROM orders o
      JOIN shipments s ON s.id = o.shipment_id
      JOIN couriers c ON c.id = o.courier_id

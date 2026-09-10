@@ -22,6 +22,7 @@ import { AcceptOfferButton } from "@/components/AcceptOfferButton";
 import { RatingForm } from "@/components/RatingForm";
 import { CancelShipmentButton } from "@/components/CancelShipmentButton";
 import { CancelOrderButton } from "@/components/CancelOrderButton";
+import { AutoRefresh } from "@/components/AutoRefresh";
 
 export default async function PosiljkaDetailPage({
   params,
@@ -47,6 +48,7 @@ export default async function PosiljkaDetailPage({
 
   return (
     <div className="mx-auto max-w-2xl space-y-6">
+      <AutoRefresh intervalMs={20000} />
       <div>
         <h1 className="text-2xl font-semibold">
           {ZONE_LABELS[shipment.zona_preuzimanja]} → {ZONE_LABELS[shipment.zona_isporuke]}
@@ -112,6 +114,12 @@ export default async function PosiljkaDetailPage({
       {!order && (
         <section className="space-y-3">
           <h2 className="font-semibold">Ponude</h2>
+          {offers.length > 0 && (
+            <p className="text-xs text-neutral-500">
+              Naznačeno vreme je procena dostavljača od trenutka kada
+              preuzme pošiljku, ne od trenutka slanja ponude.
+            </p>
+          )}
           {offers.length === 0 ? (
             <p className="rounded-lg border border-dashed border-black/15 p-6 text-center text-sm text-neutral-500">
               {shipment.nestandardna

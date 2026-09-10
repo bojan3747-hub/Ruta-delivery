@@ -14,6 +14,7 @@ import {
   formatDateTime,
 } from "@/lib/labels";
 import { StatusBadge } from "@/components/StatusBadge";
+import { AutoRefresh } from "@/components/AutoRefresh";
 
 export default async function OperaterPorudzbinaDetailPage({
   params,
@@ -32,6 +33,7 @@ export default async function OperaterPorudzbinaDetailPage({
 
   return (
     <div className="mx-auto max-w-2xl space-y-6">
+      <AutoRefresh intervalMs={20000} />
       <div>
         <Link href="/operater/porudzbine" className="text-sm text-emerald-700 hover:underline">
           ← Nazad na porudžbine

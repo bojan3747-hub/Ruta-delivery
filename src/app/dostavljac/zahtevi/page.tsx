@@ -57,6 +57,9 @@ export default async function ZahteviPage() {
                     {ZONE_LABELS[s.zona_preuzimanja]} → {ZONE_LABELS[s.zona_isporuke]}
                   </p>
                   <p className="text-sm text-neutral-500">
+                    Klijent: {s.client_naziv}
+                  </p>
+                  <p className="text-sm text-neutral-500">
                     {SHIPMENT_TYPE_LABELS[s.tip]}
                     {s.sadrzaj_posiljke
                       ? ` · ${SHIPMENT_CONTENT_LABELS[s.sadrzaj_posiljke]}`

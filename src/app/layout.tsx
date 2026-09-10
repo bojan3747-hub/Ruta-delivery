@@ -3,6 +3,7 @@ import Link from "next/link";
 import "./globals.css";
 import { NavBar } from "@/components/NavBar";
 import { BackButton } from "@/components/BackButton";
+import { NavigationDepthTracker } from "@/components/NavigationDepthTracker";
 
 export const metadata: Metadata = {
   title: "Ruta-Dostava — dostava u Beogradu",
@@ -14,6 +15,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html lang="sr" className="h-full antialiased">
       <body className="min-h-full flex flex-col bg-neutral-50 text-neutral-900">
+        <NavigationDepthTracker />
         <NavBar />
         <main className="mx-auto w-full max-w-5xl flex-1 px-4 py-8">
           <BackButton />

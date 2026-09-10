@@ -1,4 +1,4 @@
-import { pool, queryOne } from "../db";
+import { pool, query, queryOne } from "../db";
 import { hashPassword } from "../auth";
 import type { CompanyRow, UserRow } from "../types";
 
@@ -43,4 +43,22 @@ export async function createCompanyAccount(input: {
 
 export async function getCompanyById(id: string): Promise<CompanyRow | null> {
   return queryOne<CompanyRow>("SELECT * FROM companies WHERE id = $1", [id]);
+}
+
+export interface CompanyForOperator extends CompanyRow {
+  /** Faza 7: operater treba da vidi listu registrovanih klijenata sa svim
+   * podacima koje klijent unese pri registraciji — deo tih podataka
+   * (kontakt ime/telefon, email) živi na `users`, ne na `companies`. */
+  kontakt_ime: string;
+  kontakt_telefon: string | null;
+  kontakt_email: string;
+}
+
+export async function listCompaniesForOperator(): Promise<CompanyForOperator[]> {
+  return query<CompanyForOperator>(
+    `SELECT comp.*, u.ime AS kontakt_ime, u.telefon AS kontakt_telefon, u.email AS kontakt_email
+     FROM companies comp
+     JOIN users u ON u.id = comp.user_id
+     ORDER BY comp.created_at DESC`
+  );
 }

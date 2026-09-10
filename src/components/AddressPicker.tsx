@@ -31,6 +31,16 @@ interface Suggestion {
  * Ulicu, i prazni Broj SAMO kad predlog već nosi kućni broj (kad ne nosi,
  * već uneti Broj ostaje netaknut — ista logika kao pre, samo primenjena
  * selektivno).
+ *
+ * Faza 7 ("kad se unese broj, mapa treba da se azurira i prikaze bas taj
+ * broj"): dok god se biralo SAMO iz predloga, mapa je prikazivala tacku
+ * ulice iz tog predloga -- kad bi korisnik posle toga otkucao broj u
+ * odvojeno polje Broj, mapa je ostajala na staroj (samo-ulica) tacki. Sad,
+ * kad postoji izabrana ulica I uneti broj, dodatno (debounced) geokodiramo
+ * KOMBINOVANU adresu (ulica + broj) i tu, precizniju tacku prikazujemo na
+ * mapi umesto stare -- vidi `numberedSelected` nize. Best-effort: ako to
+ * geokodiranje ne uspe, mapa jednostavno ostaje na nivou ulice (postojece
+ * ponasanje), nista se ne blokira.
  */
 export function AddressPicker({
   name,
@@ -50,6 +60,11 @@ export function AddressPicker({
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [selected, setSelected] = useState<Suggestion | null>(null);
+  // Faza 7: precizna tačka za Ulica+Broj zajedno (vidi komentar iznad
+  // komponente) — kad postoji, koristi se za mapu UMESTO `selected`.
+  const [numberedSelected, setNumberedSelected] = useState<Suggestion | null>(
+    null
+  );
 
   // Tekst polja u trenutku poslednjeg izbora iz liste — dok se ne promeni,
   // ne pokrećemo novu pretragu (izbor ne sme da obriše broj koji je korisnik ukucao).
@@ -88,9 +103,38 @@ export function AddressPicker({
     };
   }, [query, resolvedQuery]);
 
+  // Kad je izabrana ulica (klik na predlog) I korisnik unese broj, ponovo
+  // geokodiramo kombinovanu adresu da mapa prikaže tačan broj, ne samo
+  // ulicu. Best-effort — neuspeh tiho ostavlja mapu na nivou ulice.
+  useEffect(() => {
+    if (!selected || !broj.trim()) {
+      setNumberedSelected(null);
+      return;
+    }
+    const controller = new AbortController();
+    const timeout = setTimeout(async () => {
+      try {
+        const combinedQuery = `${query.trim()} ${broj.trim()}`;
+        const res = await fetch(
+          `/api/geocode?q=${encodeURIComponent(combinedQuery)}`,
+          { signal: controller.signal }
+        );
+        const data: Suggestion[] = await res.json();
+        if (data[0]) setNumberedSelected(data[0]);
+      } catch {
+        // Mapa jednostavno ostaje na nivou ulice — vidi komentar iznad.
+      }
+    }, 500);
+    return () => {
+      clearTimeout(timeout);
+      controller.abort();
+    };
+  }, [broj, selected, query]);
+
   const baseInputClass = "rounded-md border border-black/15 px-3 py-2 text-sm";
   const inputClass = `w-full ${baseInputClass}`;
   const combined = broj.trim() ? `${query.trim()} ${broj.trim()}` : query.trim();
+  const mapPoint = numberedSelected ?? selected;
 
   return (
     <div>
@@ -165,13 +209,13 @@ export function AddressPicker({
         Ulica.
       </p>
 
-      {selected && token && (
+      {mapPoint && token && (
         <>
           <img
             src={
               `https://api.mapbox.com/styles/v1/mapbox/streets-v12/static/` +
-              `pin-s+047857(${selected.lon},${selected.lat})/` +
-              `${selected.lon},${selected.lat},15,0/400x160@2x` +
+              `pin-s+047857(${mapPoint.lon},${mapPoint.lat})/` +
+              `${mapPoint.lon},${mapPoint.lat},15,0/400x160@2x` +
               `?access_token=${token}`
             }
             alt="Lokacija na mapi"
@@ -179,7 +223,7 @@ export function AddressPicker({
             height={160}
             className="mt-2 h-auto w-full rounded-md border border-black/10"
           />
-          {!selected.has_housenumber && (
+          {!mapPoint.has_housenumber && (
             <p className="mt-1 text-xs text-neutral-500">
               Mapa prikazuje ulicu — tačan kućni broj nije uvek precizno pozicioniran.
             </p>

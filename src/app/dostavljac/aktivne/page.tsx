@@ -13,6 +13,7 @@ import { StatusBadge } from "@/components/StatusBadge";
 import { AdvanceOrderButton } from "@/components/AdvanceOrderButton";
 import { CancelOrderButton } from "@/components/CancelOrderButton";
 import { RatingForm } from "@/components/RatingForm";
+import { AutoRefresh } from "@/components/AutoRefresh";
 
 export default async function AktivneIsporukePage() {
   const user = await getCurrentUser();
@@ -25,6 +26,7 @@ export default async function AktivneIsporukePage() {
 
   return (
     <div className="space-y-6">
+      <AutoRefresh intervalMs={20000} />
       <h1 className="text-2xl font-semibold">Aktivne isporuke</h1>
 
       {orders.length === 0 ? (
@@ -40,6 +42,7 @@ export default async function AktivneIsporukePage() {
                   <p className="font-medium">
                     {ZONE_LABELS[o.zona_preuzimanja]} → {ZONE_LABELS[o.zona_isporuke]}
                   </p>
+                  <p className="text-sm text-neutral-500">Klijent: {o.client_naziv}</p>
                   <p className="text-sm text-neutral-500">
                     {SHIPMENT_TYPE_LABELS[o.tip]}
                     {o.sadrzaj_posiljke

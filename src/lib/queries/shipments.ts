@@ -175,6 +175,12 @@ export async function cancelShipment(
 
 export const MANUAL_REQUEST_WINDOW_MINUTES = 15;
 
+export interface OpenRequestForCourier extends ShipmentRow {
+  /** Faza 7: ime firme klijenta, vidljivo dostavljaču od trenutka zahteva
+   * (ranije se videlo tek u istoriji završenih porudžbina). */
+  client_naziv: string;
+}
+
 /**
  * Open shipments a courier can still send an offer for (Faza 4): every
  * standard shipment stays visible until someone offers (no deadline —
@@ -185,9 +191,11 @@ export const MANUAL_REQUEST_WINDOW_MINUTES = 15;
  */
 export async function listOpenRequestsForCourier(
   courierId: string
-): Promise<ShipmentRow[]> {
-  return query<ShipmentRow>(
-    `SELECT s.* FROM shipments s
+): Promise<OpenRequestForCourier[]> {
+  return query<OpenRequestForCourier>(
+    `SELECT s.*, comp.naziv AS client_naziv
+     FROM shipments s
+     JOIN companies comp ON comp.id = s.client_id
      WHERE s.status = 'OTVORENA'
        AND (
          s.nestandardna = false
