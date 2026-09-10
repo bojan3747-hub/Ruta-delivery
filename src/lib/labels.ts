@@ -105,18 +105,24 @@ export const OFFER_STATUS_LABELS: Record<OfferStatus, string> = {
   ISTEKLA: "Istekla",
 };
 
+// Faza 9 (korisnikova odluka, 2026-09-10): pojednostavljeni statusi —
+// "Preuzeto" i "U tranzitu"/"Na isporuci" spajaju se u jedan korak, tako da
+// klijent i dostavljač prate samo 3 jasna koraka umesto 4. NA_ISPORUCI
+// namerno dobija ISTI tekst kao U_TRANZITU (spojeni koncept) — enum
+// vrednost ostaje u bazi (Postgres ne dozvoljava lako brisanje enum
+// vrednosti) ali se od ove faze više ne dodeljuje novim porudžbinama, vidi
+// NEXT_STATUS u src/lib/queries/orders.ts i migraciju u db/schema.sql.
 export const ORDER_STATUS_LABELS: Record<OrderStatus, string> = {
-  PREUZETO: "Preuzeto",
-  U_TRANZITU: "U tranzitu",
-  NA_ISPORUCI: "Na isporuci",
-  ISPORUCENO: "Isporučeno",
+  PREUZETO: "Primio ponudu",
+  U_TRANZITU: "Preuzeo ponudu",
+  NA_ISPORUCI: "Preuzeo ponudu",
+  ISPORUCENO: "Isporučio",
   OTKAZANO: "Otkazano",
 };
 
 export const ORDER_STATUS_STEPS: OrderStatus[] = [
   "PREUZETO",
   "U_TRANZITU",
-  "NA_ISPORUCI",
   "ISPORUCENO",
 ];
 

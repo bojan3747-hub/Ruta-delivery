@@ -18,7 +18,12 @@ export function AdvanceOrderButton({
   const router = useRouter();
   const fileRef = useRef<HTMLInputElement>(null);
   const label = nextStatusLabel(status);
-  const isFinalStep = status === "NA_ISPORUCI";
+  // Faza 9: pošto je "U tranzitu"/"Na isporuci" sad jedan spojen korak,
+  // klik koji vodi u ISPORUCENO (i traži foto-dokaz) sad se dešava iz
+  // U_TRANZITU — NA_ISPORUCI ostaje kao siguran fallback za retku
+  // porudžbinu zatečenu u starom statusu (vidi NEXT_STATUS u
+  // src/lib/queries/orders.ts).
+  const isFinalStep = status === "U_TRANZITU" || status === "NA_ISPORUCI";
 
   if (!label) return null;
 

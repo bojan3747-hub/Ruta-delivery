@@ -96,9 +96,13 @@ async function main() {
   await step("courier sees active delivery and advances status", async () => {
     await courier.goto(`${BASE}/dostavljac/aktivne`);
     await courier.waitForSelector("text=Označi:", { timeout: 5000 });
-    // Advance through all steps to ISPORUCENO
-    for (let i = 0; i < 3; i++) {
-      await courier.click("text=Označi:");
+    // Faza 9: broj koraka do ISPORUCENO se promenio (spojeni statusi), pa
+    // ovde klikćemo dok dugme ne nestane umesto na fiksan broj puta — ovo
+    // ostaje ispravno bez obzira koliko tranzicija tok trenutno ima.
+    for (let i = 0; i < 5; i++) {
+      const btn = courier.locator("text=Označi:");
+      if ((await btn.count()) === 0) break;
+      await btn.first().click();
       await courier.waitForTimeout(500);
     }
     await courier.waitForSelector("text=Nedavno završene", { timeout: 5000 });

@@ -301,6 +301,24 @@ CREATE TABLE IF NOT EXISTS orders (
 -- baze koje već imaju tabelu orders.
 ALTER TABLE orders ADD COLUMN IF NOT EXISTS otkazano_razlog TEXT;
 
+-- Faza 9: timestamp za svaku promenu statusa porudžbine. "Ponuda
+-- prihvaćena" je već pokriveno postojećom created_at kolonom (porudžbina
+-- se pravi u tom trenutku) — ove dve kolone pokrivaju preostala dva
+-- koraka. Nullable: postojeće porudžbine (pre ove izmene) nemaju ove
+-- podatke i ostaju NULL.
+ALTER TABLE orders ADD COLUMN IF NOT EXISTS preuzeto_at TIMESTAMPTZ;
+ALTER TABLE orders ADD COLUMN IF NOT EXISTS isporuceno_at TIMESTAMPTZ;
+
+-- Faza 9: pojednostavljenje statusa porudžbine na "Primio ponudu" /
+-- "Preuzeo ponudu" / "Isporučio" (korisnikova odluka, 2026-09-10) — stariji
+-- NA_ISPORUCI status se spaja sa U_TRANZITU pod istim novim nazivom
+-- "Preuzeo ponudu". Enum vrednost 'NA_ISPORUCI' namerno OSTAJE u tipu
+-- order_status (Postgres ne dozvoljava lako brisanje enum vrednosti), ali
+-- se od ove faze više nikad ne dodeljuje novim prelazima — vidi NEXT_STATUS
+-- u src/lib/queries/orders.ts. Ovaj UPDATE je bezbedno ponovo pokretati
+-- (posle prve primene nema više redova sa NA_ISPORUCI, pa ne radi ništa).
+UPDATE orders SET status = 'U_TRANZITU' WHERE status = 'NA_ISPORUCI';
+
 CREATE TABLE IF NOT EXISTS ratings (
   id         UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   order_id   UUID NOT NULL REFERENCES orders(id) ON DELETE CASCADE,

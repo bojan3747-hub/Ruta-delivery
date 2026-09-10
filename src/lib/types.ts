@@ -216,6 +216,11 @@ export interface OrderRow {
   otkazano_razlog: string | null;
   created_at: string;
   updated_at: string;
+  // Faza 9: timestamp za svaku promenu statusa — "ponuda prihvaćena" je već
+  // pokriveno sa created_at (porudžbina se pravi u tom trenutku). Nullable
+  // jer starije porudžbine (pre ove izmene) nemaju ove podatke.
+  preuzeto_at: string | null;
+  isporuceno_at: string | null;
 }
 
 export type RatingDirection = "KLIJENT_KA_DOSTAVLJACU" | "DOSTAVLJAC_KA_KLIJENTU";

@@ -15,8 +15,10 @@ import {
   SHIPMENT_TYPE_LABELS,
   SPECIAL_CARGO_LABELS,
   TERMIN_LABELS,
+  formatDateTime,
   formatMoney,
 } from "@/lib/labels";
+import type { OrderStatus } from "@/lib/types";
 import { StatusBadge } from "@/components/StatusBadge";
 import { AcceptOfferButton } from "@/components/AcceptOfferButton";
 import { RatingForm } from "@/components/RatingForm";
@@ -171,16 +173,32 @@ export default async function PosiljkaDetailPage({
             {ORDER_STATUS_STEPS.map((step, idx) => {
               const currentIdx = ORDER_STATUS_STEPS.indexOf(order.status);
               const reached = order.status !== "OTKAZANO" && idx <= currentIdx;
+              // Faza 9: vreme kad je svaki korak dostignut — "Primio
+              // ponudu" je pokriveno postojećim created_at (porudžbina se
+              // pravi u tom trenutku), ostala dva imaju svoju kolonu.
+              const stepTimestamp: Partial<Record<OrderStatus, string | null>> = {
+                PREUZETO: order.created_at,
+                U_TRANZITU: order.preuzeto_at,
+                ISPORUCENO: order.isporuceno_at,
+              };
+              const timestamp = reached ? stepTimestamp[step] : null;
               return (
                 <li key={step} className="flex items-center gap-2">
-                  <span
-                    className={`rounded-full px-3 py-1 text-xs font-medium ${
-                      reached
-                        ? "bg-emerald-700 text-white"
-                        : "bg-neutral-200 text-neutral-500"
-                    }`}
-                  >
-                    {ORDER_STATUS_LABELS[step]}
+                  <span className="flex flex-col items-center">
+                    <span
+                      className={`rounded-full px-3 py-1 text-xs font-medium ${
+                        reached
+                          ? "bg-emerald-700 text-white"
+                          : "bg-neutral-200 text-neutral-500"
+                      }`}
+                    >
+                      {ORDER_STATUS_LABELS[step]}
+                    </span>
+                    {timestamp && (
+                      <span className="mt-0.5 text-[10px] text-neutral-400">
+                        {formatDateTime(timestamp)}
+                      </span>
+                    )}
                   </span>
                   {idx < ORDER_STATUS_STEPS.length - 1 && (
                     <span className="text-neutral-300">→</span>

@@ -6,12 +6,17 @@ import { StatusBadge } from "@/components/StatusBadge";
 import { AutoRefresh } from "@/components/AutoRefresh";
 import type { OrderStatus } from "@/lib/types";
 
+// Faza 9: NA_ISPORUCI je izbačen iz filtera — ostao je u ORDER_STATUS_LABELS
+// samo kao stari/spojeni status (isti tekst kao U_TRANZITU), pa bi inače
+// pravio duplikat "Preuzeo ponudu" stavke u padajućem meniju.
 const FILTERS: { value: OrderStatus | "SVE"; label: string }[] = [
   { value: "SVE", label: "Sve" },
-  ...(Object.keys(ORDER_STATUS_LABELS) as OrderStatus[]).map((status) => ({
-    value: status,
-    label: ORDER_STATUS_LABELS[status],
-  })),
+  ...(Object.keys(ORDER_STATUS_LABELS) as OrderStatus[])
+    .filter((status) => status !== "NA_ISPORUCI")
+    .map((status) => ({
+      value: status,
+      label: ORDER_STATUS_LABELS[status],
+    })),
 ];
 
 export default async function OperaterPorudzbinePage({

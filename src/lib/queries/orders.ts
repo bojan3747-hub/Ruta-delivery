@@ -46,9 +46,15 @@ export interface OrderWithShipment extends OrderRow {
   client_telefon?: string;
 }
 
+// Faza 9: pojednostavljeni tok — "U tranzitu" i "Na isporuci" su spojeni u
+// jedan korak ("Preuzeo ponudu"), pa se sada ide direktno U_TRANZITU ->
+// ISPORUCENO. NA_ISPORUCI ostaje mapiran na ISPORUCENO samo kao siguran
+// fallback (da nijedna porudžbina ne ostane "zaglavljena" ako je slučajno
+// zatečena u tom starom statusu) — od ove faze se novim porudžbinama više
+// nikad ne dodeljuje, vidi migraciju u db/schema.sql.
 const NEXT_STATUS: Record<OrderStatus, OrderStatus | null> = {
   PREUZETO: "U_TRANZITU",
-  U_TRANZITU: "NA_ISPORUCI",
+  U_TRANZITU: "ISPORUCENO",
   NA_ISPORUCI: "ISPORUCENO",
   ISPORUCENO: null,
   OTKAZANO: null,
@@ -187,8 +193,11 @@ export async function advanceOrder(
     if (next === "ISPORUCENO") {
       const percent = await getActiveCommissionPercent();
       const provizija = Math.round(Number(order.cena) * (percent / 100) * 100) / 100;
+      // Faza 9: zabeleži tačno vreme isporuke (isporuceno_at).
       const res = await client.query<OrderRow>(
-        `UPDATE orders SET status = $1, provizija = $2, updated_at = now() WHERE id = $3 RETURNING *`,
+        `UPDATE orders SET status = $1, provizija = $2, updated_at = now(),
+           isporuceno_at = now()
+         WHERE id = $3 RETURNING *`,
         [next, provizija, orderId]
       );
       updated = res.rows[0];
@@ -197,8 +206,18 @@ export async function advanceOrder(
         [order.shipment_id]
       );
     } else {
+      // Faza 9: jedini preostali među-korak je U_TRANZITU ("Preuzeo
+      // ponudu") — NEXT_STATUS garantuje da je `next` ovde uvek
+      // U_TRANZITU (jedina druga vrednost, ISPORUCENO, je pokrivena u
+      // granu iznad, a null je već izbačen `if (!next) throw` gore), pa
+      // se preuzeto_at bezuslovno postavlja. (Napomena: raniji pokušaj sa
+      // `CASE WHEN $1 = 'U_TRANZITU' ...` je pucao sa "inconsistent types
+      // deduced for parameter $1" jer Postgres ne može da izvede jedinstven
+      // tip za $1 kad se koristi i kao vrednost enum kolone i u poređenju
+      // sa string literalom u istom upitu.)
       const res = await client.query<OrderRow>(
-        "UPDATE orders SET status = $1, updated_at = now() WHERE id = $2 RETURNING *",
+        `UPDATE orders SET status = $1, updated_at = now(), preuzeto_at = now()
+         WHERE id = $2 RETURNING *`,
         [next, orderId]
       );
       updated = res.rows[0];
