@@ -46,6 +46,7 @@ export function CreatePreApprovedCourierForm() {
             <option value="APR">APR</option>
             <option value="Oglasi">Oglasi</option>
             <option value="Preporuka">Preporuka</option>
+            <option value="Landing page prijava">Landing page prijava</option>
             <option value="Drugo">Drugo</option>
           </select>
         </div>

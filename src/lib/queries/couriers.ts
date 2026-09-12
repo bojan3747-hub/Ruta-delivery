@@ -6,15 +6,49 @@ export async function createPreApprovedCourier(input: {
   naziv: string;
   telefon: string;
   izvorKontakta: string;
+  // Faza 11: opciona polja koja može popuniti javna forma "Prijavite se za
+  // saradnju" na landing page-u (samooperater ih i dalje ne mora uneti —
+  // ostaju null dok se ne popune, isto kao i pre ove izmene, i mogu se
+  // kasnije prepisati pravim podacima pri aktivaciji naloga).
+  pib?: string;
+  tipVozila?: string;
+  nosivostKg?: number;
+  zones?: Zone[];
 }): Promise<CourierRow> {
   const row = await queryOne<CourierRow>(
-    `INSERT INTO couriers (naziv, telefon, izvor_kontakta, status)
-     VALUES ($1, $2, $3, 'NA_POTVRDI')
+    `INSERT INTO couriers (naziv, telefon, izvor_kontakta, pib, tip_vozila, nosivost_kg, status)
+     VALUES ($1, $2, $3, $4, $5, $6, 'NA_POTVRDI')
      RETURNING *`,
-    [input.naziv, input.telefon, input.izvorKontakta]
+    [
+      input.naziv,
+      input.telefon,
+      input.izvorKontakta,
+      input.pib ?? null,
+      input.tipVozila ?? null,
+      input.nosivostKg ?? null,
+    ]
   );
   if (!row) throw new Error("Kreiranje dostavljača nije uspelo");
+
+  if (input.zones && input.zones.length > 0) {
+    for (const zone of input.zones) {
+      await query(
+        `INSERT INTO courier_zones (courier_id, zone)
+         VALUES ($1, $2)
+         ON CONFLICT (courier_id, zone) DO NOTHING`,
+        [row.id, zone]
+      );
+    }
+  }
+
   return row;
+}
+
+/** Used to dedupe self-service interest submissions from the landing page. */
+export async function getCourierByPhone(telefon: string): Promise<CourierRow | null> {
+  return queryOne<CourierRow>("SELECT * FROM couriers WHERE telefon = $1", [
+    telefon,
+  ]);
 }
 
 export async function listCouriersForOperator(): Promise<CourierRow[]> {

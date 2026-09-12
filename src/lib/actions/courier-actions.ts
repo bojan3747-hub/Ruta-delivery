@@ -5,6 +5,8 @@ import { revalidatePath } from "next/cache";
 import { getCurrentUser } from "../auth";
 import {
   activateCourier,
+  createPreApprovedCourier,
+  getCourierByPhone,
   getCourierByToken,
   setCourierAvailability,
   updateCourierPricing,
@@ -74,6 +76,53 @@ export async function activateCourierAction(
   }
 
   redirect("/prijava?aktivirano=1");
+}
+
+// Faza 11: javna forma na landing page-u ("Prijavite se za saradnju") —
+// namerno BEZ prijave/autentikacije, dostupna svakome ko dođe na sajt (npr.
+// preko Oglasa ili APR kontakta). Kreira "NA_POTVRDI" nalog, isto kao kad
+// operater ručno unese dostavljača — pojavljuje se u
+// /operater/dostavljaci gde operater zove da potvrdi podatke i pošalje
+// link za aktivaciju, ništa se ne aktivira automatski.
+export async function submitCourierInterestAction(
+  _prev: ActionState,
+  formData: FormData
+): Promise<ActionState> {
+  const naziv = str(formData, "naziv");
+  const telefon = str(formData, "telefon");
+  const pib = str(formData, "pib");
+  const tipVozila = str(formData, "tipVozila");
+  const nosivostKgRaw = str(formData, "nosivostKg");
+  const zones = selectedZones(formData);
+
+  if (!naziv || !telefon) {
+    return { error: "Unesite naziv firme/radnje i broj telefona." };
+  }
+
+  const nosivostKg = nosivostKgRaw ? Number(nosivostKgRaw) : undefined;
+  if (nosivostKg !== undefined && (!Number.isFinite(nosivostKg) || nosivostKg <= 0)) {
+    return { error: "Unesite validnu nosivost vozila (kg), ili ostavite prazno." };
+  }
+
+  // Dedup: ako je isti broj telefona već prijavljen (bilo koji status),
+  // ne pravimo duplikat naloga — samo potvrđujemo prijem.
+  const existing = await getCourierByPhone(telefon);
+  if (!existing) {
+    await createPreApprovedCourier({
+      naziv,
+      telefon,
+      izvorKontakta: "Landing page prijava",
+      pib: pib || undefined,
+      tipVozila: tipVozila || undefined,
+      nosivostKg,
+      zones,
+    });
+  }
+
+  return {
+    success: true,
+    message: "Hvala! Kontaktiraćemo vas uskoro na uneti broj telefona.",
+  };
 }
 
 export async function setCourierAvailabilityAction(

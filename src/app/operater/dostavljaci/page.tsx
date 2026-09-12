@@ -52,6 +52,8 @@ export default async function DostavljaciPage() {
                   {c.telefon}
                   {c.izvor_kontakta ? ` · ${c.izvor_kontakta}` : ""}
                   {c.tip_vozila ? ` · ${VEHICLE_TYPE_LABELS[c.tip_vozila]}` : ""}
+                  {c.nosivost_kg ? ` · do ${Number(c.nosivost_kg)} kg` : ""}
+                  {c.pib ? ` · PIB ${c.pib}` : ""}
                 </p>
               </div>
               <div className="flex items-center gap-2">

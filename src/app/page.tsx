@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { getCurrentUser } from "@/lib/auth";
+import { CourierInterestForm } from "@/components/CourierInterestForm";
 
 const ROLE_HOME: Record<string, string> = {
   CLIENT: "/klijent",
@@ -139,12 +140,51 @@ export default async function HomePage() {
       </section>
 
       <section className="rounded-lg border border-black/10 bg-white p-6 text-center">
-        <h2 className="font-semibold">Vozite kombi ili ste kurirska služba?</h2>
-        <p className="mt-1 text-sm text-neutral-600">
-          Naloge za dostavljače trenutno kreira operater platforme na osnovu
-          direktnog kontakta. Ako vas je Ruta-Dostava kontaktirala, aktivirajte nalog
-          preko linka koji ste dobili.
+        <h2 className="text-2xl font-semibold">
+          Vozite kombi ili kamionet? Zaradite dodatno uz Ruta-Dostavu.
+        </h2>
+        <p className="mx-auto mt-2 max-w-2xl text-sm text-neutral-600">
+          Firmama u Beogradu treba prevoz za veće i nestandardne pošiljke koje
+          klasične kurirske službe teško pokrivaju — Ruta-Dostava vas povezuje
+          sa njima.
         </p>
+        <div className="mx-auto mt-6 grid max-w-3xl gap-6 text-left sm:grid-cols-3">
+          <div className="rounded-lg bg-neutral-50 p-4">
+            <h3 className="font-semibold">Vi određujete cenu</h3>
+            <p className="mt-1 text-sm text-neutral-600">
+              Za standardne zahteve sami šaljete ponudu — cenu i vreme
+              isporuke birate vi, ne mi.
+            </p>
+          </div>
+          <div className="rounded-lg bg-neutral-50 p-4">
+            <h3 className="font-semibold">Bez pretplate</h3>
+            <p className="mt-1 text-sm text-neutral-600">
+              Nema ulaznog troška ni mesečne pretplate — provizija se
+              naplaćuje samo na završenu isporuku.
+            </p>
+          </div>
+          <div className="rounded-lg bg-neutral-50 p-4">
+            <h3 className="font-semibold">Dodatni posao</h3>
+            <p className="mt-1 text-sm text-neutral-600">
+              Prihvatate samo zahteve koji vam odgovaraju, pored posla koji
+              već imate — bez obaveze i bez ekskluzivnosti.
+            </p>
+          </div>
+        </div>
+        <div className="mx-auto mt-8 max-w-xl border-t border-black/10 pt-6">
+          <h3 className="font-semibold">Prijavite se za saradnju</h3>
+          <p className="mt-1 text-sm text-neutral-600">
+            Ostavite osnovne podatke — kontaktiraćemo vas da dogovorimo
+            detalje i otvorimo vam nalog.
+          </p>
+          <div className="mt-4">
+            <CourierInterestForm />
+          </div>
+          <p className="mt-4 text-xs text-neutral-400">
+            Ako vas je Ruta-Dostava već kontaktirala, aktivirajte nalog preko
+            linka koji ste dobili umesto ove forme.
+          </p>
+        </div>
       </section>
     </div>
   );
