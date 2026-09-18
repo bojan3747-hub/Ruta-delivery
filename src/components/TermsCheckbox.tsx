@@ -8,7 +8,7 @@ export function TermsCheckbox() {
           href="/opsti-uslovi"
           target="_blank"
           rel="noopener noreferrer"
-          className="text-emerald-700 underline hover:text-emerald-800"
+          className="text-emerald-600 underline hover:text-emerald-700"
         >
           Opšte uslove korišćenja
         </a>{" "}

@@ -29,53 +29,108 @@ export default async function HomePage() {
 
   return (
     <div className="space-y-16">
-      <section className="space-y-4 py-8 text-center">
-        <span className="inline-block rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-emerald-800">
-          B2B platforma za dostavu
-        </span>
-        <h1 className="text-4xl font-bold tracking-tight text-neutral-900">
-          Dostava u Beogradu, na jednom mestu
-        </h1>
-        <p className="mx-auto max-w-2xl text-lg text-neutral-600">
-          Ruta-Dostava je napravljena za firme kojima je povremeno ili redovno
-          potrebna dostava — a ne žele da zovu pet različitih prevoznika da
-          uporede cenu i dostupnost. Unesite pošiljku, uporedite ponude
-          proverenih kombi prevoznika i kurirskih službi, pratite isporuku —
-          sve na jednom mestu.
-        </p>
-        {user ? (
-          <div className="flex flex-col items-center gap-2 pt-2">
-            <Link
-              href={ROLE_HOME[user.role]}
-              className="rounded-md bg-emerald-700 px-5 py-2.5 text-sm font-medium text-white hover:bg-emerald-800"
-            >
-              {ROLE_PANEL_LABELS[user.role]}
-            </Link>
-            <span className="text-xs text-neutral-500">
-              Ulogovani ste kao {user.ime} · {ROLE_LABELS[user.role]}
+      <section className="overflow-hidden rounded-2xl bg-gradient-to-br from-slate-900 via-slate-800 to-emerald-900 px-6 py-12 text-white sm:px-10 sm:py-16">
+        <div className="grid gap-10 lg:grid-cols-2 lg:items-center">
+          <div className="space-y-5">
+            <span className="inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-emerald-300">
+              <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
+              B2B platforma za dostavu
             </span>
+            <h1 className="font-serif text-4xl font-bold leading-tight sm:text-5xl">
+              Dostava na vreme,
+              <br />
+              <span className="text-emerald-400">svaki put.</span>
+            </h1>
+            <p className="max-w-md text-base text-slate-300">
+              Ruta-Dostava je napravljena za firme kojima je povremeno ili
+              redovno potrebna dostava — a ne žele da zovu pet različitih
+              prevoznika da uporede cenu i dostupnost. Unesite pošiljku,
+              uporedite ponude proverenih kombi prevoznika i kurirskih
+              službi, pratite isporuku — sve na jednom mestu.
+            </p>
+            {user ? (
+              <div className="flex flex-col items-start gap-2 pt-2">
+                <Link
+                  href={ROLE_HOME[user.role]}
+                  className="rounded-md bg-emerald-500 px-5 py-2.5 text-sm font-medium text-slate-900 hover:bg-emerald-400"
+                >
+                  {ROLE_PANEL_LABELS[user.role]}
+                </Link>
+                <span className="text-xs text-slate-400">
+                  Ulogovani ste kao {user.ime} · {ROLE_LABELS[user.role]}
+                </span>
+              </div>
+            ) : (
+              <div className="flex flex-wrap gap-3 pt-2">
+                <Link
+                  href="/registracija"
+                  className="rounded-md bg-emerald-500 px-5 py-2.5 text-sm font-medium text-slate-900 hover:bg-emerald-400"
+                >
+                  Registrujte firmu
+                </Link>
+                <Link
+                  href="/prijava"
+                  className="rounded-md border border-white/30 px-5 py-2.5 text-sm font-medium text-white hover:bg-white/10"
+                >
+                  Prijavite se
+                </Link>
+              </div>
+            )}
           </div>
-        ) : (
-          <div className="flex justify-center gap-3 pt-2">
-            <Link
-              href="/registracija"
-              className="rounded-md bg-emerald-700 px-5 py-2.5 text-sm font-medium text-white hover:bg-emerald-800"
-            >
-              Registrujte firmu
-            </Link>
-            <Link
-              href="/prijava"
-              className="rounded-md border border-[#1e3a5f] px-5 py-2.5 text-sm font-medium text-[#1e3a5f] hover:bg-[#1e3a5f]/5"
-            >
-              Prijavite se
-            </Link>
+
+          <div className="rounded-xl border border-white/10 bg-white/5 p-5 backdrop-blur-sm">
+            <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">
+              Kako izgleda praćenje isporuke
+            </p>
+            <div className="mt-4 space-y-3">
+              <div className="flex items-center justify-between border-b border-white/10 pb-3">
+                <div className="flex items-center gap-2">
+                  <span className="h-2 w-2 rounded-full bg-blue-400" />
+                  <div>
+                    <p className="text-sm font-medium">Novi Beograd → Zemun</p>
+                    <p className="text-xs text-slate-400">Srednji paket</p>
+                  </div>
+                </div>
+                <span className="text-xs font-medium text-blue-300">
+                  U tranzitu
+                </span>
+              </div>
+              <div className="flex items-center justify-between border-b border-white/10 pb-3">
+                <div className="flex items-center gap-2">
+                  <span className="h-2 w-2 rounded-full bg-emerald-400" />
+                  <div>
+                    <p className="text-sm font-medium">Vračar → Novi Beograd</p>
+                    <p className="text-xs text-slate-400">Mali paket · Hitno</p>
+                  </div>
+                </div>
+                <span className="text-xs font-medium text-emerald-300">
+                  Isporučeno
+                </span>
+              </div>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <span className="h-2 w-2 rounded-full bg-amber-400" />
+                  <div>
+                    <p className="text-sm font-medium">Čukarica → Voždovac</p>
+                    <p className="text-xs text-slate-400">
+                      Veliki paket · Nestandardna
+                    </p>
+                  </div>
+                </div>
+                <span className="text-xs font-medium text-amber-300">
+                  Preuzeto
+                </span>
+              </div>
+            </div>
           </div>
-        )}
+        </div>
       </section>
 
       <section className="space-y-6">
         <div className="text-center">
-          <h2 className="text-2xl font-semibold">Koji problem rešavamo</h2>
+          <h2 className="font-serif text-2xl font-semibold">
+            Koji problem rešavamo
+          </h2>
           <p className="mx-auto mt-2 max-w-2xl text-neutral-600">
             Firmama je dostava retko potpuno predvidljiva — nekad je paket mali
             i hitan, nekad je pošiljka koju treba dogovoriti unapred.
@@ -113,7 +168,9 @@ export default async function HomePage() {
       </section>
 
       <section className="rounded-lg border border-black/10 bg-white p-6">
-        <h2 className="text-center text-2xl font-semibold">Kako radi</h2>
+        <h2 className="text-center font-serif text-2xl font-semibold">
+          Kako radi
+        </h2>
         <div className="mt-6 grid gap-6 sm:grid-cols-3">
           <div>
             <h3 className="font-semibold">1. Unesite pošiljku</h3>
@@ -140,7 +197,7 @@ export default async function HomePage() {
       </section>
 
       <section className="rounded-lg border border-black/10 bg-white p-6 text-center">
-        <h2 className="text-2xl font-semibold">
+        <h2 className="font-serif text-2xl font-semibold">
           Vozite kombi ili kamionet? Zaradite dodatno uz Ruta-Dostavu.
         </h2>
         <p className="mx-auto mt-2 max-w-2xl text-sm text-neutral-600">

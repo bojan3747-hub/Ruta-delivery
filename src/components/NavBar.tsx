@@ -18,19 +18,11 @@ export async function NavBar() {
           href="/"
           className="flex items-center gap-2 text-lg tracking-tight"
         >
-          <svg width="22" height="22" viewBox="0 0 64 64" fill="none" aria-hidden="true">
-            <circle cx="16" cy="16" r="6" stroke="#047857" strokeWidth="3.5" />
-            <path
-              d="M16 22 V32 Q16 38 22 38 H40 Q46 38 46 44 V48"
-              stroke="#047857"
-              strokeWidth="3.5"
-              strokeLinecap="round"
-            />
-            <circle cx="46" cy="50" r="6" fill="#1e3a5f" />
-          </svg>
-          <span>
-            <span className="font-bold text-emerald-800">Ruta</span>
-            <span className="font-medium text-neutral-900">-Dostava</span>
+          <span className="flex h-7 w-7 items-center justify-center rounded-md bg-emerald-600 text-sm font-bold text-white">
+            R
+          </span>
+          <span className="font-serif font-semibold text-neutral-900">
+            Ruta-Dostava
           </span>
         </Link>
         {user ? (
@@ -54,7 +46,7 @@ export async function NavBar() {
             </Link>
             <Link
               href="/registracija"
-              className="rounded-md bg-emerald-700 px-3 py-1.5 text-white hover:bg-emerald-800"
+              className="rounded-md bg-emerald-600 px-3 py-1.5 text-white hover:bg-emerald-700"
             >
               Registracija
             </Link>

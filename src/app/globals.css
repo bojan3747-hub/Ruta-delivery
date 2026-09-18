@@ -8,12 +8,18 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  /* Faza 13 (reskin po Figma dizajnu): Inter za tekst (font-sans, isto kao
+     do sada bilo je oslanjanje na sistemski font), Roboto Slab za velike
+     naslove preko Tailwind klase `font-serif`. Fontovi se učitavaju preko
+     @fontsource paketa u layout.tsx (vidi komentar tamo zašto ne next/font/
+     google). */
+  --font-sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI",
+    Roboto, Helvetica, Arial, sans-serif;
+  --font-serif: "Roboto Slab", Georgia, serif;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family:
-    -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial,
-    sans-serif;
+  font-family: var(--font-sans);
 }
