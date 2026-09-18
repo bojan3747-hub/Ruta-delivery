@@ -15,14 +15,14 @@ export default async function FakturePage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-semibold">Fakture</h1>
+        <h1 className="font-serif text-2xl font-semibold text-neutral-900">Fakture</h1>
         <p className="mt-1 text-sm text-neutral-600">
           Mesečna faktura za proviziju platforme, obračunata na isporuke
           završene tog meseca.
         </p>
       </div>
 
-      <div className="rounded-lg border border-black/10 bg-white p-4 text-sm">
+      <div className="rounded-xl border border-black/10 bg-white p-4 text-sm">
         {karticaRegistrovana ? (
           <p>
             <span className="text-neutral-500">Način naplate:</span> kartica na
@@ -41,7 +41,7 @@ export default async function FakturePage() {
           Još nema faktura.
         </p>
       ) : (
-        <div className="overflow-x-auto rounded-lg border border-black/10 bg-white">
+        <div className="overflow-x-auto rounded-xl border border-black/10 bg-white">
           <table className="w-full text-left text-sm">
             <thead className="border-b border-black/10 text-neutral-500">
               <tr>

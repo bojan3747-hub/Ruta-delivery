@@ -6,6 +6,8 @@ import { listOrdersForCourier } from "@/lib/queries/orders";
 import { ZONE_LABELS } from "@/lib/zones";
 import { VEHICLE_TYPE_LABELS } from "@/lib/labels";
 import { CourierAvailabilityToggle } from "@/components/CourierAvailabilityToggle";
+import { StatCard } from "@/components/StatCard";
+import { TruckIcon, ClipboardListIcon, StarIcon } from "@/components/icons";
 
 export default async function DostavljacPage() {
   const user = await getCurrentUser();
@@ -22,10 +24,10 @@ export default async function DostavljacPage() {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-semibold">Zdravo, {courier.naziv}</h1>
+      <h1 className="font-serif text-2xl font-semibold text-neutral-900">Zdravo, {courier.naziv}</h1>
 
       {courier.status === "SUSPENDOVAN" && (
-        <p className="rounded-md bg-red-50 px-4 py-3 text-sm text-red-800 border border-red-200">
+        <p className="rounded-lg bg-red-50 px-4 py-3 text-sm text-red-800 border border-red-200">
           Vaš nalog je suspendovan od strane operatera — ne dobijate nove
           zahteve za ponude. Postojeće aktivne isporuke možete da završite
           normalno. Za više informacija kontaktirajte operatera.
@@ -37,7 +39,7 @@ export default async function DostavljacPage() {
       )}
 
       {!cenovnikPodesen && (
-        <p className="rounded-md bg-amber-50 px-4 py-3 text-sm text-amber-800 border border-amber-200">
+        <p className="rounded-lg bg-amber-50 px-4 py-3 text-sm text-amber-800 border border-amber-200">
           Cenovnik nije podešen — nećete dobijati automatske zahteve za
           standardne pošiljke dok ga ne unesete.{" "}
           <Link href="/dostavljac/cenovnik" className="underline font-medium">
@@ -46,26 +48,18 @@ export default async function DostavljacPage() {
         </p>
       )}
 
-      <div className="grid gap-4 sm:grid-cols-3">
-        <div className="rounded-lg border border-black/10 bg-white p-4">
-          <p className="text-2xl font-semibold">{activeOrders.length}</p>
-          <p className="text-sm text-neutral-500">Aktivnih isporuka</p>
-        </div>
-        <div className="rounded-lg border border-black/10 bg-white p-4">
-          <p className="text-2xl font-semibold">{requests.length}</p>
-          <p className="text-sm text-neutral-500">Otvorenih zahteva za ponudu</p>
-        </div>
-        <div className="rounded-lg border border-black/10 bg-white p-4">
-          <p className="text-2xl font-semibold">
-            {courier.ocena_prosek ? Number(courier.ocena_prosek).toFixed(1) : "—"}
-          </p>
-          <p className="text-sm text-neutral-500">
-            Prosečna ocena ({courier.broj_ocena})
-          </p>
-        </div>
+      <div className="grid gap-3 sm:grid-cols-3">
+        <StatCard icon={TruckIcon} value={activeOrders.length} label="Aktivnih isporuka" accent="blue" />
+        <StatCard icon={ClipboardListIcon} value={requests.length} label="Otvorenih zahteva za ponudu" accent="amber" />
+        <StatCard
+          icon={StarIcon}
+          value={courier.ocena_prosek ? Number(courier.ocena_prosek).toFixed(1) : "—"}
+          label={`Prosečna ocena (${courier.broj_ocena})`}
+          accent="emerald"
+        />
       </div>
 
-      <div className="rounded-lg border border-black/10 bg-white p-4 text-sm">
+      <div className="rounded-xl border border-black/10 bg-white p-4 text-sm">
         <p>
           <span className="text-neutral-500">Vozilo:</span>{" "}
           {courier.tip_vozila ? VEHICLE_TYPE_LABELS[courier.tip_vozila] : "—"}

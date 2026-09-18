@@ -37,10 +37,10 @@ export function CourierAvailabilityToggle({
             else router.refresh();
           })
         }
-        className={`shrink-0 rounded-md border px-4 py-2 text-sm font-medium disabled:opacity-50 ${
+        className={`shrink-0 rounded-lg border px-4 py-2 text-sm font-medium disabled:opacity-50 ${
           dostupan
             ? "border-black/15 hover:bg-black/5"
-            : "border-emerald-200 text-emerald-700 hover:bg-emerald-50"
+            : "border-emerald-200 text-emerald-600 hover:bg-emerald-50"
         }`}
       >
         {isPending ? "..." : dostupan ? "Idi na pauzu" : "Vrati se"}

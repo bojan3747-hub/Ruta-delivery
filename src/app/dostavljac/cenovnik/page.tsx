@@ -15,7 +15,7 @@ export default async function CenovnikPage() {
   return (
     <div className="mx-auto max-w-xl space-y-6">
       <div>
-        <h1 className="text-2xl font-semibold">Cenovnik i zone pokrivenosti</h1>
+        <h1 className="font-serif text-2xl font-semibold text-neutral-900">Cenovnik i zone pokrivenosti</h1>
         <p className="mt-1 text-sm text-neutral-600">
           Ovaj cenovnik se koristi za automatski izračunate ponude na
           standardnim pošiljkama. Sačuvane vrednosti odmah važe za nove

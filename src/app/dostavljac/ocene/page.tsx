@@ -15,7 +15,7 @@ export default async function OcenePage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-semibold">Ocene</h1>
+        <h1 className="font-serif text-2xl font-semibold text-neutral-900">Ocene</h1>
         <p className="mt-1 text-sm text-neutral-600">
           Prosečna ocena:{" "}
           {courier.ocena_prosek ? `★ ${Number(courier.ocena_prosek).toFixed(1)}` : "—"}{" "}
@@ -30,7 +30,7 @@ export default async function OcenePage() {
       ) : (
         <ul className="space-y-3">
           {ratings.map((r) => (
-            <li key={r.id} className="rounded-lg border border-black/10 bg-white p-4">
+            <li key={r.id} className="rounded-xl border border-black/10 bg-white p-4">
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <span className="font-medium">{"★".repeat(r.ocena)}{"☆".repeat(5 - r.ocena)}</span>
                 <span className="text-sm text-neutral-500">{formatDateTime(r.created_at)}</span>

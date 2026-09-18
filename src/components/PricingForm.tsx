@@ -10,7 +10,7 @@ import { SubmitButton } from "./SubmitButton";
 
 const initialState: ActionState = {};
 const inputClass =
-  "mt-1 w-full rounded-md border border-black/15 px-3 py-2 text-sm";
+  "mt-1 w-full rounded-lg border border-black/15 px-3 py-2 text-sm outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/30";
 
 export function PricingForm({
   defaults,
@@ -29,7 +29,7 @@ export function PricingForm({
     <form action={formAction} className="space-y-5">
       <FormMessage error={state.error} />
       {state.success && (
-        <p className="text-sm text-emerald-700">Cenovnik je sačuvan.</p>
+        <p className="text-sm text-emerald-600">Cenovnik je sačuvan.</p>
       )}
 
       <div className="grid gap-4 sm:grid-cols-3">

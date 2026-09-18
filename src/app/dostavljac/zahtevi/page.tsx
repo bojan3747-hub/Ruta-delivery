@@ -32,7 +32,7 @@ export default async function ZahteviPage() {
     <div className="space-y-6">
       <AutoRefresh intervalMs={20000} />
       <div>
-        <h1 className="text-2xl font-semibold">Zahtevi za ponude</h1>
+        <h1 className="font-serif text-2xl font-semibold text-neutral-900">Zahtevi za ponude</h1>
         <p className="mt-1 text-sm text-neutral-600">
           Sve otvorene pošiljke (standardne i nestandardne) u vašim zonama za
           koje još niste poslali ponudu. Standardne pošiljke ostaju vidljive
@@ -50,7 +50,7 @@ export default async function ZahteviPage() {
           {requests.map((s) => {
             const quote = courier ? computeAutoQuote(courier, s) : null;
             return (
-            <li key={s.id} className="rounded-lg border border-black/10 bg-white p-4">
+            <li key={s.id} className="rounded-xl border border-black/10 bg-white p-4">
               <div className="flex flex-wrap items-start justify-between gap-2">
                 <div>
                   <p className="font-medium">

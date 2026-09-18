@@ -27,7 +27,7 @@ export default async function AktivneIsporukePage() {
   return (
     <div className="space-y-6">
       <AutoRefresh intervalMs={20000} />
-      <h1 className="text-2xl font-semibold">Aktivne isporuke</h1>
+      <h1 className="font-serif text-2xl font-semibold text-neutral-900">Aktivne isporuke</h1>
 
       {orders.length === 0 ? (
         <p className="rounded-lg border border-dashed border-black/15 p-8 text-center text-neutral-500">
@@ -36,7 +36,7 @@ export default async function AktivneIsporukePage() {
       ) : (
         <ul className="space-y-4">
           {orders.map((o) => (
-            <li key={o.id} className="rounded-lg border border-black/10 bg-white p-4">
+            <li key={o.id} className="rounded-xl border border-black/10 bg-white p-4">
               <div className="flex flex-wrap items-start justify-between gap-3">
                 <div>
                   <p className="font-medium">
@@ -102,7 +102,7 @@ export default async function AktivneIsporukePage() {
           <h2 className="font-semibold">Nedavno završene</h2>
           <ul className="space-y-3">
             {completed.map((o) => (
-              <li key={o.id} className="rounded-lg border border-black/10 bg-white p-4 text-sm">
+              <li key={o.id} className="rounded-xl border border-black/10 bg-white p-4 text-sm">
                 <div className="flex flex-wrap items-center justify-between gap-2">
                   <div>
                     <p className="font-medium">
@@ -125,7 +125,7 @@ export default async function AktivneIsporukePage() {
                       href={`/api/posiljke/${o.shipment_id}/fotografija`}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-emerald-700 hover:underline"
+                      className="text-emerald-600 hover:underline"
                     >
                       Foto-dokaz
                     </a>
