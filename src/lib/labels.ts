@@ -155,6 +155,14 @@ export function formatMonth(value: string): string {
   return new Date(value).toLocaleDateString("sr-RS", { month: "long", year: "numeric" });
 }
 
+export function formatDate(value: string | Date): string {
+  return new Date(value).toLocaleDateString("sr-RS", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+  });
+}
+
 export function formatDateTime(value: string): string {
   return new Date(value).toLocaleString("sr-RS", {
     day: "2-digit",

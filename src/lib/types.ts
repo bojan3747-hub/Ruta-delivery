@@ -151,6 +151,10 @@ export interface CourierRow {
   aktivacioni_token: string;
   payment_customer_token: string | null;
   created_at: string;
+  // Faza 12: automatski besplatan period od aktivacije + ručno podešen
+  // lični procenat provizije (uvek ima prednost) — vidi commission.ts.
+  aktiviran_at: string | null;
+  provizija_procenat: string | null;
 }
 
 export interface CourierZoneRow {

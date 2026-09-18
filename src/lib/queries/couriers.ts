@@ -120,10 +120,13 @@ export async function activateCourier(input: {
       ]
     );
 
+    // Faza 12: aktiviran_at se beleži baš ovde (trenutak stvarne aktivacije,
+    // ne trenutak kad je lead/pre-approved nalog kreiran) — od ovog trenutka
+    // počinje da teče automatski besplatan period od 3 meseca.
     await client.query(
       `UPDATE couriers
        SET user_id = $1, email = $2, telefon = $3, pib = $4,
-           tip_vozila = $5, nosivost_kg = $6, status = 'AKTIVAN'
+           tip_vozila = $5, nosivost_kg = $6, status = 'AKTIVAN', aktiviran_at = now()
        WHERE id = $7`,
       [
         userResult.rows[0].id,
@@ -269,6 +272,19 @@ export async function setCourierAvailability(
 ): Promise<void> {
   await query("UPDATE couriers SET dostupan = $1 WHERE id = $2", [
     dostupan,
+    courierId,
+  ]);
+}
+
+/** Faza 12: operater ručno podešava (ili briše, prosleđivanjem null) lični
+ * procenat provizije za konkretnog dostavljača — vidi
+ * getEffectiveCommissionPercent u commission.ts za redosled primene. */
+export async function setCourierCommissionPercent(
+  courierId: string,
+  percent: number | null
+): Promise<void> {
+  await query("UPDATE couriers SET provizija_procenat = $1 WHERE id = $2", [
+    percent,
     courierId,
   ]);
 }

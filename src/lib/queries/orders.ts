@@ -1,6 +1,6 @@
 import { pool, query, queryOne } from "../db";
-import type { OrderRow, OrderStatus, ShipmentRow } from "../types";
-import { getActiveCommissionPercent } from "./commission";
+import type { CourierRow, OrderRow, OrderStatus, ShipmentRow } from "../types";
+import { getEffectiveCommissionPercent } from "./commission";
 
 /**
  * Puni skup podataka o pošiljci koji prati porudžbinu na svakom mestu gde
@@ -191,7 +191,16 @@ export async function advanceOrder(
 
     let updated: OrderRow;
     if (next === "ISPORUCENO") {
-      const percent = await getActiveCommissionPercent();
+      // Faza 12: efektivan procenat provizije zavisi od dostavljača (lično
+      // podešen procenat / automatski besplatan period od aktivacije /
+      // globalni procenat) — vidi getEffectiveCommissionPercent.
+      const courierRes = await client.query<CourierRow>(
+        "SELECT * FROM couriers WHERE id = $1",
+        [courierId]
+      );
+      const courier = courierRes.rows[0];
+      if (!courier) throw new Error("Dostavljač nije pronađen");
+      const { percent } = await getEffectiveCommissionPercent(courier);
       const provizija = Math.round(Number(order.cena) * (percent / 100) * 100) / 100;
       // Faza 9: zabeleži tačno vreme isporuke (isporuceno_at).
       const res = await client.query<OrderRow>(

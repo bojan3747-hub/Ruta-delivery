@@ -1,11 +1,18 @@
 import Link from "next/link";
 import { listCouriersForOperator } from "@/lib/queries/couriers";
+import {
+  FREE_PERIOD_MONTHS,
+  getEffectiveCommissionPercent,
+  type EffectiveCommission,
+} from "@/lib/queries/commission";
+import type { CourierRow } from "@/lib/types";
 import { CreatePreApprovedCourierForm } from "@/components/CreatePreApprovedCourierForm";
 import { BulkImportCouriersForm } from "@/components/BulkImportCouriersForm";
 import { CourierStatusButton } from "@/components/CourierStatusButton";
 import { CourierVerifiedButton } from "@/components/CourierVerifiedButton";
+import { CourierCommissionForm } from "@/components/CourierCommissionForm";
 import { StatusBadge } from "@/components/StatusBadge";
-import { VEHICLE_TYPE_LABELS } from "@/lib/labels";
+import { VEHICLE_TYPE_LABELS, formatDate } from "@/lib/labels";
 
 const STATUS_LABELS: Record<string, string> = {
   NA_POTVRDI: "Poziv poslat / na potvrdi",
@@ -13,8 +20,25 @@ const STATUS_LABELS: Record<string, string> = {
   SUSPENDOVAN: "Suspendovan",
 };
 
+// Faza 12: tekstualni prikaz efektivne provizije — dok nalog nije aktiviran
+// (aktiviran_at je još null), automatski besplatan period tek treba da
+// počne, pa se to napominje umesto da se pogrešno prikaže globalni procenat.
+function commissionLabel(courier: CourierRow, info: EffectiveCommission): string {
+  if (info.source === "RUCNO") return `${info.percent}% · ručno podešeno`;
+  if (courier.status === "NA_POTVRDI") {
+    return `0% · besplatan period od ${FREE_PERIOD_MONTHS} meseca počinje pri aktivaciji`;
+  }
+  if (info.source === "BESPLATAN_PERIOD" && info.freeUntil) {
+    return `0% · besplatan period do ${formatDate(info.freeUntil)}`;
+  }
+  return `${info.percent}% · globalni procenat`;
+}
+
 export default async function DostavljaciPage() {
   const couriers = await listCouriersForOperator();
+  const commissionInfo = await Promise.all(
+    couriers.map((c) => getEffectiveCommissionPercent(c))
+  );
 
   return (
     <div className="space-y-8">
@@ -36,7 +60,7 @@ export default async function DostavljaciPage() {
       </div>
 
       <ul className="divide-y divide-black/10 rounded-lg border border-black/10 bg-white">
-        {couriers.map((c) => (
+        {couriers.map((c, i) => (
           <li key={c.id} className="px-4 py-3">
             <div className="flex flex-wrap items-center justify-between gap-2">
               <div>
@@ -66,6 +90,15 @@ export default async function DostavljaciPage() {
                 )}
                 <CourierStatusButton courierId={c.id} status={c.status} />
               </div>
+            </div>
+            <div className="mt-2 flex flex-wrap items-center justify-between gap-2 rounded-md bg-neutral-50 px-3 py-2">
+              <p className="text-xs text-neutral-600">
+                Provizija: {commissionLabel(c, commissionInfo[i])}
+              </p>
+              <CourierCommissionForm
+                courierId={c.id}
+                current={c.provizija_procenat === null ? null : Number(c.provizija_procenat)}
+              />
             </div>
             {c.status === "SUSPENDOVAN" && (
               <p className="mt-2 text-sm text-red-700">

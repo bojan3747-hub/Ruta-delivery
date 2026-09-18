@@ -174,6 +174,17 @@ ALTER TABLE couriers DROP COLUMN IF EXISTS payu_customer_token;
 ALTER TABLE couriers ADD COLUMN IF NOT EXISTS dostupan BOOLEAN NOT NULL DEFAULT true;
 ALTER TABLE couriers ADD COLUMN IF NOT EXISTS verifikovan BOOLEAN NOT NULL DEFAULT false;
 
+-- Faza 12: lični procenat provizije po dostavljaču (ručno podešavanje od
+-- strane operatera, uvek ima prednost nad svim ostalim) + datum aktivacije
+-- naloga, da bi se automatski primenio besplatan period od 3 meseca od
+-- aktivacije (kad dostavljač stvarno može da počne da radi), bez ručnog
+-- praćenja. Oba nullable: postojeći dostavljači (pre ove izmene) nemaju
+-- aktiviran_at popunjen unazad, pa automatski ostaju na globalnom procentu
+-- kao i do sada — ništa im se ne menja. Logika efektivnog procenta je u
+-- src/lib/queries/commission.ts (getEffectiveCommissionPercent).
+ALTER TABLE couriers ADD COLUMN IF NOT EXISTS aktiviran_at TIMESTAMPTZ;
+ALTER TABLE couriers ADD COLUMN IF NOT EXISTS provizija_procenat NUMERIC(5, 2);
+
 CREATE TABLE IF NOT EXISTS courier_zones (
   id         UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   courier_id UUID NOT NULL REFERENCES couriers(id) ON DELETE CASCADE,

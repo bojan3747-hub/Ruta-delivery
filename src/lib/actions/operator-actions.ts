@@ -5,6 +5,7 @@ import { getCurrentUser } from "../auth";
 import {
   createPreApprovedCourier,
   listCouriersForOperator,
+  setCourierCommissionPercent,
   setCourierStatus,
   setCourierVerified,
 } from "../queries/couriers";
@@ -162,6 +163,27 @@ export async function setCourierVerifiedAction(
   }
 
   await setCourierVerified(courierId, verifikovan);
+  revalidatePath("/operater/dostavljaci");
+  return {};
+}
+
+/** Faza 12: operater ručno podešava (ili briše, prosleđivanjem null) lični
+ * procenat provizije za konkretnog dostavljača. */
+export async function setCourierCommissionAction(
+  courierId: string,
+  percent: number | null
+): Promise<{ error?: string }> {
+  try {
+    await requireOperator();
+  } catch (err) {
+    return { error: err instanceof Error ? err.message : "Greška." };
+  }
+
+  if (percent !== null && (!Number.isFinite(percent) || percent < 0 || percent > 100)) {
+    return { error: "Procenat mora biti između 0 i 100, ili prazno za podrazumevano." };
+  }
+
+  await setCourierCommissionPercent(courierId, percent);
   revalidatePath("/operater/dostavljaci");
   return {};
 }
