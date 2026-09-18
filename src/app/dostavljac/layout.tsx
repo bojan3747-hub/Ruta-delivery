@@ -1,24 +1,23 @@
 import { requireUser } from "@/lib/auth";
-import { NavTabs } from "@/components/NavTabs";
+import { PortalSidebar, type PortalNavItem } from "@/components/PortalSidebar";
 
-const NAV_ITEMS = [
-  { href: "/dostavljac", label: "Pregled" },
-  { href: "/dostavljac/zahtevi", label: "Zahtevi za ponude" },
-  { href: "/dostavljac/aktivne", label: "Aktivne isporuke" },
-  { href: "/dostavljac/cenovnik", label: "Cenovnik i zone" },
-  { href: "/dostavljac/fakture", label: "Fakture" },
-  { href: "/dostavljac/ocene", label: "Ocene" },
+const NAV_ITEMS: PortalNavItem[] = [
+  { href: "/dostavljac", label: "Pregled", icon: "home" },
+  { href: "/dostavljac/zahtevi", label: "Zahtevi za ponude", icon: "clipboardList" },
+  { href: "/dostavljac/aktivne", label: "Aktivne isporuke", icon: "truck" },
+  { href: "/dostavljac/cenovnik", label: "Cenovnik i zone", icon: "percent" },
+  { href: "/dostavljac/fakture", label: "Fakture", icon: "receipt" },
+  { href: "/dostavljac/ocene", label: "Ocene", icon: "star" },
 ];
 
 export default async function DostavljacLayout({
   children,
 }: LayoutProps<"/dostavljac">) {
-  await requireUser("COURIER");
+  const user = await requireUser("COURIER");
 
   return (
-    <div className="space-y-6">
-      <NavTabs items={NAV_ITEMS} />
+    <PortalSidebar user={user} navItems={NAV_ITEMS}>
       {children}
-    </div>
+    </PortalSidebar>
   );
 }

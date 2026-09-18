@@ -12,7 +12,7 @@ export default async function KlijentOcenePage() {
   if (!company) {
     return (
       <div className="space-y-6">
-        <h1 className="text-2xl font-semibold">Ocene o vama</h1>
+        <h1 className="font-serif text-2xl font-semibold text-neutral-900">Ocene o vama</h1>
         <p className="rounded-lg border border-dashed border-black/15 p-8 text-center text-neutral-500">
           Podaci o firmi nisu pronađeni. Pokušajte da se ponovo prijavite.
         </p>
@@ -25,7 +25,7 @@ export default async function KlijentOcenePage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-semibold">Ocene o vama</h1>
+        <h1 className="font-serif text-2xl font-semibold text-neutral-900">Ocene o vama</h1>
         <p className="mt-1 text-sm text-neutral-600">
           Ono što su dostavljači ostavili nakon isporuke. Prosečna ocena:{" "}
           {company.ocena_prosek ? `★ ${Number(company.ocena_prosek).toFixed(1)}` : "—"}{" "}
@@ -40,7 +40,7 @@ export default async function KlijentOcenePage() {
       ) : (
         <ul className="space-y-3">
           {ratings.map((r) => (
-            <li key={r.id} className="rounded-lg border border-black/10 bg-white p-4">
+            <li key={r.id} className="rounded-xl border border-black/10 bg-white p-4">
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <span className="font-medium">{"★".repeat(r.ocena)}{"☆".repeat(5 - r.ocena)}</span>
                 <span className="text-sm text-neutral-500">{formatDateTime(r.created_at)}</span>

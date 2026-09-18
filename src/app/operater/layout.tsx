@@ -1,25 +1,24 @@
 import { requireUser } from "@/lib/auth";
-import { NavTabs } from "@/components/NavTabs";
+import { PortalSidebar, type PortalNavItem } from "@/components/PortalSidebar";
 
-const NAV_ITEMS = [
-  { href: "/operater", label: "Pregled" },
-  { href: "/operater/porudzbine", label: "Porudžbine" },
-  { href: "/operater/klijenti", label: "Klijenti" },
-  { href: "/operater/dostavljaci", label: "Dostavljači" },
-  { href: "/operater/provizija", label: "Provizija" },
-  { href: "/operater/opsti-uslovi", label: "Opšti uslovi" },
-  { href: "/operater/reset-lozinke", label: "Reset lozinke" },
+const NAV_ITEMS: PortalNavItem[] = [
+  { href: "/operater", label: "Pregled", icon: "home" },
+  { href: "/operater/porudzbine", label: "Porudžbine", icon: "clipboardList" },
+  { href: "/operater/klijenti", label: "Klijenti", icon: "users" },
+  { href: "/operater/dostavljaci", label: "Dostavljači", icon: "truck" },
+  { href: "/operater/provizija", label: "Provizija", icon: "percent" },
+  { href: "/operater/opsti-uslovi", label: "Opšti uslovi", icon: "fileText" },
+  { href: "/operater/reset-lozinke", label: "Reset lozinke", icon: "keyRound" },
 ];
 
 export default async function OperaterLayout({
   children,
 }: LayoutProps<"/operater">) {
-  await requireUser("OPERATOR");
+  const user = await requireUser("OPERATOR");
 
   return (
-    <div className="space-y-6">
-      <NavTabs items={NAV_ITEMS} />
+    <PortalSidebar user={user} navItems={NAV_ITEMS}>
       {children}
-    </div>
+    </PortalSidebar>
   );
 }

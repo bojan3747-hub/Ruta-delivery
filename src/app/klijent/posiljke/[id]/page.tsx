@@ -52,7 +52,7 @@ export default async function PosiljkaDetailPage({
     <div className="mx-auto max-w-2xl space-y-6">
       <AutoRefresh intervalMs={20000} />
       <div>
-        <h1 className="text-2xl font-semibold">
+        <h1 className="font-serif text-2xl font-semibold text-neutral-900">
           {ZONE_LABELS[shipment.zona_preuzimanja]} → {ZONE_LABELS[shipment.zona_isporuke]}
         </h1>
         <div className="mt-2 grid gap-x-4 gap-y-1 text-sm text-neutral-600 sm:grid-cols-2">
@@ -129,7 +129,7 @@ export default async function PosiljkaDetailPage({
                 : "Čekamo da neki od dostavljača u vašim zonama pošalje ponudu."}
             </p>
           ) : (
-            <ul className="divide-y divide-black/10 rounded-lg border border-black/10 bg-white">
+            <ul className="divide-y divide-black/10 rounded-xl border border-black/10 bg-white">
               {offers.map((o) => (
                 <li
                   key={o.id}
@@ -188,7 +188,7 @@ export default async function PosiljkaDetailPage({
                     <span
                       className={`rounded-full px-3 py-1 text-xs font-medium ${
                         reached
-                          ? "bg-emerald-700 text-white"
+                          ? "bg-emerald-600 text-white"
                           : "bg-neutral-200 text-neutral-500"
                       }`}
                     >
@@ -208,7 +208,7 @@ export default async function PosiljkaDetailPage({
             })}
           </ol>
 
-          <div className="rounded-lg border border-black/10 bg-white p-4 text-sm">
+          <div className="rounded-xl border border-black/10 bg-white p-4 text-sm">
             <p>
               <span className="text-neutral-500">Dostavljač:</span>{" "}
               {courier?.naziv} {courier?.telefon ? `· ${courier.telefon}` : ""}
@@ -223,7 +223,7 @@ export default async function PosiljkaDetailPage({
                   href={`/api/posiljke/${shipment.id}/fotografija`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-emerald-700 hover:underline"
+                  className="text-emerald-600 hover:underline"
                 >
                   Pogledajte foto-dokaz o isporuci
                 </a>

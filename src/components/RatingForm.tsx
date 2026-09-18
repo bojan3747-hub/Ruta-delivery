@@ -43,7 +43,7 @@ export function RatingForm({
         name="komentar"
         rows={2}
         placeholder="Komentar (opciono)"
-        className="w-full rounded-md border border-black/15 px-3 py-2 text-sm"
+        className="w-full rounded-lg border border-black/15 px-3 py-2 text-sm"
       />
       <SubmitButton pendingLabel="Slanje...">Pošalji ocenu</SubmitButton>
     </form>

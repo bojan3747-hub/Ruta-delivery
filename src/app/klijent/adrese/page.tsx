@@ -12,14 +12,14 @@ export default async function AdresarPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-semibold">Sačuvane adrese</h1>
+        <h1 className="font-serif text-2xl font-semibold text-neutral-900">Sačuvane adrese</h1>
         <p className="mt-1 text-sm text-neutral-600">
           Sačuvajte adrese koje često koristite (npr. sedište firme) da ih ne
           kucate iznova pri svakoj novoj pošiljci.
         </p>
       </div>
 
-      <div className="rounded-lg border border-black/10 bg-white p-5">
+      <div className="rounded-xl border border-black/10 bg-white p-5 shadow-sm">
         <SavedAddressForm />
       </div>
 
@@ -28,7 +28,7 @@ export default async function AdresarPage() {
           Još nemate sačuvanih adresa.
         </p>
       ) : (
-        <ul className="divide-y divide-black/10 rounded-lg border border-black/10 bg-white">
+        <ul className="divide-y divide-black/10 rounded-xl border border-black/10 bg-white">
           {addresses.map((a) => (
             <li key={a.id} className="flex flex-wrap items-center justify-between gap-2 px-4 py-3">
               <div>

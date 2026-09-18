@@ -23,7 +23,7 @@ export function CancelShipmentButton({ shipmentId }: { shipmentId: string }) {
             else router.refresh();
           });
         }}
-        className="rounded-md border border-red-200 px-3 py-1.5 text-sm font-medium text-red-700 hover:bg-red-50 disabled:opacity-50"
+        className="rounded-lg border border-red-200 px-3 py-1.5 text-sm font-medium text-red-700 hover:bg-red-50 disabled:opacity-50"
       >
         {isPending ? "Otkazivanje..." : "Otkaži pošiljku"}
       </button>

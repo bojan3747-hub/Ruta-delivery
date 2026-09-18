@@ -16,7 +16,7 @@ export function CancelOrderButton({ orderId }: { orderId: string }) {
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="rounded-md border border-red-200 px-3 py-1.5 text-sm font-medium text-red-700 hover:bg-red-50"
+        className="rounded-lg border border-red-200 px-3 py-1.5 text-sm font-medium text-red-700 hover:bg-red-50"
       >
         Otkaži porudžbinu
       </button>
@@ -24,14 +24,14 @@ export function CancelOrderButton({ orderId }: { orderId: string }) {
   }
 
   return (
-    <div className="flex flex-col items-start gap-2 rounded-md border border-red-200 bg-red-50 p-3">
+    <div className="flex flex-col items-start gap-2 rounded-lg border border-red-200 bg-red-50 p-3">
       <label className="text-xs font-medium text-red-800">
         Razlog otkazivanja (opciono)
       </label>
       <input
         value={razlog}
         onChange={(e) => setRazlog(e.target.value)}
-        className="w-full rounded-md border border-black/15 px-2 py-1 text-sm"
+        className="w-full rounded-lg border border-black/15 px-2 py-1 text-sm"
         placeholder="npr. vozilo se pokvarilo"
       />
       <div className="flex gap-2">
@@ -46,14 +46,14 @@ export function CancelOrderButton({ orderId }: { orderId: string }) {
               else router.refresh();
             })
           }
-          className="rounded-md bg-red-700 px-3 py-1.5 text-sm font-medium text-white hover:bg-red-800 disabled:opacity-50"
+          className="rounded-lg bg-red-700 px-3 py-1.5 text-sm font-medium text-white hover:bg-red-800 disabled:opacity-50"
         >
           {isPending ? "Otkazivanje..." : "Potvrdi otkazivanje"}
         </button>
         <button
           type="button"
           onClick={() => setOpen(false)}
-          className="rounded-md border border-black/15 px-3 py-1.5 text-sm hover:bg-black/5"
+          className="rounded-lg border border-black/15 px-3 py-1.5 text-sm hover:bg-black/5"
         >
           Odustani
         </button>

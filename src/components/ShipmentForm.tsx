@@ -25,7 +25,7 @@ import type { SavedAddressRow } from "@/lib/types";
 
 const initialState: ActionState = {};
 const inputClass =
-  "mt-1 w-full rounded-md border border-black/15 px-3 py-2 text-sm";
+  "mt-1 w-full rounded-lg border border-black/15 px-3 py-2 text-sm outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/30";
 
 // Faza 5, opcija C ("Neutralna + akcenat"): sve tri sekcije forme dobijaju
 // istu neutralno sivu pozadinu/traku, a boja se koristi samo na maloj
@@ -102,7 +102,7 @@ export function ShipmentForm({
       <FormMessage error={state.error} />
 
       <section className={sectionClass}>
-        <SectionHeading dotClassName="bg-emerald-700">
+        <SectionHeading dotClassName="bg-emerald-600">
           Podaci o pošiljaocu
         </SectionHeading>
 
@@ -390,7 +390,7 @@ export function ShipmentForm({
       </section>
 
       <SubmitButton
-        className="w-full rounded-md bg-emerald-700 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-800 disabled:opacity-50"
+        className="w-full rounded-lg bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-700 disabled:opacity-50"
         pendingLabel="Slanje zahteva..."
       >
         Zatraži ponude
