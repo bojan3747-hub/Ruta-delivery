@@ -24,12 +24,12 @@ export function CommissionForm({ current }: { current: number }) {
           step="0.1"
           required
           defaultValue={current}
-          className="mt-1 w-32 rounded-md border border-black/15 px-3 py-2 text-sm"
+          className="mt-1 w-32 rounded-lg border border-black/15 px-3 py-2 text-sm outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/30"
         />
       </div>
       <SubmitButton pendingLabel="Čuvanje...">Sačuvaj</SubmitButton>
       {state.success && (
-        <p className="text-sm text-emerald-700">Sačuvano.</p>
+        <p className="text-sm text-emerald-600">Sačuvano.</p>
       )}
     </form>
   );

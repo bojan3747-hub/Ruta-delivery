@@ -13,7 +13,7 @@ export default async function ResetLozinkeOperaterPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-semibold">Zahtevi za reset lozinke</h1>
+        <h1 className="font-serif text-2xl font-semibold text-neutral-900">Zahtevi za reset lozinke</h1>
         <p className="mt-1 text-sm text-neutral-600">
           Korisnik je zatražio reset sa stranice za prijavu. Pošto aplikacija
           još ne šalje mejlove, link ispod prosledite korisniku ručno (telefon,
@@ -26,7 +26,7 @@ export default async function ResetLozinkeOperaterPage() {
           Trenutno nema aktivnih zahteva.
         </p>
       ) : (
-        <ul className="divide-y divide-black/10 rounded-lg border border-black/10 bg-white">
+        <ul className="divide-y divide-black/10 rounded-xl border border-black/10 bg-white">
           {pending.map((p) => (
             <li key={p.id} className="px-4 py-3">
               <p className="font-medium">
@@ -40,7 +40,7 @@ export default async function ResetLozinkeOperaterPage() {
                 Link:{" "}
                 <a
                   href={`/reset-lozinke/${p.reset_token}`}
-                  className="text-emerald-700 underline hover:text-emerald-800"
+                  className="text-emerald-600 underline hover:text-emerald-700"
                 >
                   /reset-lozinke/{p.reset_token}
                 </a>

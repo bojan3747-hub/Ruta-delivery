@@ -25,18 +25,18 @@ export function GenerateInvoicesForm() {
           name="period"
           required
           defaultValue={currentMonthValue()}
-          className="mt-1 rounded-md border border-black/15 px-3 py-2 text-sm"
+          className="mt-1 rounded-lg border border-black/15 px-3 py-2 text-sm outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/30"
         />
       </div>
       <SubmitButton
-        className="rounded-md bg-emerald-700 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-800 disabled:opacity-50"
+        className="rounded-lg bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-700 disabled:opacity-50"
         pendingLabel="Generisanje..."
       >
         Generiši fakture
       </SubmitButton>
       <FormMessage error={state.error} />
       {state.success && state.message && (
-        <p className="text-sm text-emerald-700">{state.message}</p>
+        <p className="text-sm text-emerald-600">{state.message}</p>
       )}
     </form>
   );

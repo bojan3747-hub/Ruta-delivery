@@ -23,14 +23,14 @@ export default async function ProvizijaPage() {
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="text-2xl font-semibold">Provizija</h1>
+        <h1 className="font-serif text-2xl font-semibold text-neutral-900">Provizija</h1>
         <p className="mt-1 text-sm text-neutral-600">
           Procenat se primenjuje na svaku porudžbinu u trenutku kada pređe u
           status &ldquo;Isporučeno&rdquo;.
         </p>
       </div>
 
-      <div className="rounded-lg border border-black/10 bg-white p-5">
+      <div className="rounded-xl border border-black/10 bg-white p-5">
         <CommissionForm current={Number(setting.procenat)} />
       </div>
 
@@ -43,7 +43,7 @@ export default async function ProvizijaPage() {
             zasebna faza — za sada se ovde ručno prati status.
           </p>
         </div>
-        <div className="rounded-lg border border-black/10 bg-white p-5">
+        <div className="rounded-xl border border-black/10 bg-white p-5">
           <GenerateInvoicesForm />
         </div>
 
@@ -52,7 +52,7 @@ export default async function ProvizijaPage() {
             Još nema generisanih faktura.
           </p>
         ) : (
-          <div className="overflow-x-auto rounded-lg border border-black/10 bg-white">
+          <div className="overflow-x-auto rounded-xl border border-black/10 bg-white">
             <table className="w-full text-left text-sm">
               <thead className="border-b border-black/10 text-neutral-500">
                 <tr>
@@ -90,7 +90,7 @@ export default async function ProvizijaPage() {
         {orders.length === 0 ? (
           <p className="text-sm text-neutral-500">Još nema porudžbina.</p>
         ) : (
-          <div className="overflow-x-auto rounded-lg border border-black/10 bg-white">
+          <div className="overflow-x-auto rounded-xl border border-black/10 bg-white">
             <table className="w-full text-left text-sm">
               <thead className="border-b border-black/10 text-neutral-500">
                 <tr>

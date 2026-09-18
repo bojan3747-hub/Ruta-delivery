@@ -36,7 +36,7 @@ export function BulkImportCouriersForm() {
           className="text-sm"
         />
         <SubmitButton
-          className="rounded-md bg-emerald-700 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-800 disabled:opacity-50"
+          className="rounded-lg bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-700 disabled:opacity-50"
           pendingLabel="Uvoz..."
         >
           Uvezi
@@ -44,7 +44,7 @@ export function BulkImportCouriersForm() {
       </div>
       <FormMessage error={state.error} />
       {state.success && (
-        <p className="whitespace-pre-line rounded-md bg-emerald-50 px-3 py-2 text-sm text-emerald-800 border border-emerald-200">
+        <p className="whitespace-pre-line rounded-lg bg-emerald-50 px-3 py-2 text-sm text-emerald-800 border border-emerald-200">
           {state.message}
         </p>
       )}

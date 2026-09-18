@@ -35,11 +35,11 @@ export default async function OperaterPorudzbinaDetailPage({
     <div className="mx-auto max-w-2xl space-y-6">
       <AutoRefresh intervalMs={20000} />
       <div>
-        <Link href="/operater/porudzbine" className="text-sm text-emerald-700 hover:underline">
+        <Link href="/operater/porudzbine" className="text-sm text-emerald-600 hover:underline">
           ← Nazad na porudžbine
         </Link>
         <div className="mt-2 flex flex-wrap items-center justify-between gap-2">
-          <h1 className="text-2xl font-semibold">
+          <h1 className="font-serif text-2xl font-semibold text-neutral-900">
             {ZONE_LABELS[order.zona_preuzimanja]} → {ZONE_LABELS[order.zona_isporuke]}
           </h1>
           <StatusBadge status={order.status} label={ORDER_STATUS_LABELS[order.status]} />
@@ -47,7 +47,7 @@ export default async function OperaterPorudzbinaDetailPage({
         <p className="mt-1 text-sm text-neutral-500">{formatDateTime(order.created_at)}</p>
       </div>
 
-      <div className="rounded-lg border border-black/10 bg-white p-4 text-sm space-y-1">
+      <div className="rounded-xl border border-black/10 bg-white p-4 text-sm space-y-1">
         <p>
           <span className="text-neutral-500">Preuzimanje:</span>{" "}
           {order.adresa_preuzimanja}
@@ -97,7 +97,7 @@ export default async function OperaterPorudzbinaDetailPage({
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2">
-        <div className="rounded-lg border border-black/10 bg-white p-4 text-sm">
+        <div className="rounded-xl border border-black/10 bg-white p-4 text-sm">
           <p className="font-medium">Klijent</p>
           <p className="mt-1 text-neutral-600">{order.client_naziv}</p>
           {order.client_kontakt_ime && (
@@ -105,14 +105,14 @@ export default async function OperaterPorudzbinaDetailPage({
           )}
           {order.client_telefon && <p className="text-neutral-600">{order.client_telefon}</p>}
         </div>
-        <div className="rounded-lg border border-black/10 bg-white p-4 text-sm">
+        <div className="rounded-xl border border-black/10 bg-white p-4 text-sm">
           <p className="font-medium">Dostavljač</p>
           <p className="mt-1 text-neutral-600">{order.courier_naziv}</p>
           <p className="text-neutral-600">{order.courier_telefon}</p>
         </div>
       </div>
 
-      <div className="rounded-lg border border-black/10 bg-white p-4 text-sm">
+      <div className="rounded-xl border border-black/10 bg-white p-4 text-sm">
         <p>
           <span className="text-neutral-500">Cena:</span> {formatMoney(order.cena)}
         </p>
@@ -128,7 +128,7 @@ export default async function OperaterPorudzbinaDetailPage({
               href={`/api/posiljke/${order.shipment_id}/fotografija`}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-emerald-700 hover:underline"
+              className="text-emerald-600 hover:underline"
             >
               Pogledajte foto-dokaz o isporuci
             </a>
@@ -137,7 +137,7 @@ export default async function OperaterPorudzbinaDetailPage({
       </div>
 
       {order.status === "OTKAZANO" && (
-        <p className="rounded-lg border border-black/10 bg-white p-4 text-sm text-neutral-600">
+        <p className="rounded-xl border border-black/10 bg-white p-4 text-sm text-neutral-600">
           Porudžbina je otkazana.
           {order.otkazano_razlog ? ` Razlog: ${order.otkazano_razlog}` : ""}
         </p>
@@ -146,7 +146,7 @@ export default async function OperaterPorudzbinaDetailPage({
       {(ratingKlijenta || ratingDostavljaca) && (
         <div className="grid gap-4 sm:grid-cols-2">
           {ratingKlijenta && (
-            <div className="rounded-lg border border-black/10 bg-white p-4 text-sm">
+            <div className="rounded-xl border border-black/10 bg-white p-4 text-sm">
               <p className="font-medium">Ocena klijenta o dostavljaču</p>
               <p className="mt-1">
                 {"★".repeat(ratingKlijenta.ocena)}
@@ -158,7 +158,7 @@ export default async function OperaterPorudzbinaDetailPage({
             </div>
           )}
           {ratingDostavljaca && (
-            <div className="rounded-lg border border-black/10 bg-white p-4 text-sm">
+            <div className="rounded-xl border border-black/10 bg-white p-4 text-sm">
               <p className="font-medium">Ocena dostavljača o klijentu</p>
               <p className="mt-1">
                 {"★".repeat(ratingDostavljaca.ocena)}

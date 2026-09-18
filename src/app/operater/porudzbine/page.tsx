@@ -45,7 +45,7 @@ export default async function OperaterPorudzbinePage({
     <div className="space-y-6">
       <AutoRefresh intervalMs={20000} />
       <div>
-        <h1 className="text-2xl font-semibold">Porudžbine</h1>
+        <h1 className="font-serif text-2xl font-semibold text-neutral-900">Porudžbine</h1>
         <p className="mt-1 text-sm text-neutral-600">
           Pregled i pretraga svih porudžbina na platformi.
         </p>
@@ -57,14 +57,14 @@ export default async function OperaterPorudzbinePage({
           name="q"
           defaultValue={q ?? ""}
           placeholder="Pretraži po klijentu, dostavljaču ili ID-u porudžbine"
-          className="min-w-64 flex-1 rounded-md border border-black/15 px-3 py-2 text-sm"
+          className="min-w-64 flex-1 rounded-lg border border-black/15 px-3 py-2 text-sm outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/30"
         />
         {activeFilter !== "SVE" && (
           <input type="hidden" name="status" value={activeFilter} />
         )}
         <button
           type="submit"
-          className="rounded-md bg-emerald-700 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-800"
+          className="rounded-lg bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-700"
         >
           Pretraži
         </button>
@@ -83,7 +83,7 @@ export default async function OperaterPorudzbinePage({
             }
             className={`rounded-full px-3 py-1 text-xs font-medium ${
               activeFilter === f.value
-                ? "bg-emerald-700 text-white"
+                ? "bg-emerald-600 text-white"
                 : "bg-black/5 text-neutral-700 hover:bg-black/10"
             }`}
           >
@@ -97,7 +97,7 @@ export default async function OperaterPorudzbinePage({
           Nema porudžbina koje odgovaraju pretrazi.
         </p>
       ) : (
-        <ul className="divide-y divide-black/10 rounded-lg border border-black/10 bg-white">
+        <ul className="divide-y divide-black/10 rounded-xl border border-black/10 bg-white">
           {orders.map((o) => (
             <li key={o.id}>
               <Link

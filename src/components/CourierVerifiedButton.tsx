@@ -28,10 +28,10 @@ export function CourierVerifiedButton({
             else router.refresh();
           })
         }
-        className={`rounded-md border px-3 py-1.5 text-xs font-medium disabled:opacity-50 ${
+        className={`rounded-lg border px-3 py-1.5 text-xs font-medium disabled:opacity-50 ${
           verifikovan
             ? "border-black/15 hover:bg-black/5"
-            : "border-emerald-200 text-emerald-700 hover:bg-emerald-50"
+            : "border-emerald-200 text-emerald-600 hover:bg-emerald-50"
         }`}
       >
         {isPending ? "..." : verifikovan ? "Ukloni verifikaciju" : "Označi kao verifikovan"}

@@ -43,7 +43,7 @@ export default async function DostavljaciPage() {
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="text-2xl font-semibold">Dostavljači</h1>
+        <h1 className="font-serif text-2xl font-semibold text-neutral-900">Dostavljači</h1>
         <p className="mt-1 text-sm text-neutral-600">
           Unesite prevoznika prikupljenog sa APR-a ili oglasa da kreirate
           pre-approved nalog. Dostavljač aktivira nalog preko linka i sam
@@ -51,15 +51,15 @@ export default async function DostavljaciPage() {
         </p>
       </div>
 
-      <div className="rounded-lg border border-black/10 bg-white p-5">
+      <div className="rounded-xl border border-black/10 bg-white p-5">
         <CreatePreApprovedCourierForm />
       </div>
 
-      <div className="rounded-lg border border-black/10 bg-white p-5">
+      <div className="rounded-xl border border-black/10 bg-white p-5">
         <BulkImportCouriersForm />
       </div>
 
-      <ul className="divide-y divide-black/10 rounded-lg border border-black/10 bg-white">
+      <ul className="divide-y divide-black/10 rounded-xl border border-black/10 bg-white">
         {couriers.map((c, i) => (
           <li key={c.id} className="px-4 py-3">
             <div className="flex flex-wrap items-center justify-between gap-2">
@@ -91,7 +91,7 @@ export default async function DostavljaciPage() {
                 <CourierStatusButton courierId={c.id} status={c.status} />
               </div>
             </div>
-            <div className="mt-2 flex flex-wrap items-center justify-between gap-2 rounded-md bg-neutral-50 px-3 py-2">
+            <div className="mt-2 flex flex-wrap items-center justify-between gap-2 rounded-lg bg-neutral-50 px-3 py-2">
               <p className="text-xs text-neutral-600">
                 Provizija: {commissionLabel(c, commissionInfo[i])}
               </p>
@@ -111,7 +111,7 @@ export default async function DostavljaciPage() {
                 Link za aktivaciju:{" "}
                 <Link
                   href={`/aktivacija/${c.aktivacioni_token}`}
-                  className="text-emerald-700 hover:underline"
+                  className="text-emerald-600 hover:underline"
                 >
                   /aktivacija/{c.aktivacioni_token}
                 </Link>

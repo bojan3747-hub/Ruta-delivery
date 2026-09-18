@@ -46,14 +46,14 @@ export function CourierCommissionForm({
           placeholder="auto"
           value={value}
           onChange={(e) => setValue(e.target.value)}
-          className="w-16 rounded-md border border-black/15 px-2 py-1 text-xs"
+          className="w-16 rounded-lg border border-black/15 px-2 py-1 text-xs outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/30"
         />
         <span className="text-xs text-neutral-500">%</span>
         <button
           type="button"
           disabled={isPending}
           onClick={submit}
-          className="rounded-md border border-black/15 px-2 py-1 text-xs font-medium hover:bg-black/5 disabled:opacity-50"
+          className="rounded-lg border border-black/15 px-2 py-1 text-xs font-medium hover:bg-black/5 disabled:opacity-50"
         >
           {isPending ? "..." : "Sačuvaj"}
         </button>

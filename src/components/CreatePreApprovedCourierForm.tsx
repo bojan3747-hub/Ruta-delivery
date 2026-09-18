@@ -7,7 +7,8 @@ import { FormMessage } from "./FormMessage";
 import { SubmitButton } from "./SubmitButton";
 
 const initialState: ActionState = {};
-const inputClass = "mt-1 w-full rounded-md border border-black/15 px-3 py-2 text-sm";
+const inputClass =
+  "mt-1 w-full rounded-lg border border-black/15 px-3 py-2 text-sm outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/30";
 
 export function CreatePreApprovedCourierForm() {
   const [state, formAction] = useActionState(
@@ -24,7 +25,7 @@ export function CreatePreApprovedCourierForm() {
     <form ref={formRef} action={formAction} className="space-y-4">
       <FormMessage error={state.error} />
       {state.success && (
-        <p className="text-sm text-emerald-700">
+        <p className="text-sm text-emerald-600">
           Nalog je kreiran — link za aktivaciju je u listi ispod.
         </p>
       )}
@@ -52,7 +53,7 @@ export function CreatePreApprovedCourierForm() {
         </div>
       </div>
       <SubmitButton
-        className="rounded-md bg-emerald-700 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-800 disabled:opacity-50"
+        className="rounded-lg bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-700 disabled:opacity-50"
         pendingLabel="Kreiranje..."
       >
         Kreiraj pre-approved nalog

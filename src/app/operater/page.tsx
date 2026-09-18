@@ -1,6 +1,8 @@
 import { listCouriersForOperator } from "@/lib/queries/couriers";
 import { listAllOrdersForOperator } from "@/lib/queries/orders";
 import { formatMoney } from "@/lib/labels";
+import { StatCard } from "@/components/StatCard";
+import { TruckIcon, ClipboardListIcon, PackageIcon, PercentIcon } from "@/components/icons";
 
 export default async function OperaterPage() {
   const [couriers, orders] = await Promise.all([
@@ -17,24 +19,17 @@ export default async function OperaterPage() {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-semibold">Pregled platforme</h1>
+      <h1 className="font-serif text-2xl font-semibold text-neutral-900">Pregled platforme</h1>
       <div className="grid gap-4 sm:grid-cols-4">
-        <div className="rounded-lg border border-black/10 bg-white p-4">
-          <p className="text-2xl font-semibold">{aktivni}</p>
-          <p className="text-sm text-neutral-500">Aktivnih dostavljača</p>
-        </div>
-        <div className="rounded-lg border border-black/10 bg-white p-4">
-          <p className="text-2xl font-semibold">{naPotvrdi}</p>
-          <p className="text-sm text-neutral-500">Čeka aktivaciju</p>
-        </div>
-        <div className="rounded-lg border border-black/10 bg-white p-4">
-          <p className="text-2xl font-semibold">{orders.length}</p>
-          <p className="text-sm text-neutral-500">Ukupno porudžbina</p>
-        </div>
-        <div className="rounded-lg border border-black/10 bg-white p-4">
-          <p className="text-2xl font-semibold">{formatMoney(ukupnaProvizija)}</p>
-          <p className="text-sm text-neutral-500">Ukupna provizija</p>
-        </div>
+        <StatCard icon={TruckIcon} value={aktivni} label="Aktivnih dostavljača" accent="blue" />
+        <StatCard icon={ClipboardListIcon} value={naPotvrdi} label="Čeka aktivaciju" accent="amber" />
+        <StatCard icon={PackageIcon} value={orders.length} label="Ukupno porudžbina" accent="slate" />
+        <StatCard
+          icon={PercentIcon}
+          value={formatMoney(ukupnaProvizija)}
+          label="Ukupna provizija"
+          accent="emerald"
+        />
       </div>
     </div>
   );

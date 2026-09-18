@@ -22,7 +22,7 @@ export function MarkInvoicePaidButton({ invoiceId }: { invoiceId: string }) {
             else router.refresh();
           })
         }
-        className="rounded-md border border-black/15 px-3 py-1.5 text-xs font-medium hover:bg-black/5 disabled:opacity-50"
+        className="rounded-lg border border-black/15 px-3 py-1.5 text-xs font-medium hover:bg-black/5 disabled:opacity-50"
       >
         {isPending ? "..." : "Označi kao naplaćeno"}
       </button>

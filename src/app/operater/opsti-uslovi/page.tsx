@@ -9,7 +9,7 @@ export default async function OperaterOpstiUsloviPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-semibold">Opšti uslovi korišćenja</h1>
+        <h1 className="font-serif text-2xl font-semibold text-neutral-900">Opšti uslovi korišćenja</h1>
         <p className="mt-1 text-sm text-neutral-600">
           Klijenti i dostavljači ovaj dokument moraju da prihvate pri
           registraciji/aktivaciji naloga. Novi upload odmah postaje važeća
@@ -17,7 +17,7 @@ export default async function OperaterOpstiUsloviPage() {
         </p>
       </div>
 
-      <div className="rounded-lg border border-black/10 bg-white p-5">
+      <div className="rounded-xl border border-black/10 bg-white p-5">
         {current ? (
           <p className="mb-4 text-sm">
             <span className="text-neutral-500">Trenutno važi:</span>{" "}
@@ -26,7 +26,7 @@ export default async function OperaterOpstiUsloviPage() {
               href="/api/opsti-uslovi"
               target="_blank"
               rel="noopener noreferrer"
-              className="text-emerald-700 underline hover:text-emerald-800"
+              className="text-emerald-600 underline hover:text-emerald-700"
             >
               pregledaj
             </a>
@@ -42,7 +42,7 @@ export default async function OperaterOpstiUsloviPage() {
       {history.length > 1 && (
         <div>
           <h2 className="mb-3 font-semibold">Istorija verzija</h2>
-          <ul className="divide-y divide-black/10 rounded-lg border border-black/10 bg-white">
+          <ul className="divide-y divide-black/10 rounded-xl border border-black/10 bg-white">
             {history.slice(1).map((doc) => (
               <li key={doc.id} className="px-4 py-3 text-sm text-neutral-600">
                 {doc.naziv_fajla} — {formatDateTime(doc.created_at)}

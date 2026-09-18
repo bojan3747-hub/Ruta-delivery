@@ -39,7 +39,7 @@ export function CourierStatusButton({
             else router.refresh();
           });
         }}
-        className={`rounded-md border px-3 py-1.5 text-xs font-medium disabled:opacity-50 ${
+        className={`rounded-lg border px-3 py-1.5 text-xs font-medium disabled:opacity-50 ${
           status === "AKTIVAN"
             ? "border-red-200 text-red-700 hover:bg-red-50"
             : "border-black/15 hover:bg-black/5"
