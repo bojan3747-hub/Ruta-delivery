@@ -13,6 +13,7 @@ import { setCommissionPercent } from "../queries/commission";
 import { generateInvoicesForPeriod, setInvoiceStatus } from "../queries/invoices";
 import { uploadOpstiUslovi } from "../queries/opsti-uslovi";
 import { parseCsv } from "../csv";
+import { isValidPhone, isTooLong, MAX_NAME_LEN, MAX_UPLOAD_SIZE_BYTES } from "../validation";
 import type { ActionState } from "./auth-actions";
 
 function str(formData: FormData, key: string): string {
@@ -44,6 +45,12 @@ export async function createPreApprovedCourierAction(
   if (!naziv || !telefon || !izvorKontakta) {
     return { error: "Popunite sva obavezna polja." };
   }
+  if (!isValidPhone(telefon)) {
+    return { error: "Unesite validan broj telefona." };
+  }
+  if (isTooLong(naziv, MAX_NAME_LEN) || isTooLong(izvorKontakta, MAX_NAME_LEN)) {
+    return { error: "Uneti tekst je predugačak." };
+  }
 
   await createPreApprovedCourier({ naziv, telefon, izvorKontakta });
 
@@ -64,6 +71,9 @@ export async function bulkImportCouriersAction(
   const file = formData.get("csv");
   if (!(file instanceof File) || file.size === 0) {
     return { error: "Izaberite CSV fajl." };
+  }
+  if (file.size > MAX_UPLOAD_SIZE_BYTES) {
+    return { error: "CSV fajl je prevelik (maksimum 10 MB)." };
   }
 
   const text = await file.text();
@@ -102,6 +112,14 @@ export async function bulkImportCouriersAction(
 
     if (!naziv || !telefon) {
       rowErrors.push(`Red ${i + 1}: nedostaje naziv ili telefon.`);
+      continue;
+    }
+    if (!isValidPhone(telefon)) {
+      rowErrors.push(`Red ${i + 1}: neispravan format telefona.`);
+      continue;
+    }
+    if (isTooLong(naziv, MAX_NAME_LEN)) {
+      rowErrors.push(`Red ${i + 1}: naziv je predugačak.`);
       continue;
     }
     if (seenPhones.has(telefon)) {
@@ -257,6 +275,9 @@ export async function uploadOpstiUsloviAction(
   }
   if (file.type !== "application/pdf") {
     return { error: "Fajl mora biti PDF." };
+  }
+  if (file.size > MAX_UPLOAD_SIZE_BYTES) {
+    return { error: "PDF fajl je prevelik (maksimum 10 MB)." };
   }
 
   const buffer = Buffer.from(await file.arrayBuffer());

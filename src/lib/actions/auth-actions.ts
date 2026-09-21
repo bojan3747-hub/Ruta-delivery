@@ -5,6 +5,7 @@ import { queryOne } from "../db";
 import { createSession, destroySession, verifyPassword } from "../auth";
 import { createCompanyAccount } from "../queries/companies";
 import { requestPasswordReset, resetPassword } from "../queries/password-reset";
+import { isValidEmail, isValidPhone, isValidPib, isTooLong, MAX_NAME_LEN } from "../validation";
 import type { UserRow } from "../types";
 
 export interface ActionState {
@@ -26,6 +27,9 @@ export async function loginAction(
 
   if (!email || !password) {
     return { error: "Unesite email i lozinku." };
+  }
+  if (!isValidEmail(email)) {
+    return { error: "Unesite validnu email adresu." };
   }
 
   const user = await queryOne<UserRow>("SELECT * FROM users WHERE email = $1", [
@@ -67,6 +71,22 @@ export async function registerClientAction(
   if (!email || !password || !ime || !telefon || !naziv) {
     return { error: "Popunite sva obavezna polja." };
   }
+  if (!isValidEmail(email)) {
+    return { error: "Unesite validnu email adresu." };
+  }
+  if (!isValidPhone(telefon)) {
+    return { error: "Unesite validan broj telefona." };
+  }
+  if (pib && !isValidPib(pib)) {
+    return { error: "PIB mora imati tačno 8 cifara." };
+  }
+  if (
+    isTooLong(ime, MAX_NAME_LEN) ||
+    isTooLong(naziv, MAX_NAME_LEN) ||
+    isTooLong(adresa, MAX_NAME_LEN)
+  ) {
+    return { error: "Uneti tekst je predugačak." };
+  }
   if (password.length < 6) {
     return { error: "Lozinka mora imati bar 6 karaktera." };
   }
@@ -107,6 +127,7 @@ export async function requestPasswordResetAction(
 ): Promise<ActionState> {
   const email = str(formData, "email").toLowerCase();
   if (!email) return { error: "Unesite email." };
+  if (!isValidEmail(email)) return { error: "Unesite validnu email adresu." };
 
   await requestPasswordReset(email);
 

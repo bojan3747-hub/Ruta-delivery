@@ -5,6 +5,7 @@ import { getCurrentUser } from "../auth";
 import { getOrderById } from "../queries/orders";
 import { getShipmentById } from "../queries/shipments";
 import { createRating } from "../queries/ratings";
+import { isTooLong, MAX_TEXT_LEN } from "../validation";
 import type { RatingDirection } from "../types";
 import type { ActionState } from "./auth-actions";
 
@@ -27,6 +28,9 @@ export async function submitRatingAction(
 
   if (!Number.isInteger(ocena) || ocena < 1 || ocena > 5) {
     return { error: "Ocena mora biti od 1 do 5." };
+  }
+  if (isTooLong(komentar, MAX_TEXT_LEN)) {
+    return { error: "Komentar je predugačak." };
   }
 
   const order = await getOrderById(orderId);

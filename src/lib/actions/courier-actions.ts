@@ -12,6 +12,7 @@ import {
   updateCourierPricing,
 } from "../queries/couriers";
 import { ZONES } from "../zones";
+import { isValidEmail, isValidPhone, isValidPib, isTooLong, MAX_NAME_LEN } from "../validation";
 import type { VehicleType, Zone } from "../types";
 import type { ActionState } from "./auth-actions";
 
@@ -40,6 +41,15 @@ export async function activateCourierAction(
   if (!token) return { error: "Nevažeći link za aktivaciju." };
   if (!email || !password || !telefon || !pib || !tipVozila) {
     return { error: "Popunite sva obavezna polja." };
+  }
+  if (!isValidEmail(email)) {
+    return { error: "Unesite validnu email adresu." };
+  }
+  if (!isValidPhone(telefon)) {
+    return { error: "Unesite validan broj telefona." };
+  }
+  if (!isValidPib(pib)) {
+    return { error: "PIB mora imati tačno 8 cifara." };
   }
   if (password.length < 6) {
     return { error: "Lozinka mora imati bar 6 karaktera." };
@@ -97,6 +107,15 @@ export async function submitCourierInterestAction(
 
   if (!naziv || !telefon) {
     return { error: "Unesite naziv firme/radnje i broj telefona." };
+  }
+  if (!isValidPhone(telefon)) {
+    return { error: "Unesite validan broj telefona." };
+  }
+  if (pib && !isValidPib(pib)) {
+    return { error: "PIB mora imati tačno 8 cifara." };
+  }
+  if (isTooLong(naziv, MAX_NAME_LEN)) {
+    return { error: "Naziv je predugačak." };
   }
 
   const nosivostKg = nosivostKgRaw ? Number(nosivostKgRaw) : undefined;

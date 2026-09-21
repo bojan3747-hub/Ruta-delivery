@@ -160,7 +160,7 @@ async function main() {
     await newCourier.fill('input[name="email"]', "test-kurir-playwright@ruta.rs");
     await newCourier.fill('input[name="password"]', "lozinka123");
     await newCourier.fill('input[name="telefon"]', "+381650000999");
-    await newCourier.fill('input[name="pib"]', "111222333");
+    await newCourier.fill('input[name="pib"]', "11122233");
     await newCourier.selectOption('select[name="tipVozila"]', "KOMBI");
     await newCourier.fill('input[name="nosivostKg"]', "500");
     await newCourier.check('input[name="zona_ZEMUN"]');

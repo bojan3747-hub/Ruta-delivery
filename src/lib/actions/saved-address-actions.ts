@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { getCurrentUser } from "../auth";
 import { createSavedAddress, deleteSavedAddress } from "../queries/saved-addresses";
 import { ZONES } from "../zones";
+import { isTooLong, MAX_NAME_LEN } from "../validation";
 import type { AddressType, Zone } from "../types";
 import type { ActionState } from "./auth-actions";
 
@@ -30,6 +31,9 @@ export async function createSavedAddressAction(
 
   if (!naziv || !adresa) {
     return { error: "Popunite naziv i adresu." };
+  }
+  if (isTooLong(naziv, MAX_NAME_LEN) || isTooLong(adresa, MAX_NAME_LEN)) {
+    return { error: "Uneti tekst je predugačak." };
   }
   if (!ZONES.includes(zona)) {
     return { error: "Izaberite zonu." };

@@ -12,7 +12,15 @@ import type {
   TerminType,
   Zone,
 } from "../types";
-import { SHIPMENT_CONTENT_LABELS, SPECIAL_CARGO_LABELS, formatDateTime } from "../labels";
+import {
+  SHIPMENT_CONTENT_LABELS,
+  SPECIAL_CARGO_LABELS,
+  SHIPMENT_TYPE_LABELS,
+  TERMIN_LABELS,
+  formatDateTime,
+} from "../labels";
+import { ZONE_LABELS } from "../zones";
+import { isValidPhone, isTooLong, MAX_NAME_LEN, MAX_TEXT_LEN } from "../validation";
 import type { ActionState } from "./auth-actions";
 
 function str(formData: FormData, key: string): string {
@@ -68,11 +76,34 @@ export async function createShipmentAction(
   ) {
     return { error: "Popunite sva obavezna polja." };
   }
+  if (!(zonaPreuzimanja in ZONE_LABELS) || !(zonaIsporuke in ZONE_LABELS)) {
+    return { error: "Izaberite validnu zonu preuzimanja i isporuke." };
+  }
+  if (!(tip in SHIPMENT_TYPE_LABELS)) {
+    return { error: "Izaberite validan tip pošiljke." };
+  }
   if (!(sadrzajPosiljke in SHIPMENT_CONTENT_LABELS)) {
     return { error: "Izaberite validan sadržaj pošiljke." };
   }
   if (posebnaKategorijaTereta && !(posebnaKategorijaTereta in SPECIAL_CARGO_LABELS)) {
     return { error: "Izaberite validnu posebnu kategoriju tereta." };
+  }
+  if (!(zeljeniTermin in TERMIN_LABELS)) {
+    return { error: "Izaberite validan željeni termin." };
+  }
+  if (!isValidPhone(posiljalacTelefon) || !isValidPhone(primalacTelefon)) {
+    return { error: "Unesite validne brojeve telefona pošiljaoca i primaoca." };
+  }
+  if (
+    isTooLong(posiljalacIme, MAX_NAME_LEN) ||
+    isTooLong(primalacIme, MAX_NAME_LEN) ||
+    isTooLong(adresaPreuzimanja, MAX_NAME_LEN) ||
+    isTooLong(adresaIsporuke, MAX_NAME_LEN)
+  ) {
+    return { error: "Uneti tekst je predugačak." };
+  }
+  if (isTooLong(napomena, MAX_TEXT_LEN)) {
+    return { error: "Napomena je predugačka." };
   }
   if (!Number.isFinite(deklarisanaVrednost) || deklarisanaVrednost <= 0) {
     return { error: "Unesite validnu deklarisanu vrednost pošiljke (veću od 0)." };
@@ -86,6 +117,9 @@ export async function createShipmentAction(
         error:
           "Unesite tačno vreme/rok isporuke (npr. datum i sat) — dostavljaču mora biti jasno kada se očekuje preuzimanje.",
       };
+    }
+    if (isTooLong(terminDetaljiRaw, MAX_NAME_LEN)) {
+      return { error: "Uneti tekst za termin je predugačak." };
     }
     terminDetalji = terminDetaljiRaw;
   } else if (zeljeniTermin === "ZAKAZANO") {

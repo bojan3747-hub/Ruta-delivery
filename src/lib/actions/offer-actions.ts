@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { getCurrentUser } from "../auth";
 import { getShipmentById } from "../queries/shipments";
 import { acceptOffer, createManualOffer } from "../queries/offers";
+import { isTooLong, MAX_TEXT_LEN } from "../validation";
 import type { ActionState } from "./auth-actions";
 
 function str(formData: FormData, key: string): string {
@@ -53,6 +54,9 @@ export async function sendManualOfferAction(
   }
   if (!Number.isFinite(procenjenoVremeMin) || procenjenoVremeMin <= 0) {
     return { error: "Unesite procenjeno vreme dolaska (u minutima)." };
+  }
+  if (isTooLong(napomena, MAX_TEXT_LEN)) {
+    return { error: "Napomena je predugačka." };
   }
 
   const shipment = await getShipmentById(shipmentId);
