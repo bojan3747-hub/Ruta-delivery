@@ -22,10 +22,38 @@ from reportlab.platypus import (
     ListFlowable,
     ListItem,
 )
+from reportlab.pdfbase import pdfmetrics
+from reportlab.pdfbase.ttfonts import TTFont
+
+# Bag: ReportLab-ovi ugrađeni fontovi (Helvetica i sl.) koriste WinAnsiEncoding
+# (cp1252), koji NEMA glifove za č, ć i đ (š i ž jesu u cp1252, pa su izgledali
+# ispravno) — ta slova su se tiho renderovala kao "■". Rešenje: registrujemo
+# DejaVu Sans (podržava punu Unicode/Latin Extended-A) i preusmerimo sve bazne
+# stilove na njega pre nego što se izvedu RutaBody/RutaH1/RutaH2/Notice.
+_DEJAVU_DIR = "/usr/share/fonts/truetype/dejavu"
+pdfmetrics.registerFont(TTFont("DejaVuSans", f"{_DEJAVU_DIR}/DejaVuSans.ttf"))
+pdfmetrics.registerFont(TTFont("DejaVuSans-Bold", f"{_DEJAVU_DIR}/DejaVuSans-Bold.ttf"))
+pdfmetrics.registerFont(
+    TTFont("DejaVuSans-Oblique", f"{_DEJAVU_DIR}/DejaVuSans-Oblique.ttf")
+)
+pdfmetrics.registerFont(
+    TTFont("DejaVuSans-BoldOblique", f"{_DEJAVU_DIR}/DejaVuSans-BoldOblique.ttf")
+)
+pdfmetrics.registerFontFamily(
+    "DejaVuSans",
+    normal="DejaVuSans",
+    bold="DejaVuSans-Bold",
+    italic="DejaVuSans-Oblique",
+    boldItalic="DejaVuSans-BoldOblique",
+)
 
 OUT_PATH = "public/dokumenti/politika-privatnosti.pdf"
 
 styles = getSampleStyleSheet()
+for _style_name in ("Normal", "Title", "Heading1", "Heading2", "Heading3"):
+    _s = styles[_style_name]
+    _s.fontName = "DejaVuSans-Bold" if _style_name != "Normal" else "DejaVuSans"
+
 styles.add(
     ParagraphStyle(
         name="RutaBody",

@@ -300,6 +300,21 @@ export function ShipmentForm({
               </option>
             ))}
           </select>
+          <p className="mt-1 text-xs text-neutral-500">
+            Zabranjeno je slanje: zlata, nakita i dragocenosti; gotovine, čekova i
+            hartija od vrednosti; oružja, municije i opasnih/zapaljivih materija;
+            droga i lekova bez recepta; ličnih dokumenata i ključeva; živih
+            životinja i biljaka. Pun spisak je dostupan u{" "}
+            <a
+              href="/opsti-uslovi"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-emerald-600 underline hover:text-emerald-700"
+            >
+              Opštim uslovima korišćenja
+            </a>
+            .
+          </p>
         </div>
 
         <div>
