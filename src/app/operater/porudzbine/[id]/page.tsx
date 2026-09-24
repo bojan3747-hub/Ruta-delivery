@@ -71,6 +71,9 @@ export default async function OperaterPorudzbinaDetailPage({
             : ""}
           {order.hitno ? " · Hitno" : ""}
           {order.nestandardna ? " · Nestandardna" : ""}
+          {order.zahteva_sleper ? " · Potreban šleper" : ""}
+          {order.zahteva_ruku_za_utovar ? " · Potrebna ruka za utovar" : ""}
+          {order.zahteva_slep ? " · Potreban šlep" : ""}
         </p>
         <p>
           <span className="text-neutral-500">Rok isporuke:</span>{" "}

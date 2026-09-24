@@ -13,11 +13,12 @@ export async function createPreApprovedCourier(input: {
   pib?: string;
   tipVozila?: string;
   nosivostKg?: number;
+  imaRukuZaUtovar?: boolean;
   zones?: Zone[];
 }): Promise<CourierRow> {
   const row = await queryOne<CourierRow>(
-    `INSERT INTO couriers (naziv, telefon, izvor_kontakta, pib, tip_vozila, nosivost_kg, status)
-     VALUES ($1, $2, $3, $4, $5, $6, 'NA_POTVRDI')
+    `INSERT INTO couriers (naziv, telefon, izvor_kontakta, pib, tip_vozila, nosivost_kg, ima_ruku_za_utovar, status)
+     VALUES ($1, $2, $3, $4, $5, $6, $7, 'NA_POTVRDI')
      RETURNING *`,
     [
       input.naziv,
@@ -26,6 +27,7 @@ export async function createPreApprovedCourier(input: {
       input.pib ?? null,
       input.tipVozila ?? null,
       input.nosivostKg ?? null,
+      input.imaRukuZaUtovar ?? false,
     ]
   );
   if (!row) throw new Error("Kreiranje dostavljača nije uspelo");
@@ -92,6 +94,7 @@ export async function activateCourier(input: {
   pib: string;
   tipVozila: string;
   nosivostKg: number;
+  imaRukuZaUtovar: boolean;
   zones: Zone[];
 }): Promise<void> {
   const client = await pool.connect();
@@ -126,8 +129,9 @@ export async function activateCourier(input: {
     await client.query(
       `UPDATE couriers
        SET user_id = $1, email = $2, telefon = $3, pib = $4,
-           tip_vozila = $5, nosivost_kg = $6, status = 'AKTIVAN', aktiviran_at = now()
-       WHERE id = $7`,
+           tip_vozila = $5, nosivost_kg = $6, ima_ruku_za_utovar = $7,
+           status = 'AKTIVAN', aktiviran_at = now()
+       WHERE id = $8`,
       [
         userResult.rows[0].id,
         input.email.toLowerCase().trim(),
@@ -135,6 +139,7 @@ export async function activateCourier(input: {
         input.pib,
         input.tipVozila,
         input.nosivostKg,
+        input.imaRukuZaUtovar,
         input.courierId,
       ]
     );

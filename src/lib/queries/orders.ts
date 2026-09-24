@@ -16,7 +16,8 @@ const SHIPMENT_DETAIL_COLUMNS = `
   s.zona_preuzimanja, s.zona_isporuke, s.adresa_preuzimanja, s.adresa_isporuke,
   s.posiljalac_ime, s.posiljalac_telefon, s.primalac_ime, s.primalac_telefon,
   s.tip, s.sadrzaj_posiljke, s.posebna_kategorija_tereta, s.hitno,
-  s.nestandardna, s.zeljeni_termin, s.termin_detalji, s.napomena,
+  s.nestandardna, s.zahteva_sleper, s.zahteva_ruku_za_utovar, s.zahteva_slep,
+  s.zeljeni_termin, s.termin_detalji, s.napomena,
   s.deklarisana_vrednost, s.udaljenost_km
 `;
 
@@ -34,6 +35,9 @@ export interface OrderWithShipment extends OrderRow {
   posebna_kategorija_tereta: ShipmentRow["posebna_kategorija_tereta"];
   hitno: ShipmentRow["hitno"];
   nestandardna: ShipmentRow["nestandardna"];
+  zahteva_sleper: ShipmentRow["zahteva_sleper"];
+  zahteva_ruku_za_utovar: ShipmentRow["zahteva_ruku_za_utovar"];
+  zahteva_slep: ShipmentRow["zahteva_slep"];
   zeljeni_termin: ShipmentRow["zeljeni_termin"];
   termin_detalji: ShipmentRow["termin_detalji"];
   napomena: ShipmentRow["napomena"];

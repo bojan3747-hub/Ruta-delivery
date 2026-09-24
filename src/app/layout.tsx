@@ -23,10 +23,44 @@ import "@fontsource/roboto-slab/latin-ext-600.css";
 import "@fontsource/roboto-slab/latin-ext-700.css";
 import { NavigationDepthTracker } from "@/components/NavigationDepthTracker";
 
+// Faza 17 (2026-09-24): SEO popravke po preporukama iz analize
+// "Ruta-Dostava — SEO i vidljivost" (2026-09). Title/H1/meta description sad
+// sadrže pojmove koje ljudi zaista pretražuju ("kombi prevoz", "dostava za
+// firme", "Beograd") umesto samo slogana. `metadataBase` omogućava relativne
+// URL-ove (npr. `alternates.canonical`, `openGraph.url`) niže u stablu strana
+// bez ponavljanja punog domena na svakom mestu.
+const SITE_URL = "https://ruta-dostava.rs";
+const SITE_TITLE = "Kombi prevoz i dostava za firme u Beogradu | Ruta-Dostava";
+const SITE_DESCRIPTION =
+  "Unesite pošiljku i za par minuta uporedite ponude proverenih kombi prevoznika i kurira u Beogradu. Isti dan, i uveče.";
+
 export const metadata: Metadata = {
-  title: "Ruta-Dostava — dostava u Beogradu",
-  description:
-    "Ruta-Dostava je B2B platforma koja povezuje firme sa kombi prevoznicima i kurirskim službama u Beogradu.",
+  metadataBase: new URL(SITE_URL),
+  title: {
+    default: SITE_TITLE,
+    template: "%s | Ruta-Dostava",
+  },
+  description: SITE_DESCRIPTION,
+  alternates: {
+    canonical: "/",
+  },
+  openGraph: {
+    title: SITE_TITLE,
+    description: SITE_DESCRIPTION,
+    url: "/",
+    siteName: "Ruta-Dostava",
+    locale: "sr_RS",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: SITE_TITLE,
+    description: SITE_DESCRIPTION,
+  },
+  robots: {
+    index: true,
+    follow: true,
+  },
 };
 
 // Faza 13 (deo 2): root layout je sad namerno "prazan" — samo html/body,

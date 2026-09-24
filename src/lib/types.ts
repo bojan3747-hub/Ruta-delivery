@@ -17,7 +17,18 @@ export type Zone =
   | "PALILULA"
   | "RAKOVICA";
 
-export type VehicleType = "MOTOR" | "PUTNICKO_VOZILO" | "KOMBI" | "KAMION";
+// Faza 18 (2026-09-24): "ŠLEPER" dodat uz fokus na veća vozila — za pošiljke
+// koje ne staju ni u kamion (npr. mašine, veći građevinski teret). "ŠLEP" je
+// dodat naknadno, posle korisnikovog ispravke (šleper != šlep) — ovo je
+// vozilo/služba koja prevozi DRUGA vozila (npr. pokvaren automobil),
+// odvojeno od šlepera (kamiona sa prikolicom za teret).
+export type VehicleType =
+  | "MOTOR"
+  | "PUTNICKO_VOZILO"
+  | "KOMBI"
+  | "KAMION"
+  | "SLEPER"
+  | "SLEP";
 
 export type CourierStatus = "NA_POTVRDI" | "AKTIVAN" | "SUSPENDOVAN";
 
@@ -77,7 +88,20 @@ export type SpecialCargoType =
   | "TRAKTORSKA_GUMA_SA_FELNOM"
   | "GUMA_PUTNICKA_SA_FELNOM"
   | "GUMA_POLUTERETNA_SA_FELNOM"
-  | "GUMA_TERETNA_SA_FELNOM";
+  | "GUMA_TERETNA_SA_FELNOM"
+  // Faza 16 (2026-09-23): "velike" pošiljke koje traže kombi/kamion —
+  // bela tehnika, nameštaj i rasuti građevinski materijal.
+  | "FRIZIDER_ZAMRZIVAC"
+  | "VES_MASINA_MASINA_ZA_SUDOVE"
+  | "SPORET_RERNA"
+  | "BOJLER"
+  | "KLIMA_UREDJAJ"
+  | "KAUC_TROSED_GARNITURA"
+  | "ORMAN_PLAKAR"
+  | "KREVET_SA_DUSEKOM"
+  | "STO_I_STOLICE"
+  | "RASUTI_GRADJEVINSKI_MATERIJAL"
+  | "GRADJEVINSKI_SUT_OTPAD";
 
 export type TerminType = "ODMAH" | "DANAS_DO" | "ZAKAZANO";
 
@@ -138,6 +162,10 @@ export interface CourierRow {
   pib: string | null;
   tip_vozila: VehicleType | null;
   nosivost_kg: string | null;
+  // Faza 18: vozilo ima hidrauličnu ruku za utovar/istovar (samostalan
+  // utovar bez viljuškara/dizalice na terenu) — nezavisno od tip_vozila,
+  // jer i kamion i šleper mogu (ali ne moraju) imati ovu opremu.
+  ima_ruku_za_utovar: boolean;
   cena_po_km: string | null;
   cena_po_kg: string | null;
   minimalna_cena: string | null;
@@ -179,6 +207,13 @@ export interface ShipmentRow {
   posebna_kategorija_tereta: SpecialCargoType | null;
   hitno: boolean;
   nestandardna: boolean;
+  // Faza 18: klijent naznačava da pošiljka traži veće vozilo — šleper i/ili
+  // dostavljača čije vozilo ima ruku za utovar (hidrauličnu dizalicu za
+  // samostalan utovar/istovar bez viljuškara na terenu), i/ili šlep službu
+  // (prevoz drugog vozila, npr. pokvarenog automobila).
+  zahteva_sleper: boolean;
+  zahteva_ruku_za_utovar: boolean;
+  zahteva_slep: boolean;
   zeljeni_termin: TerminType;
   termin_detalji: string | null;
   napomena: string | null;

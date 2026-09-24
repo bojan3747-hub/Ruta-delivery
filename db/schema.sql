@@ -33,6 +33,15 @@ DO $$ BEGIN
   CREATE TYPE vehicle_type AS ENUM ('MOTOR', 'PUTNICKO_VOZILO', 'KOMBI', 'KAMION');
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
+-- Faza 18 (2026-09-24): fokus na veća vozila — šleper kao poseban tip
+-- vozila (za terete koji ne staju ni u kamion).
+ALTER TYPE vehicle_type ADD VALUE IF NOT EXISTS 'SLEPER';
+
+-- Faza 18 (nastavak, ispravka korisnika): "ŠLEP" — služba koja prevozi
+-- DRUGA vozila (npr. pokvaren automobil), odvojeno od šlepera (kamiona sa
+-- prikolicom za teret).
+ALTER TYPE vehicle_type ADD VALUE IF NOT EXISTS 'SLEP';
+
 DO $$ BEGIN
   CREATE TYPE courier_status AS ENUM ('NA_POTVRDI', 'AKTIVAN');
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
@@ -103,6 +112,21 @@ DO $$ BEGIN
   );
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
+-- Faza 16 (2026-09-23): dopuna "Posebna kategorija tereta" sa "velikim"
+-- pošiljkama koje traže kombi/kamion — bela tehnika, nameštaj i rasuti
+-- građevinski materijal.
+ALTER TYPE special_cargo_type ADD VALUE IF NOT EXISTS 'FRIZIDER_ZAMRZIVAC';
+ALTER TYPE special_cargo_type ADD VALUE IF NOT EXISTS 'VES_MASINA_MASINA_ZA_SUDOVE';
+ALTER TYPE special_cargo_type ADD VALUE IF NOT EXISTS 'SPORET_RERNA';
+ALTER TYPE special_cargo_type ADD VALUE IF NOT EXISTS 'BOJLER';
+ALTER TYPE special_cargo_type ADD VALUE IF NOT EXISTS 'KLIMA_UREDJAJ';
+ALTER TYPE special_cargo_type ADD VALUE IF NOT EXISTS 'KAUC_TROSED_GARNITURA';
+ALTER TYPE special_cargo_type ADD VALUE IF NOT EXISTS 'ORMAN_PLAKAR';
+ALTER TYPE special_cargo_type ADD VALUE IF NOT EXISTS 'KREVET_SA_DUSEKOM';
+ALTER TYPE special_cargo_type ADD VALUE IF NOT EXISTS 'STO_I_STOLICE';
+ALTER TYPE special_cargo_type ADD VALUE IF NOT EXISTS 'RASUTI_GRADJEVINSKI_MATERIJAL';
+ALTER TYPE special_cargo_type ADD VALUE IF NOT EXISTS 'GRADJEVINSKI_SUT_OTPAD';
+
 -- ---------------------------------------------------------------------------
 -- Tables
 -- ---------------------------------------------------------------------------
@@ -149,6 +173,7 @@ CREATE TABLE IF NOT EXISTS couriers (
   pib               TEXT,
   tip_vozila        vehicle_type,
   nosivost_kg       NUMERIC(10, 2),
+  ima_ruku_za_utovar BOOLEAN NOT NULL DEFAULT false,
   cena_po_km        NUMERIC(10, 2),
   cena_po_kg        NUMERIC(10, 2),
   minimalna_cena    NUMERIC(10, 2),
@@ -173,6 +198,10 @@ ALTER TABLE couriers ADD COLUMN IF NOT EXISTS payment_customer_token TEXT;
 ALTER TABLE couriers DROP COLUMN IF EXISTS payu_customer_token;
 ALTER TABLE couriers ADD COLUMN IF NOT EXISTS dostupan BOOLEAN NOT NULL DEFAULT true;
 ALTER TABLE couriers ADD COLUMN IF NOT EXISTS verifikovan BOOLEAN NOT NULL DEFAULT false;
+
+-- Faza 18: vozilo ima hidrauličnu ruku za utovar/istovar — nezavisno od
+-- tip_vozila (i kamion i šleper mogu, ali ne moraju, imati ovu opremu).
+ALTER TABLE couriers ADD COLUMN IF NOT EXISTS ima_ruku_za_utovar BOOLEAN NOT NULL DEFAULT false;
 
 -- Faza 12: lični procenat provizije po dostavljaču (ručno podešavanje od
 -- strane operatera, uvek ima prednost nad svim ostalim) + datum aktivacije
@@ -206,6 +235,9 @@ CREATE TABLE IF NOT EXISTS shipments (
   tip                 shipment_type NOT NULL,
   hitno               BOOLEAN NOT NULL DEFAULT false,
   nestandardna        BOOLEAN NOT NULL DEFAULT false,
+  zahteva_sleper           BOOLEAN NOT NULL DEFAULT false,
+  zahteva_ruku_za_utovar   BOOLEAN NOT NULL DEFAULT false,
+  zahteva_slep             BOOLEAN NOT NULL DEFAULT false,
   zeljeni_termin      termin_type NOT NULL DEFAULT 'ODMAH',
   termin_detalji      TEXT,
   napomena            TEXT,
@@ -232,6 +264,12 @@ ALTER TABLE shipments ADD COLUMN IF NOT EXISTS deklarisana_vrednost NUMERIC(10, 
 -- "Posebna kategorija tereta" je uvek opciono.
 ALTER TABLE shipments ADD COLUMN IF NOT EXISTS sadrzaj_posiljke shipment_content;
 ALTER TABLE shipments ADD COLUMN IF NOT EXISTS posebna_kategorija_tereta special_cargo_type;
+
+-- Faza 18: klijent naznačava da pošiljka traži veće vozilo — šleper i/ili
+-- dostavljača čije vozilo ima ruku za utovar.
+ALTER TABLE shipments ADD COLUMN IF NOT EXISTS zahteva_sleper BOOLEAN NOT NULL DEFAULT false;
+ALTER TABLE shipments ADD COLUMN IF NOT EXISTS zahteva_ruku_za_utovar BOOLEAN NOT NULL DEFAULT false;
+ALTER TABLE shipments ADD COLUMN IF NOT EXISTS zahteva_slep BOOLEAN NOT NULL DEFAULT false;
 
 -- Prava udaljenost/ruta (umesto ručne tabele zona) — koordinate obe adrese
 -- (dobijene geokodiranjem konačnog teksta adrese pri kreiranju pošiljke) i

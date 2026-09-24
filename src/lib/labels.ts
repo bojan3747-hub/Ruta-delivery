@@ -82,6 +82,19 @@ export const SPECIAL_CARGO_LABELS: Record<SpecialCargoType, string> = {
   GUMA_PUTNICKA_SA_FELNOM: "Guma putnička sa felnom",
   GUMA_POLUTERETNA_SA_FELNOM: "Guma poluteretna sa felnom",
   GUMA_TERETNA_SA_FELNOM: "Guma teretna sa felnom",
+  // Faza 16 (2026-09-23, korisnikov zahtev): "velike" pošiljke koje traže
+  // kombi/kamion — bela tehnika, nameštaj i rasuti građevinski materijal.
+  FRIZIDER_ZAMRZIVAC: "Frižider / zamrzivač",
+  VES_MASINA_MASINA_ZA_SUDOVE: "Veš mašina / mašina za sudove",
+  SPORET_RERNA: "Šporet / rerna",
+  BOJLER: "Bojler",
+  KLIMA_UREDJAJ: "Klima uređaj (spoljna i unutrašnja jedinica)",
+  KAUC_TROSED_GARNITURA: "Kauč / trosed / ugaona garnitura",
+  ORMAN_PLAKAR: "Orman / plakar",
+  KREVET_SA_DUSEKOM: "Krevet (sa dušekom)",
+  STO_I_STOLICE: "Trpezarijski sto sa stolicama",
+  RASUTI_GRADJEVINSKI_MATERIJAL: "Rasuti materijal (pesak, šljunak, cement)",
+  GRADJEVINSKI_SUT_OTPAD: "Građevinski šut / otpad (za odvoz)",
 };
 
 export const TERMIN_LABELS: Record<TerminType, string> = {
@@ -138,6 +151,8 @@ export const VEHICLE_TYPE_LABELS: Record<VehicleType, string> = {
   PUTNICKO_VOZILO: "Putničko vozilo",
   KOMBI: "Kombi",
   KAMION: "Kamion",
+  SLEPER: "Šleper",
+  SLEP: "Šlep služba (prevoz vozila)",
 };
 
 export function formatMoney(value: string | number): string {

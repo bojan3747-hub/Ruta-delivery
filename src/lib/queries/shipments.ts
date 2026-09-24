@@ -25,6 +25,9 @@ export async function createShipment(input: {
   posebnaKategorijaTereta?: SpecialCargoType;
   hitno: boolean;
   nestandardna: boolean;
+  zahtevaSleper: boolean;
+  zahtevaRukuZaUtovar: boolean;
+  zahtevaSlep: boolean;
   zeljeniTermin: TerminType;
   terminDetalji?: string;
   // Faza 8: pravi datum+vreme za termin "Zakazano" (vidi terminDetalji za
@@ -46,11 +49,12 @@ export async function createShipment(input: {
        client_id, zona_preuzimanja, zona_isporuke, adresa_preuzimanja,
        adresa_isporuke, posiljalac_ime, posiljalac_telefon, primalac_ime,
        primalac_telefon, tip, sadrzaj_posiljke, posebna_kategorija_tereta,
-       hitno, nestandardna, zeljeni_termin, termin_detalji, napomena,
+       hitno, nestandardna, zahteva_sleper, zahteva_ruku_za_utovar,
+       zahteva_slep, zeljeni_termin, termin_detalji, napomena,
        deklarisana_vrednost, preuzimanje_lat, preuzimanje_lon, isporuka_lat,
        isporuka_lon, udaljenost_km, zakazano_datum_vreme
      ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,
-               $19,$20,$21,$22,$23,$24)
+               $19,$20,$21,$22,$23,$24,$25,$26,$27)
      RETURNING *`,
     [
       input.clientId,
@@ -67,6 +71,9 @@ export async function createShipment(input: {
       input.posebnaKategorijaTereta ?? null,
       input.hitno,
       input.nestandardna,
+      input.zahtevaSleper,
+      input.zahtevaRukuZaUtovar,
+      input.zahtevaSlep,
       input.zeljeniTermin,
       input.terminDetalji ?? null,
       input.napomena ?? null,

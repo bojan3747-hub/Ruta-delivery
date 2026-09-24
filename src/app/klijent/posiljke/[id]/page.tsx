@@ -87,7 +87,11 @@ export default async function PosiljkaDetailPage({
             ? ` · ${SPECIAL_CARGO_LABELS[shipment.posebna_kategorija_tereta]}`
             : ""}
           {shipment.hitno ? " · Hitno" : ""}
-          {shipment.nestandardna ? " · Nestandardna" : ""} ·{" "}
+          {shipment.nestandardna ? " · Nestandardna" : ""}
+          {shipment.zahteva_sleper ? " · Potreban šleper" : ""}
+          {shipment.zahteva_ruku_za_utovar ? " · Potrebna ruka za utovar" : ""}
+          {shipment.zahteva_slep ? " · Potreban šlep" : ""}{" "}
+          ·{" "}
           {TERMIN_LABELS[shipment.zeljeni_termin]}
           {shipment.termin_detalji ? ` (${shipment.termin_detalji})` : ""}
           {shipment.udaljenost_km

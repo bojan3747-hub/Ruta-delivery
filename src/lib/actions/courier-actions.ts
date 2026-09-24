@@ -35,6 +35,7 @@ export async function activateCourierAction(
   const pib = str(formData, "pib");
   const tipVozila = str(formData, "tipVozila") as VehicleType;
   const nosivostKg = Number(str(formData, "nosivostKg"));
+  const imaRukuZaUtovar = formData.get("imaRukuZaUtovar") === "on";
   const zones = selectedZones(formData);
   const uslovi = formData.get("uslovi") === "on";
 
@@ -79,6 +80,7 @@ export async function activateCourierAction(
       pib,
       tipVozila,
       nosivostKg,
+      imaRukuZaUtovar,
       zones,
     });
   } catch (err) {
@@ -103,6 +105,7 @@ export async function submitCourierInterestAction(
   const pib = str(formData, "pib");
   const tipVozila = str(formData, "tipVozila");
   const nosivostKgRaw = str(formData, "nosivostKg");
+  const imaRukuZaUtovar = formData.get("imaRukuZaUtovar") === "on";
   const zones = selectedZones(formData);
 
   if (!naziv || !telefon) {
@@ -134,6 +137,7 @@ export async function submitCourierInterestAction(
       pib: pib || undefined,
       tipVozila: tipVozila || undefined,
       nosivostKg,
+      imaRukuZaUtovar,
       zones,
     });
   }

@@ -52,6 +52,9 @@ export async function createShipmentAction(
     : undefined;
   const hitno = formData.get("hitno") === "on";
   const nestandardna = formData.get("nestandardna") === "on";
+  const zahtevaSleper = formData.get("zahtevaSleper") === "on";
+  const zahtevaRukuZaUtovar = formData.get("zahtevaRukuZaUtovar") === "on";
+  const zahtevaSlep = formData.get("zahtevaSlep") === "on";
   const zeljeniTermin = str(formData, "zeljeniTermin") as TerminType;
   const terminDetaljiRaw = str(formData, "terminDetalji");
   // Faza 8: "Zakazano" sad ima pravo polje datum+vreme (terminDatumVreme,
@@ -158,6 +161,9 @@ export async function createShipmentAction(
     posebnaKategorijaTereta,
     hitno,
     nestandardna,
+    zahtevaSleper,
+    zahtevaRukuZaUtovar,
+    zahtevaSlep,
     zeljeniTermin,
     terminDetalji,
     terminDatumVreme,

@@ -80,6 +80,12 @@ export function ActivateCourierForm({
         </div>
       </div>
 
+      <label className="flex items-center gap-2 text-sm">
+        <input type="checkbox" name="imaRukuZaUtovar" className="h-4 w-4" />
+        Vozilo ima ruku za utovar (hidraulična dizalica za samostalan
+        utovar/istovar)
+      </label>
+
       <div>
         <label className="block text-sm font-medium">Zone pokrivenosti *</label>
         <div className="mt-2 grid grid-cols-2 gap-2 sm:grid-cols-3">

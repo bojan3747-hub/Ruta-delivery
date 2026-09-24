@@ -61,6 +61,7 @@ async function main() {
     pib: "107654321",
     tipVozila: "KOMBI",
     nosivostKg: 800,
+    imaRukuZaUtovar: false,
     zones: ["NOVI_BEOGRAD", "ZEMUN", "STARI_GRAD", "SAVSKI_VENAC"],
   });
   await updateCourierPricing(kombiNikola.id, {
@@ -84,6 +85,7 @@ async function main() {
     pib: "106543210",
     tipVozila: "MOTOR",
     nosivostKg: 30,
+    imaRukuZaUtovar: false,
     zones: ["VRACAR", "ZVEZDARA", "STARI_GRAD", "PALILULA"],
   });
   await updateCourierPricing(markoDostava.id, {
@@ -107,6 +109,7 @@ async function main() {
     pib: "105432109",
     tipVozila: "KAMION",
     nosivostKg: 3000,
+    imaRukuZaUtovar: true,
     zones: ["CUKARICA", "VOZDOVAC", "RAKOVICA"],
   });
   await updateCourierPricing(cukaricaTransport.id, {
@@ -139,6 +142,9 @@ async function main() {
     sadrzajPosiljke: "ELEKTRONIKA_I_KOMPONENTE",
     hitno: false,
     nestandardna: false,
+    zahtevaSleper: false,
+    zahtevaRukuZaUtovar: false,
+    zahtevaSlep: false,
     zeljeniTermin: "DANAS_DO",
     terminDetalji: "do 17h",
     napomena: "Pozvati pre dolaska.",
@@ -168,6 +174,9 @@ async function main() {
     posebnaKategorijaTereta: "EURO_PALETA_CELA",
     hitno: false,
     nestandardna: true,
+    zahtevaSleper: false,
+    zahtevaRukuZaUtovar: true,
+    zahtevaSlep: false,
     zeljeniTermin: "ZAKAZANO",
     terminDetalji: "Sutra ujutru",
     napomena: "3 palete povrća, potrebna rampa za utovar.",

@@ -68,6 +68,10 @@ export function CourierInterestForm() {
           <input type="number" name="nosivostKg" min="1" className={inputClass} />
         </div>
       </div>
+      <label className="flex items-center gap-2 text-sm">
+        <input type="checkbox" name="imaRukuZaUtovar" className="h-4 w-4" />
+        Vozilo ima ruku za utovar (hidraulična dizalica)
+      </label>
       <div>
         <label className="block text-sm font-medium">Zone u kojima radite</label>
         <div className="mt-2 grid grid-cols-2 gap-2 sm:grid-cols-3">

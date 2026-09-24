@@ -63,6 +63,7 @@ export default async function DostavljacPage() {
         <p>
           <span className="text-neutral-500">Vozilo:</span>{" "}
           {courier.tip_vozila ? VEHICLE_TYPE_LABELS[courier.tip_vozila] : "—"}
+          {courier.ima_ruku_za_utovar ? " · ima ruku za utovar" : ""}
         </p>
         <p className="mt-1">
           <span className="text-neutral-500">Zone pokrivenosti:</span>{" "}

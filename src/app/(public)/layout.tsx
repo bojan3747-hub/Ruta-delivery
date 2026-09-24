@@ -20,13 +20,21 @@ export default function PublicLayout({ children }: { children: React.ReactNode }
         {children}
       </main>
       <footer className="border-t border-black/10 py-4 text-center text-xs text-black/40">
-        <p>Ruta-Dostava — MVP prototip, Beograd</p>
-        <p className="mt-1">
+        {/* Faza 17 (2026-09-24): "MVP prototip" je SEO analiza označila kao
+            signal koji odbija poverenje — zamenjeno neutralnijom formulacijom.
+            Pravi naziv firme/PIB/kontakt i dalje čekaju korisnikove podatke
+            (vidi status doc, Faza 1/2) — namerno se ne izmišljaju ovde. */}
+        <p>Ruta-Dostava — u probnom radu, Beograd</p>
+        <p className="mt-1 flex flex-wrap items-center justify-center gap-x-3 gap-y-1">
           <Link
             href="/dokumenti/politika-privatnosti.pdf"
             className="underline hover:text-black/60"
           >
             Politika privatnosti
+          </Link>
+          <span aria-hidden="true">·</span>
+          <Link href="/opsti-uslovi" className="underline hover:text-black/60">
+            Opšti uslovi korišćenja
           </Link>
         </p>
       </footer>

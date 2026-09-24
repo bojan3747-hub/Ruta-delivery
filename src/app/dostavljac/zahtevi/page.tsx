@@ -68,6 +68,9 @@ export default async function ZahteviPage() {
                       ? ` · ${SPECIAL_CARGO_LABELS[s.posebna_kategorija_tereta]}`
                       : ""}
                     {s.hitno ? " · Hitno" : ""}
+                    {s.zahteva_sleper ? " · Potreban šleper" : ""}
+                    {s.zahteva_ruku_za_utovar ? " · Potrebna ruka za utovar" : ""}
+                    {s.zahteva_slep ? " · Potreban šlep" : ""}
                   </p>
                   <p className="mt-0.5 text-sm font-medium text-neutral-800">
                     Rok isporuke: {TERMIN_LABELS[s.zeljeni_termin]}

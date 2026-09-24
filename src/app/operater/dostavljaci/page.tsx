@@ -77,6 +77,7 @@ export default async function DostavljaciPage() {
                   {c.izvor_kontakta ? ` · ${c.izvor_kontakta}` : ""}
                   {c.tip_vozila ? ` · ${VEHICLE_TYPE_LABELS[c.tip_vozila]}` : ""}
                   {c.nosivost_kg ? ` · do ${Number(c.nosivost_kg)} kg` : ""}
+                  {c.ima_ruku_za_utovar ? " · ruka za utovar" : ""}
                   {c.pib ? ` · PIB ${c.pib}` : ""}
                 </p>
               </div>

@@ -130,6 +130,7 @@ async function main() {
     pib: "111222333",
     tipVozila: "KOMBI",
     nosivostKg: 500,
+    imaRukuZaUtovar: false,
     zones: ["NOVI_BEOGRAD"],
   });
 
@@ -153,6 +154,9 @@ async function main() {
       sadrzajPosiljke: "KNJIGE",
       hitno: false,
       nestandardna: false,
+      zahtevaSleper: false,
+      zahtevaRukuZaUtovar: false,
+      zahtevaSlep: false,
       zeljeniTermin: "ODMAH",
       deklarisanaVrednost: 0,
     });

@@ -347,6 +347,35 @@ export function ShipmentForm({
           </label>
         </div>
 
+        <div className="space-y-2 rounded-lg border border-black/10 bg-neutral-50 p-3">
+          <p className="text-sm font-medium">Posebni zahtevi za vozilo (opciono)</p>
+          <div className="flex flex-wrap gap-6">
+            <label className="flex items-center gap-2 text-sm">
+              <input type="checkbox" name="zahtevaSleper" className="h-4 w-4" />
+              Potreban šleper
+            </label>
+            <label className="flex items-center gap-2 text-sm">
+              <input
+                type="checkbox"
+                name="zahtevaRukuZaUtovar"
+                className="h-4 w-4"
+              />
+              Potrebna ruka za utovar (hidraulična dizalica)
+            </label>
+            <label className="flex items-center gap-2 text-sm">
+              <input type="checkbox" name="zahtevaSlep" className="h-4 w-4" />
+              Potreban šlep (prevoz vozila)
+            </label>
+          </div>
+          <p className="text-xs text-neutral-500">
+            Šleper — pošiljka ne staje u standardan kombi/kamion. Ruka za
+            utovar — potreban samostalan utovar/istovar bez viljuškara na
+            terenu. Šlep — sama pošiljka je vozilo koje treba prevesti (npr.
+            pokvaren automobil). Javiće se samo dostavljači koji imaju
+            odgovarajuće vozilo.
+          </p>
+        </div>
+
         <div>
           <label className="block text-sm font-medium">Željeni termin preuzimanja *</label>
           <select

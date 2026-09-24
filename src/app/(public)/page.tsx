@@ -37,10 +37,13 @@ export default async function HomePage() {
               B2B platforma za dostavu
             </span>
             <h1 className="font-serif text-4xl font-bold leading-tight sm:text-5xl">
-              Dostava na vreme,
+              Kombi prevoz i dostava za
               <br />
-              <span className="text-emerald-400">svaki put.</span>
+              firme u <span className="text-emerald-400">Beogradu</span>
             </h1>
+            <p className="text-sm font-medium uppercase tracking-wide text-slate-400">
+              Dostava na vreme, svaki put.
+            </p>
             <p className="max-w-md text-base text-slate-300">
               Ruta-Dostava je napravljena za firme kojima je povremeno ili
               redovno potrebna dostava — a ne žele da zovu pet različitih
