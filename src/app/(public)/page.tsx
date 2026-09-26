@@ -42,14 +42,14 @@ export default async function HomePage() {
               firme u <span className="text-emerald-400">Beogradu</span>
             </h1>
             <p className="text-sm font-medium uppercase tracking-wide text-slate-400">
-              Dostava na vreme, svaki put.
+              Od manjih paketa do kamionskog tereta — na vreme, svaki put.
             </p>
             <p className="max-w-md text-base text-slate-300">
               Ruta-Dostava je napravljena za firme kojima je povremeno ili
               redovno potrebna dostava — a ne žele da zovu pet različitih
               prevoznika da uporede cenu i dostupnost. Unesite pošiljku,
-              uporedite ponude proverenih kombi prevoznika i kurirskih
-              službi, pratite isporuku — sve na jednom mestu.
+              uporedite ponude proverenih kombi i kamionskih prevoznika i
+              kurirskih službi, pratite isporuku — sve na jednom mestu.
             </p>
             {user ? (
               <div className="flex flex-col items-start gap-2 pt-2">
