@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import ExcelJS from "exceljs";
 import { getCurrentUser } from "@/lib/auth";
 import { listCompaniesForOperator } from "@/lib/queries/companies";
+import { CLIENT_TYPE_LABELS } from "@/lib/labels";
 
 /**
  * Izvoz liste registrovanih klijenata u Excel (.xlsx) za operatera (Faza 7)
@@ -22,7 +23,8 @@ export async function GET() {
   const sheet = workbook.addWorksheet("Klijenti");
 
   sheet.columns = [
-    { header: "Naziv firme", key: "naziv", width: 28 },
+    { header: "Naziv / Ime", key: "naziv", width: 28 },
+    { header: "Tip", key: "tip", width: 14 },
     { header: "PIB", key: "pib", width: 14 },
     { header: "Adresa", key: "adresa", width: 30 },
     { header: "Kontakt ime", key: "kontaktIme", width: 22 },
@@ -32,11 +34,12 @@ export async function GET() {
     { header: "Datum registracije", key: "datum", width: 16 },
   ];
   sheet.getRow(1).font = { bold: true };
-  sheet.autoFilter = { from: "A1", to: "H1" };
+  sheet.autoFilter = { from: "A1", to: "I1" };
 
   for (const c of companies) {
     sheet.addRow({
       naziv: c.naziv,
+      tip: CLIENT_TYPE_LABELS[c.tip_klijenta],
       pib: c.pib ?? "",
       adresa: c.adresa ?? "",
       kontaktIme: c.kontakt_ime,

@@ -1,5 +1,5 @@
 import { listCompaniesForOperator } from "@/lib/queries/companies";
-import { formatDateTime } from "@/lib/labels";
+import { formatDateTime, CLIENT_TYPE_LABELS } from "@/lib/labels";
 
 export default async function OperaterKlijentiPage() {
   const companies = await listCompaniesForOperator();
@@ -32,10 +32,23 @@ export default async function OperaterKlijentiPage() {
             <li key={c.id} className="px-4 py-3 text-sm">
               <div className="flex flex-wrap items-start justify-between gap-2">
                 <div>
-                  <p className="font-medium">{c.naziv}</p>
+                  <p className="font-medium">
+                    {c.naziv}{" "}
+                    <span className="ml-1 rounded-full bg-neutral-100 px-2 py-0.5 text-xs font-normal text-neutral-500">
+                      {CLIENT_TYPE_LABELS[c.tip_klijenta]}
+                    </span>
+                  </p>
                   <p className="mt-0.5 text-neutral-500">
-                    {c.pib ? `PIB: ${c.pib}` : "PIB: —"}
-                    {c.adresa ? ` · ${c.adresa}` : ""}
+                    {[
+                      c.tip_klijenta === "FIRMA"
+                        ? c.pib
+                          ? `PIB: ${c.pib}`
+                          : "PIB: —"
+                        : null,
+                      c.adresa || null,
+                    ]
+                      .filter(Boolean)
+                      .join(" · ")}
                   </p>
                   <p className="mt-0.5 text-neutral-500">
                     Kontakt: {c.kontakt_ime}

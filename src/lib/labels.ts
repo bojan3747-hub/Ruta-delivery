@@ -1,6 +1,9 @@
 import type {
   AddressType,
+  ClientType,
   InvoiceStatus,
+  MachineRequestStatus,
+  MachineType,
   OfferStatus,
   OrderStatus,
   ShipmentContentType,
@@ -16,6 +19,34 @@ import type {
 // ovde (ne šema baze) — postojeći `shipment_type` enum i sva logika oko
 // njega ostaju nepromenjeni, ovo samo pojašnjava korisniku šta koja
 // kategorija znači pri izboru u formi.
+// Faza 19a: klijent (companies) je firma (podrazumevano) ili fizičko lice
+// (B2C) — provideri (couriers) ostaju isključivo firme, ovo se ne odnosi
+// na njih.
+export const CLIENT_TYPE_LABELS: Record<ClientType, string> = {
+  FIRMA: "Firma",
+  FIZICKO_LICE: "Fizičko lice",
+};
+
+// Faza 19b: mašine koje dostavljač može da ponudi za "Angažovanje mašina",
+// isključivo sa rukovaocem — konačna lista potvrđena od korisnika
+// (2026-09-28).
+export const MACHINE_TYPE_LABELS: Record<MachineType, string> = {
+  MINI_BAGER: "Mini bager (kopačica)",
+  BAGER_UTOVARIVAC: "Bager-utovarivač (rovokopač)",
+  MINI_UTOVARIVAC: "Mini utovarivač",
+  VALJAK: "Valjak (vibracioni)",
+  VIBRO_PLOCA: "Vibro ploča (nabijačica)",
+  AUTO_DIZALICA: "Auto-dizalica (mobilna dizalica)",
+  TELESKOPSKI_UTOVARIVAC: "Teleskopski utovarivač (telehendler)",
+  VILJUSKAR: "Viljuškar",
+  MESALICA_ZA_BETON: "Mešalica za beton",
+  PUMPA_ZA_BETON: "Pumpa za beton",
+  PLATFORMA_ZA_RAD_NA_VISINI: "Platforma za rad na visini",
+  AGREGAT: "Agregat (generator struje)",
+  PUMPA_ZA_VODU: "Pumpa za vodu",
+  BUSILICA_ZA_RUPE: "Bušilica za rupe/stubove",
+};
+
 export const SHIPMENT_TYPE_LABELS: Record<ShipmentType, string> = {
   DOKUMENT: "Dokument",
   MALI_PAKET: "Mali paket (do 5 kg)",
@@ -111,6 +142,15 @@ export const SHIPMENT_STATUS_LABELS: Record<ShipmentStatus, string> = {
   OTKAZANA: "Otkazana",
 };
 
+// Faza 19c
+export const MACHINE_REQUEST_STATUS_LABELS: Record<MachineRequestStatus, string> = {
+  OTVOREN: "Otvoren — čeka ponude",
+  PRIHVACENO: "Prihvaćeno",
+  NA_LOKACIJI: "Na lokaciji",
+  ZAVRSENO: "Završeno",
+  OTKAZANO: "Otkazano",
+};
+
 export const OFFER_STATUS_LABELS: Record<OfferStatus, string> = {
   POSLATA: "Poslata",
   PRIHVACENA: "Prihvaćena",
@@ -144,6 +184,22 @@ export function nextStatusLabel(current: OrderStatus): string | null {
   const idx = ORDER_STATUS_STEPS.indexOf(current);
   if (idx === -1 || idx === ORDER_STATUS_STEPS.length - 1) return null;
   return ORDER_STATUS_LABELS[ORDER_STATUS_STEPS[idx + 1]];
+}
+
+// Faza 19d: koraci POSLE prihvatanja ponude (OTVOREN nije uključen, isto
+// kao što ORDER_STATUS_STEPS ne uključuje shipment statuse pre porudžbine).
+export const MACHINE_REQUEST_STATUS_STEPS: MachineRequestStatus[] = [
+  "PRIHVACENO",
+  "NA_LOKACIJI",
+  "ZAVRSENO",
+];
+
+export function nextMachineRequestStatusLabel(
+  current: MachineRequestStatus
+): string | null {
+  const idx = MACHINE_REQUEST_STATUS_STEPS.indexOf(current);
+  if (idx === -1 || idx === MACHINE_REQUEST_STATUS_STEPS.length - 1) return null;
+  return MACHINE_REQUEST_STATUS_LABELS[MACHINE_REQUEST_STATUS_STEPS[idx + 1]];
 }
 
 export const VEHICLE_TYPE_LABELS: Record<VehicleType, string> = {

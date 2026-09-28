@@ -21,6 +21,20 @@ export async function setCommissionPercent(percent: number): Promise<void> {
   );
 }
 
+// Faza 19e: poseban globalni procenat za angažovanje mašina (odgovor
+// korisnika #3 iz plana Faze 19 — "poseban procenat, ista logika").
+export async function getActiveMachineCommissionPercent(): Promise<number> {
+  const setting = await getCommissionSetting();
+  return Number(setting.procenat_masine);
+}
+
+export async function setMachineCommissionPercent(percent: number): Promise<void> {
+  await pool.query(
+    `UPDATE commission_settings SET procenat_masine = $1, updated_at = now() WHERE id = 1`,
+    [percent]
+  );
+}
+
 // Faza 12: automatski besplatan period za nove dostavljače, računat od
 // datuma AKTIVACIJE naloga (ne od datuma prijave/leada — dostavljač pre
 // aktivacije ionako ne može ništa da zaradi, pa nema smisla da mu tad
@@ -70,5 +84,29 @@ export async function getEffectiveCommissionPercent(
     return { percent: 0, source: "BESPLATAN_PERIOD", freeUntil };
   }
   const global = await getActiveCommissionPercent();
+  return { percent: global, source: "GLOBALNO", freeUntil };
+}
+
+/**
+ * Faza 19e: isti mehanizam kao getEffectiveCommissionPercent, samo za
+ * angažovanje mašina — poseban lični procenat (provizija_procenat_masine)
+ * i poseban globalni procenat (procenat_masine), ali ISTI besplatan
+ * period (isti aktiviran_at — jedan nalog, jedna aktivacija).
+ */
+export async function getEffectiveMachineCommissionPercent(
+  courier: Pick<CourierRow, "provizija_procenat_masine" | "aktiviran_at">
+): Promise<EffectiveCommission> {
+  const freeUntil = getFreeUntil(courier.aktiviran_at);
+
+  if (
+    courier.provizija_procenat_masine !== null &&
+    courier.provizija_procenat_masine !== undefined
+  ) {
+    return { percent: Number(courier.provizija_procenat_masine), source: "RUCNO", freeUntil };
+  }
+  if (freeUntil !== null && Date.now() < freeUntil.getTime()) {
+    return { percent: 0, source: "BESPLATAN_PERIOD", freeUntil };
+  }
+  const global = await getActiveMachineCommissionPercent();
   return { percent: global, source: "GLOBALNO", freeUntil };
 }

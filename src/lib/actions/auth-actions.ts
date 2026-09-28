@@ -6,6 +6,7 @@ import { createSession, destroySession, verifyPassword } from "../auth";
 import { createCompanyAccount } from "../queries/companies";
 import { requestPasswordReset, resetPassword } from "../queries/password-reset";
 import { isValidEmail, isValidPhone, isValidPib, isTooLong, MAX_NAME_LEN } from "../validation";
+import { CLIENT_TYPE_LABELS } from "../labels";
 import type { UserRow } from "../types";
 
 export interface ActionState {
@@ -63,10 +64,23 @@ export async function registerClientAction(
   const password = str(formData, "password");
   const ime = str(formData, "ime");
   const telefon = str(formData, "telefon");
-  const naziv = str(formData, "naziv");
-  const pib = str(formData, "pib");
   const adresa = str(formData, "adresa");
   const uslovi = formData.get("uslovi") === "on";
+
+  // Faza 19a: klijent bira "Firma" ili "Fizičko lice" na formi; podrazumevano
+  // FIRMA (stara forma nije menjala ovo polje) radi kompatibilnosti.
+  const tipKlijentaRaw = str(formData, "tipKlijenta") || "FIRMA";
+  if (!(tipKlijentaRaw in CLIENT_TYPE_LABELS)) {
+    return { error: "Nepoznat tip naloga." };
+  }
+  const tipKlijenta = tipKlijentaRaw as keyof typeof CLIENT_TYPE_LABELS;
+  const isFizickoLice = tipKlijenta === "FIZICKO_LICE";
+
+  // Fizičko lice nema poseban naziv firme ni PIB — "naziv" na companies
+  // (obavezno NOT NULL polje u šemi) se u tom slučaju popunjava imenom i
+  // prezimenom kontakt osobe, a PIB se ignoriše čak i ako je nekako poslat.
+  const naziv = isFizickoLice ? ime : str(formData, "naziv");
+  const pib = isFizickoLice ? "" : str(formData, "pib");
 
   if (!email || !password || !ime || !telefon || !naziv) {
     return { error: "Popunite sva obavezna polja." };
@@ -111,6 +125,7 @@ export async function registerClientAction(
       naziv,
       pib: pib || undefined,
       adresa: adresa || undefined,
+      tipKlijenta,
     });
     userId = user.id;
   } catch {

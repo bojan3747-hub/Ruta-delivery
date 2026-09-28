@@ -86,6 +86,38 @@ DO $$ BEGIN
   CREATE TYPE address_type AS ENUM ('POSILJALAC', 'PRIMALAC', 'OBA');
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
+-- Faza 19a (2026-09-28): klijent (companies) je firma (podrazumevano, radi
+-- kompatibilnosti sa svim postojećim registracijama) ili fizičko lice (B2C).
+-- Provideri (couriers) ostaju isključivo firme, ovo se ne odnosi na njih.
+DO $$ BEGIN
+  CREATE TYPE client_type AS ENUM ('FIRMA', 'FIZICKO_LICE');
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- Faza 19b (2026-09-28): manje građevinske mašine koje dostavljač može da
+-- ponudi za angažovanje SA rukovaocem (nova, paralelna funkcionalnost uz
+-- postojeći prevoz pošiljki) — konačna lista potvrđena od korisnika.
+DO $$ BEGIN
+  CREATE TYPE machine_type AS ENUM (
+    'MINI_BAGER', 'BAGER_UTOVARIVAC', 'MINI_UTOVARIVAC', 'VALJAK',
+    'VIBRO_PLOCA', 'AUTO_DIZALICA', 'TELESKOPSKI_UTOVARIVAC', 'VILJUSKAR',
+    'MESALICA_ZA_BETON', 'PUMPA_ZA_BETON', 'PLATFORMA_ZA_RAD_NA_VISINI',
+    'AGREGAT', 'PUMPA_ZA_VODU', 'BUSILICA_ZA_RUPE'
+  );
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- Faza 19c (2026-09-28): status toka za angažovanje mašine — poseban od
+-- shipment_status (poseban tok, ista logika, po odluci korisnika). Tačna
+-- terminologija potvrđena od korisnika za odgovor na pitanje o toku
+-- statusa: "Otvoren → Prihvaćeno → Na lokaciji → Završeno" (+ Otkazano).
+-- Sve vrednosti se dodaju odmah (iako 19c koristi samo OTVOREN/OTKAZANO)
+-- da bi se izbegao ALTER TYPE ... ADD VALUE u Fazi 19d kad provajder dobije
+-- mogućnost da menja status.
+DO $$ BEGIN
+  CREATE TYPE machine_request_status AS ENUM (
+    'OTVOREN', 'PRIHVACENO', 'NA_LOKACIJI', 'ZAVRSENO', 'OTKAZANO'
+  );
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
 -- Faza 5: "Sadržaj pošiljke" — spisak preuzet sa Bex Express (bexexpress.rs/najava).
 DO $$ BEGIN
   CREATE TYPE shipment_content AS ENUM (
@@ -163,6 +195,10 @@ CREATE TABLE IF NOT EXISTS companies (
 
 ALTER TABLE companies ADD COLUMN IF NOT EXISTS ocena_prosek NUMERIC(3, 2);
 ALTER TABLE companies ADD COLUMN IF NOT EXISTS broj_ocena INTEGER NOT NULL DEFAULT 0;
+-- Faza 19a: postojeći klijenti (svi registrovani pre ove izmene) ostaju
+-- 'FIRMA' po defaultu — bez migracije podataka, samo novi izbor pri
+-- registraciji ubuduće.
+ALTER TABLE companies ADD COLUMN IF NOT EXISTS tip_klijenta client_type NOT NULL DEFAULT 'FIRMA';
 
 CREATE TABLE IF NOT EXISTS couriers (
   id                UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -214,12 +250,94 @@ ALTER TABLE couriers ADD COLUMN IF NOT EXISTS ima_ruku_za_utovar BOOLEAN NOT NUL
 ALTER TABLE couriers ADD COLUMN IF NOT EXISTS aktiviran_at TIMESTAMPTZ;
 ALTER TABLE couriers ADD COLUMN IF NOT EXISTS provizija_procenat NUMERIC(5, 2);
 
+-- Faza 19e: lični procenat provizije za angažovanje mašina, poseban od
+-- provizija_procenat (za prevoz) — ista logika (uvek ima prednost),
+-- isti besplatan period preko istog aktiviran_at (jedan nalog, jedna
+-- aktivacija). Vidi getEffectiveMachineCommissionPercent u commission.ts.
+ALTER TABLE couriers ADD COLUMN IF NOT EXISTS provizija_procenat_masine NUMERIC(5, 2);
+
 CREATE TABLE IF NOT EXISTS courier_zones (
   id         UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   courier_id UUID NOT NULL REFERENCES couriers(id) ON DELETE CASCADE,
   zone       zone NOT NULL,
   UNIQUE (courier_id, zone)
 );
+
+-- Faza 19b (2026-09-28): koje mašine (sa rukovaocem) dostavljač nudi za
+-- "Angažovanje mašina", uz opcionu indikativnu cenu po satu/danu — isti
+-- obrazac kao courier_zones (poseban red po stavci, replace-all na izmenu).
+CREATE TABLE IF NOT EXISTS courier_machines (
+  id           UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  courier_id   UUID NOT NULL REFERENCES couriers(id) ON DELETE CASCADE,
+  tip_masine   machine_type NOT NULL,
+  cena_po_satu NUMERIC(10, 2),
+  cena_po_danu NUMERIC(10, 2),
+  created_at   TIMESTAMPTZ NOT NULL DEFAULT now(),
+  UNIQUE (courier_id, tip_masine)
+);
+
+-- Faza 19c (2026-09-28): klijentska strana angažovanja mašine — poseban tok
+-- od shipments (odluka korisnika: "poseban, ali ista logika"). Klijent NE
+-- bira procenjeno trajanje/termin kao strukturisano polje (odgovor
+-- korisnika: "klijent ne bira vreme vec opisuje posao") — opis_posla je
+-- obavezno, detaljno slobodno polje; zeljeni_termin je opciono slobodno
+-- polje ako klijent želi da napomene okvirni termin. Samo jedna lokacija
+-- (posao se obavlja na licu mesta, za razliku od pošiljke koja ima
+-- preuzimanje+isporuku). Zona ostaje (odgovor korisnika: "za sada samo
+-- beograd") radi buduće filtracije po pokrivenosti provajdera (courier_zones)
+-- u Fazi 19d, po istom obrascu kao kod pošiljki.
+CREATE TABLE IF NOT EXISTS machine_requests (
+  id             UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  client_id      UUID NOT NULL REFERENCES companies(id) ON DELETE CASCADE,
+  zona           zone NOT NULL,
+  adresa         TEXT NOT NULL,
+  tip_masine     machine_type NOT NULL,
+  opis_posla     TEXT NOT NULL,
+  zeljeni_termin TEXT,
+  kontakt_ime    TEXT,
+  kontakt_telefon TEXT,
+  napomena       TEXT,
+  status         machine_request_status NOT NULL DEFAULT 'OTVOREN',
+  created_at     TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+-- Faza 19d (2026-09-28): provajder (dostavljač/izvođač mašina) ručno šalje
+-- ponudu (cena + procena trajanja slobodnim tekstom — trajanje posla za
+-- mašine varira previše po vrsti mašine da bi jedna numerička jedinica
+-- (minuti kao kod pošiljki) imala smisla za sve). Reuse postojećeg
+-- offer_status enuma (POSLATA/PRIHVACENA/ODBIJENA/ISTEKLA) — ISTEKLA se ne
+-- koristi (angažovanje mašine nema rok kao nestandardna pošiljka), ali nema
+-- razloga za poseban enum samo za tri vrednosti.
+CREATE TABLE IF NOT EXISTS machine_offers (
+  id                  UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  machine_request_id  UUID NOT NULL REFERENCES machine_requests(id) ON DELETE CASCADE,
+  courier_id          UUID NOT NULL REFERENCES couriers(id) ON DELETE CASCADE,
+  cena                NUMERIC(10, 2) NOT NULL,
+  procena_trajanja    TEXT NOT NULL,
+  napomena            TEXT,
+  status              offer_status NOT NULL DEFAULT 'POSLATA',
+  created_at          TIMESTAMPTZ NOT NULL DEFAULT now(),
+  UNIQUE (machine_request_id, courier_id)
+);
+
+-- Faza 19d: kolone dodate posle prve verzije machine_requests (Faza 19c) —
+-- prate ceo tok posle prihvatanja ponude, po uzoru na orders/shipments
+-- (courier_id + cena denormalizovano radi jednostavnih upita bez JOIN-a,
+-- accepted_offer_id kao referenca na konkretnu prihvaćenu ponudu,
+-- na_lokaciji_at/zavrseno_at kao vremenske oznake po uzoru na
+-- orders.preuzeto_at/isporuceno_at).
+ALTER TABLE machine_requests ADD COLUMN IF NOT EXISTS courier_id UUID REFERENCES couriers(id);
+ALTER TABLE machine_requests ADD COLUMN IF NOT EXISTS accepted_offer_id UUID REFERENCES machine_offers(id);
+ALTER TABLE machine_requests ADD COLUMN IF NOT EXISTS cena NUMERIC(10, 2);
+ALTER TABLE machine_requests ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ NOT NULL DEFAULT now();
+ALTER TABLE machine_requests ADD COLUMN IF NOT EXISTS na_lokaciji_at TIMESTAMPTZ;
+ALTER TABLE machine_requests ADD COLUMN IF NOT EXISTS zavrseno_at TIMESTAMPTZ;
+ALTER TABLE machine_requests ADD COLUMN IF NOT EXISTS otkazano_razlog TEXT;
+
+-- Faza 19e: provizija platforme, obračunata (kao kod orders.provizija) kad
+-- angažovanje pređe u status ZAVRSENO, po tada važećem efektivnom
+-- procentu za mašine (getEffectiveMachineCommissionPercent).
+ALTER TABLE machine_requests ADD COLUMN IF NOT EXISTS provizija NUMERIC(10, 2);
 
 CREATE TABLE IF NOT EXISTS shipments (
   id                  UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -394,6 +512,13 @@ CREATE TABLE IF NOT EXISTS commission_settings (
 INSERT INTO commission_settings (id, procenat)
 VALUES (1, 10.00)
 ON CONFLICT (id) DO NOTHING;
+
+-- Faza 19e (2026-09-28): poseban globalni procenat provizije za
+-- angažovanje mašina, odvojen od procenat (za prevoz) — odgovor korisnika
+-- #3 iz plana Faze 19 ("poseban procenat, ista logika"). Ista tabela (jedan
+-- red) je dovoljna — nema potrebe za posebnom tabelom samo za jednu
+-- dodatnu vrednost.
+ALTER TABLE commission_settings ADD COLUMN IF NOT EXISTS procenat_masine NUMERIC(5, 2) NOT NULL DEFAULT 10.00;
 
 -- Mesečna faktura provizije po dostavljaču (KAN-12 nastavak): operater
 -- generiše po jednu fakturu po dostavljaču za svaki kalendarski mesec u

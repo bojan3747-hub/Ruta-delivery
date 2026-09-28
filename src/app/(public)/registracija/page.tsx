@@ -6,12 +6,13 @@ export default function RegistracijaPage() {
     <div className="mx-auto max-w-md py-6">
       <div className="mb-6 text-center">
         <h1 className="font-serif text-2xl font-bold text-neutral-900">
-          Registracija firme
+          Registracija
         </h1>
         <p className="mx-auto mt-1 max-w-sm text-sm text-neutral-500">
-          Registracija je za firme koje šalju pošiljke. Dostavljače na
-          platformu dodaje operater — ako ste kontaktirani kao prevoznik,
-          koristite link za aktivaciju koji ste dobili.
+          Registracija je za klijente koji šalju pošiljke — firme i fizička
+          lica. Dostavljače na platformu dodaje operater — ako ste
+          kontaktirani kao prevoznik, koristite link za aktivaciju koji ste
+          dobili.
         </p>
       </div>
       <div className="rounded-2xl border border-black/10 bg-white p-6 shadow-sm">

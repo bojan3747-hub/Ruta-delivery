@@ -1,10 +1,11 @@
 import Link from "next/link";
 import { getCurrentUser } from "@/lib/auth";
 import { getCourierById, getCourierZones } from "@/lib/queries/couriers";
+import { getCourierMachines } from "@/lib/queries/machines";
 import { listOpenRequestsForCourier } from "@/lib/queries/shipments";
 import { listOrdersForCourier } from "@/lib/queries/orders";
 import { ZONE_LABELS } from "@/lib/zones";
-import { VEHICLE_TYPE_LABELS } from "@/lib/labels";
+import { VEHICLE_TYPE_LABELS, MACHINE_TYPE_LABELS } from "@/lib/labels";
 import { CourierAvailabilityToggle } from "@/components/CourierAvailabilityToggle";
 import { StatCard } from "@/components/StatCard";
 import { TruckIcon, ClipboardListIcon, StarIcon } from "@/components/icons";
@@ -14,10 +15,11 @@ export default async function DostavljacPage() {
   const courier = user?.courierId ? await getCourierById(user.courierId) : null;
   if (!courier) return null;
 
-  const [zones, requests, activeOrders] = await Promise.all([
+  const [zones, requests, activeOrders, machines] = await Promise.all([
     getCourierZones(courier.id),
     listOpenRequestsForCourier(courier.id),
     listOrdersForCourier(courier.id),
+    getCourierMachines(courier.id),
   ]);
 
   const cenovnikPodesen = courier.cena_po_km != null;
@@ -72,6 +74,15 @@ export default async function DostavljacPage() {
         <p className="mt-1">
           <span className="text-neutral-500">Dnevni kapacitet:</span>{" "}
           {courier.dnevni_kapacitet}
+        </p>
+        <p className="mt-1">
+          <span className="text-neutral-500">Mašine za angažovanje:</span>{" "}
+          {machines.length > 0
+            ? machines.map((m) => MACHINE_TYPE_LABELS[m.tip_masine]).join(", ")
+            : "—"}{" "}
+          <Link href="/dostavljac/masine" className="text-emerald-600 hover:underline">
+            {machines.length > 0 ? "Izmeni" : "Dodaj"}
+          </Link>
         </p>
       </div>
     </div>

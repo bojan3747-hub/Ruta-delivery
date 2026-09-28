@@ -9,8 +9,14 @@ const COLORS: Record<string, string> = {
   PREUZETO: "bg-blue-100 text-blue-800",
   U_TRANZITU: "bg-blue-100 text-blue-800",
   NA_ISPORUCI: "bg-blue-100 text-blue-800",
+  // Faza 19c: machine_request_status ("otvoren"→amber, prihvaćeno/na
+  // lokaciji→blue, isti obrazac kao gore).
+  OTVOREN: "bg-amber-100 text-amber-800",
+  PRIHVACENO: "bg-blue-100 text-blue-800",
+  NA_LOKACIJI: "bg-blue-100 text-blue-800",
   // done / good
   ZAVRSENA: "bg-emerald-100 text-emerald-800",
+  ZAVRSENO: "bg-emerald-100 text-emerald-800",
   ISPORUCENO: "bg-emerald-100 text-emerald-800",
   PRIHVACENA: "bg-emerald-100 text-emerald-800",
   AKTIVAN: "bg-emerald-100 text-emerald-800",

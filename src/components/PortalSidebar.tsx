@@ -21,6 +21,7 @@ import {
   UsersIcon,
   FileTextIcon,
   KeyRoundIcon,
+  WrenchIcon,
 } from "./icons";
 
 const ROLE_LABELS: Record<string, string> = {
@@ -45,6 +46,7 @@ const ICONS = {
   users: UsersIcon,
   fileText: FileTextIcon,
   keyRound: KeyRoundIcon,
+  wrench: WrenchIcon,
 } as const;
 
 export type PortalIconName = keyof typeof ICONS;

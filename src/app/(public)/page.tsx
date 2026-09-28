@@ -32,10 +32,15 @@ export default async function HomePage() {
       <section className="overflow-hidden rounded-2xl bg-gradient-to-br from-slate-900 via-slate-800 to-emerald-900 px-6 py-12 text-white sm:px-10 sm:py-16">
         <div className="grid gap-10 lg:grid-cols-2 lg:items-center">
           <div className="space-y-5">
-            <span className="inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-emerald-300">
-              <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
-              B2B platforma za dostavu
-            </span>
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-emerald-300">
+                <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
+                Dostava za firme i pojedince
+              </span>
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/15 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-emerald-200">
+                Novo: angažovanje mašina
+              </span>
+            </div>
             <h1 className="font-serif text-4xl font-bold leading-tight sm:text-5xl">
               Kombi prevoz i dostava za
               <br />
@@ -69,7 +74,7 @@ export default async function HomePage() {
                   href="/registracija"
                   className="rounded-md bg-emerald-500 px-5 py-2.5 text-sm font-medium text-slate-900 hover:bg-emerald-400"
                 >
-                  Registrujte firmu
+                  Registrujte se
                 </Link>
                 <Link
                   href="/prijava"
@@ -199,6 +204,76 @@ export default async function HomePage() {
         </div>
       </section>
 
+      <section className="overflow-hidden rounded-2xl bg-gradient-to-br from-emerald-950 via-slate-900 to-slate-800 px-6 py-10 text-white sm:px-10">
+        <div className="grid gap-8 lg:grid-cols-2 lg:items-center">
+          <div className="space-y-4">
+            <span className="inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-emerald-300">
+              <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
+              Angažovanje mašina
+            </span>
+            <h2 className="font-serif text-2xl font-semibold sm:text-3xl">
+              Treba vam mini bager, valjak ili dizalica — sa rukovaocem?
+            </h2>
+            <p className="max-w-md text-sm text-slate-300">
+              Pored prevoza pošiljki, Ruta-Dostava povezuje i sa izvođačima
+              koji nude građevinske i komunalne mašine zajedno sa rukovaocem
+              — od kopanja temelja i ravnanja dvorišta do agregata i pumpi za
+              vodu. Dostupno i za firme i za fizička lica.
+            </p>
+            <div className="flex flex-wrap gap-3 pt-1">
+              {!user && (
+                <Link
+                  href="/registracija"
+                  className="rounded-md bg-emerald-500 px-5 py-2.5 text-sm font-medium text-slate-900 hover:bg-emerald-400"
+                >
+                  Angažujte mašinu
+                </Link>
+              )}
+              {user?.role === "CLIENT" && (
+                <Link
+                  href="/klijent/masine/novo"
+                  className="rounded-md bg-emerald-500 px-5 py-2.5 text-sm font-medium text-slate-900 hover:bg-emerald-400"
+                >
+                  Angažujte mašinu
+                </Link>
+              )}
+              {user?.role === "COURIER" && (
+                <Link
+                  href="/dostavljac/masine"
+                  className="rounded-md bg-emerald-500 px-5 py-2.5 text-sm font-medium text-slate-900 hover:bg-emerald-400"
+                >
+                  Dodajte svoje mašine
+                </Link>
+              )}
+            </div>
+          </div>
+          <div className="grid gap-4 sm:grid-cols-1">
+            <div className="rounded-lg bg-white/5 p-4">
+              <h3 className="font-semibold">Opišite posao, ne morate da znate cenu</h3>
+              <p className="mt-1 text-sm text-slate-300">
+                Unesete lokaciju, tip mašine i opis posla slobodnim tekstom —
+                izvođači koji pokrivaju vašu zonu sami procene cenu i trajanje
+                u svojoj ponudi.
+              </p>
+            </div>
+            <div className="rounded-lg bg-white/5 p-4">
+              <h3 className="font-semibold">Mašina uvek sa rukovaocem</h3>
+              <p className="mt-1 text-sm text-slate-300">
+                Nema samostalnog iznajmljivanja mašine — izvođač je uvek
+                odgovoran i za mašinu i za rad, kao i kod prevoza.
+              </p>
+            </div>
+            <div className="rounded-lg bg-white/5 p-4">
+              <h3 className="font-semibold">Beograd, za sada</h3>
+              <p className="mt-1 text-sm text-slate-300">
+                Isti sistem naloga, ponuda i ocena kao za prevoz pošiljki —
+                samo poseban tok, prilagođen poslu na lokaciji.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
       <section className="rounded-lg border border-black/10 bg-white p-6 text-center">
         <h2 className="font-serif text-2xl font-semibold">
           Vozite kombi ili kamionet? Zaradite dodatno uz Ruta-Dostavu.
@@ -231,6 +306,11 @@ export default async function HomePage() {
             </p>
           </div>
         </div>
+        <p className="mx-auto mt-6 max-w-2xl text-sm text-neutral-600">
+          Imate i mašinu sa rukovaocem (bager, valjak, dizalica i slično)?
+          Posle otvaranja naloga možete je dodati na svoj profil i primati
+          zahteve i za angažovanje mašine, na istom nalogu.
+        </p>
         <div className="mx-auto mt-8 max-w-xl border-t border-black/10 pt-6">
           <h3 className="font-semibold">Prijavite se za saradnju</h3>
           <p className="mt-1 text-sm text-neutral-600">

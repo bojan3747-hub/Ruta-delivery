@@ -1,6 +1,6 @@
 import { pool, query, queryOne } from "../db";
 import { hashPassword } from "../auth";
-import type { CompanyRow, UserRow } from "../types";
+import type { ClientType, CompanyRow, UserRow } from "../types";
 
 export async function createCompanyAccount(input: {
   email: string;
@@ -10,6 +10,9 @@ export async function createCompanyAccount(input: {
   naziv: string;
   pib?: string;
   adresa?: string;
+  // Faza 19a: podrazumevano 'FIRMA' radi kompatibilnosti sa postojećim
+  // pozivima ove funkcije (npr. skriptama).
+  tipKlijenta?: ClientType;
 }): Promise<{ user: UserRow; company: CompanyRow }> {
   const client = await pool.connect();
   try {
@@ -25,10 +28,16 @@ export async function createCompanyAccount(input: {
     const user = userResult.rows[0];
 
     const companyResult = await client.query<CompanyRow>(
-      `INSERT INTO companies (user_id, naziv, pib, adresa)
-       VALUES ($1, $2, $3, $4)
+      `INSERT INTO companies (user_id, naziv, pib, adresa, tip_klijenta)
+       VALUES ($1, $2, $3, $4, $5)
        RETURNING *`,
-      [user.id, input.naziv, input.pib ?? null, input.adresa ?? null]
+      [
+        user.id,
+        input.naziv,
+        input.pib ?? null,
+        input.adresa ?? null,
+        input.tipKlijenta ?? "FIRMA",
+      ]
     );
 
     await client.query("COMMIT");

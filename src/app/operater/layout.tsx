@@ -4,6 +4,7 @@ import { PortalSidebar, type PortalNavItem } from "@/components/PortalSidebar";
 const NAV_ITEMS: PortalNavItem[] = [
   { href: "/operater", label: "Pregled", icon: "home" },
   { href: "/operater/porudzbine", label: "Porudžbine", icon: "clipboardList" },
+  { href: "/operater/masine", label: "Angažovanja mašina", icon: "wrench" },
   { href: "/operater/klijenti", label: "Klijenti", icon: "users" },
   { href: "/operater/dostavljaci", label: "Dostavljači", icon: "truck" },
   { href: "/operater/provizija", label: "Provizija", icon: "percent" },

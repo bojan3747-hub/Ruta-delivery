@@ -4,6 +4,9 @@ import { PortalSidebar, type PortalNavItem } from "@/components/PortalSidebar";
 const NAV_ITEMS: PortalNavItem[] = [
   { href: "/klijent", label: "Pregled", icon: "home" },
   { href: "/klijent/nova-posiljka", label: "Nova pošiljka", icon: "package" },
+  // Faza 19c: poseban tok od pošiljki (odluka korisnika: "poseban, ali ista
+  // logika") — zato posebna stavka u meniju, ne deo forme za pošiljke.
+  { href: "/klijent/masine", label: "Angažovanje mašina", icon: "wrench" },
   { href: "/klijent/adrese", label: "Sačuvane adrese", icon: "mapPin" },
   { href: "/klijent/ocene", label: "Ocene o meni", icon: "star" },
 ];

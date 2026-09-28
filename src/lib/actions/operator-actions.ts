@@ -6,10 +6,11 @@ import {
   createPreApprovedCourier,
   listCouriersForOperator,
   setCourierCommissionPercent,
+  setCourierMachineCommissionPercent,
   setCourierStatus,
   setCourierVerified,
 } from "../queries/couriers";
-import { setCommissionPercent } from "../queries/commission";
+import { setCommissionPercent, setMachineCommissionPercent } from "../queries/commission";
 import { generateInvoicesForPeriod, setInvoiceStatus } from "../queries/invoices";
 import { uploadOpstiUslovi } from "../queries/opsti-uslovi";
 import { parseCsv } from "../csv";
@@ -223,6 +224,49 @@ export async function setCommissionAction(
 
   await setCommissionPercent(procenat);
   revalidatePath("/operater/provizija");
+  return { success: true };
+}
+
+/** Faza 19e: isto kao setCourierCommissionAction, samo za poseban lični
+ * procenat provizije za angažovanje mašina. */
+export async function setCourierMachineCommissionAction(
+  courierId: string,
+  percent: number | null
+): Promise<{ error?: string }> {
+  try {
+    await requireOperator();
+  } catch (err) {
+    return { error: err instanceof Error ? err.message : "Greška." };
+  }
+
+  if (percent !== null && (!Number.isFinite(percent) || percent < 0 || percent > 100)) {
+    return { error: "Procenat mora biti između 0 i 100, ili prazno za podrazumevano." };
+  }
+
+  await setCourierMachineCommissionPercent(courierId, percent);
+  revalidatePath("/operater/dostavljaci");
+  return {};
+}
+
+/** Faza 19e: isto kao setCommissionAction, samo za poseban globalni
+ * procenat provizije za angažovanje mašina. */
+export async function setMachineCommissionAction(
+  _prev: ActionState,
+  formData: FormData
+): Promise<ActionState> {
+  try {
+    await requireOperator();
+  } catch (err) {
+    return { error: err instanceof Error ? err.message : "Greška." };
+  }
+
+  const procenat = Number(str(formData, "procenat"));
+  if (!Number.isFinite(procenat) || procenat < 0 || procenat > 100) {
+    return { error: "Procenat provizije mora biti između 0 i 100." };
+  }
+
+  await setMachineCommissionPercent(procenat);
+  revalidatePath("/operater/masine");
   return { success: true };
 }
 

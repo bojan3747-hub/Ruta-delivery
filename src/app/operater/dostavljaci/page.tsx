@@ -1,8 +1,10 @@
 import Link from "next/link";
 import { listCouriersForOperator } from "@/lib/queries/couriers";
+import { getMachinesForCouriers } from "@/lib/queries/machines";
 import {
   FREE_PERIOD_MONTHS,
   getEffectiveCommissionPercent,
+  getEffectiveMachineCommissionPercent,
   type EffectiveCommission,
 } from "@/lib/queries/commission";
 import type { CourierRow } from "@/lib/types";
@@ -11,8 +13,9 @@ import { BulkImportCouriersForm } from "@/components/BulkImportCouriersForm";
 import { CourierStatusButton } from "@/components/CourierStatusButton";
 import { CourierVerifiedButton } from "@/components/CourierVerifiedButton";
 import { CourierCommissionForm } from "@/components/CourierCommissionForm";
+import { CourierMachineCommissionForm } from "@/components/CourierMachineCommissionForm";
 import { StatusBadge } from "@/components/StatusBadge";
-import { VEHICLE_TYPE_LABELS, formatDate } from "@/lib/labels";
+import { VEHICLE_TYPE_LABELS, MACHINE_TYPE_LABELS, formatDate } from "@/lib/labels";
 
 const STATUS_LABELS: Record<string, string> = {
   NA_POTVRDI: "Poziv poslat / na potvrdi",
@@ -39,6 +42,10 @@ export default async function DostavljaciPage() {
   const commissionInfo = await Promise.all(
     couriers.map((c) => getEffectiveCommissionPercent(c))
   );
+  const machineCommissionInfo = await Promise.all(
+    couriers.map((c) => getEffectiveMachineCommissionPercent(c))
+  );
+  const machinesByCourier = await getMachinesForCouriers(couriers.map((c) => c.id));
 
   return (
     <div className="space-y-8">
@@ -80,6 +87,15 @@ export default async function DostavljaciPage() {
                   {c.ima_ruku_za_utovar ? " · ruka za utovar" : ""}
                   {c.pib ? ` · PIB ${c.pib}` : ""}
                 </p>
+                {(machinesByCourier.get(c.id)?.length ?? 0) > 0 && (
+                  <p className="mt-0.5 text-sm text-neutral-500">
+                    Mašine:{" "}
+                    {machinesByCourier
+                      .get(c.id)!
+                      .map((m) => MACHINE_TYPE_LABELS[m.tip_masine])
+                      .join(", ")}
+                  </p>
+                )}
               </div>
               <div className="flex items-center gap-2">
                 <StatusBadge status={c.status} label={STATUS_LABELS[c.status]} />
@@ -101,6 +117,21 @@ export default async function DostavljaciPage() {
                 current={c.provizija_procenat === null ? null : Number(c.provizija_procenat)}
               />
             </div>
+            {(machinesByCourier.get(c.id)?.length ?? 0) > 0 && (
+              <div className="mt-2 flex flex-wrap items-center justify-between gap-2 rounded-lg bg-neutral-50 px-3 py-2">
+                <p className="text-xs text-neutral-600">
+                  Provizija (mašine): {commissionLabel(c, machineCommissionInfo[i])}
+                </p>
+                <CourierMachineCommissionForm
+                  courierId={c.id}
+                  current={
+                    c.provizija_procenat_masine === null
+                      ? null
+                      : Number(c.provizija_procenat_masine)
+                  }
+                />
+              </div>
+            )}
             {c.status === "SUSPENDOVAN" && (
               <p className="mt-2 text-sm text-red-700">
                 Suspendovan — ne dobija nove zahteve za ponude. Postojeće

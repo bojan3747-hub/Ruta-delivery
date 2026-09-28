@@ -5,6 +5,11 @@
 
 export type Role = "CLIENT" | "COURIER" | "OPERATOR";
 
+// Faza 19a (2026-09-28): klijent (companies) sad može biti firma ili fizičko
+// lice (B2C) — provideri (couriers) i dalje ostaju isključivo firme, ovo se
+// odnosi samo na companies.tip_klijenta.
+export type ClientType = "FIRMA" | "FIZICKO_LICE";
+
 export type Zone =
   | "STARI_GRAD"
   | "VRACAR"
@@ -31,6 +36,73 @@ export type VehicleType =
   | "SLEP";
 
 export type CourierStatus = "NA_POTVRDI" | "AKTIVAN" | "SUSPENDOVAN";
+
+// Faza 19b (2026-09-28): manje građevinske mašine koje dostavljač može da
+// ponudi za "Angažovanje mašina" — SVE isključivo sa rukovaocem (nema
+// samostalnog najma), konačna lista potvrđena od korisnika.
+export type MachineType =
+  | "MINI_BAGER"
+  | "BAGER_UTOVARIVAC"
+  | "MINI_UTOVARIVAC"
+  | "VALJAK"
+  | "VIBRO_PLOCA"
+  | "AUTO_DIZALICA"
+  | "TELESKOPSKI_UTOVARIVAC"
+  | "VILJUSKAR"
+  | "MESALICA_ZA_BETON"
+  | "PUMPA_ZA_BETON"
+  | "PLATFORMA_ZA_RAD_NA_VISINI"
+  | "AGREGAT"
+  | "PUMPA_ZA_VODU"
+  | "BUSILICA_ZA_RUPE";
+
+export interface CourierMachineRow {
+  id: string;
+  courier_id: string;
+  tip_masine: MachineType;
+  cena_po_satu: string | null;
+  cena_po_danu: string | null;
+  created_at: string;
+}
+
+// Faza 19c: zahtev klijenta za angažovanje mašine (poseban od ShipmentRow).
+export interface MachineRequestRow {
+  id: string;
+  client_id: string;
+  zona: Zone;
+  adresa: string;
+  tip_masine: MachineType;
+  opis_posla: string;
+  zeljeni_termin: string | null;
+  kontakt_ime: string | null;
+  kontakt_telefon: string | null;
+  napomena: string | null;
+  status: MachineRequestStatus;
+  created_at: string;
+  // Faza 19d: popunjeno kad je ponuda prihvaćena (vidi machine_offers).
+  courier_id: string | null;
+  accepted_offer_id: string | null;
+  cena: string | null;
+  updated_at: string;
+  na_lokaciji_at: string | null;
+  zavrseno_at: string | null;
+  otkazano_razlog: string | null;
+  // Faza 19e: obračunato kad angažovanje pređe u ZAVRSENO.
+  provizija: string | null;
+}
+
+// Faza 19d: ručna ponuda provajdera za angažovanje mašine — reuse
+// postojećeg OfferStatus (isti obrazac kao offers/shipments).
+export interface MachineOfferRow {
+  id: string;
+  machine_request_id: string;
+  courier_id: string;
+  cena: string;
+  procena_trajanja: string;
+  napomena: string | null;
+  status: OfferStatus;
+  created_at: string;
+}
 
 export type ShipmentType =
   | "DOKUMENT"
@@ -116,6 +188,14 @@ export type ShipmentStatus =
   | "ZAVRSENA"
   | "OTKAZANA";
 
+// Faza 19c: status toka angažovanja mašine — poseban od ShipmentStatus.
+export type MachineRequestStatus =
+  | "OTVOREN"
+  | "PRIHVACENO"
+  | "NA_LOKACIJI"
+  | "ZAVRSENO"
+  | "OTKAZANO";
+
 export type OfferType = "AUTOMATSKA" | "RUCNA";
 
 export type OfferStatus = "POSLATA" | "PRIHVACENA" | "ODBIJENA" | "ISTEKLA";
@@ -148,6 +228,11 @@ export interface CompanyRow {
   naziv: string;
   pib: string | null;
   adresa: string | null;
+  // Faza 19a: firma (podrazumevano, kompatibilno sa svim postojećim
+  // klijentima) ili fizičko lice (B2C) — kod fizičkog lica `naziv` nosi
+  // ime i prezime osobe (isto kao kontakt ime sa `users`), a `pib` ostaje
+  // prazno.
+  tip_klijenta: ClientType;
   ocena_prosek: string | null;
   broj_ocena: number;
   created_at: string;
@@ -183,6 +268,8 @@ export interface CourierRow {
   // lični procenat provizije (uvek ima prednost) — vidi commission.ts.
   aktiviran_at: string | null;
   provizija_procenat: string | null;
+  // Faza 19e: poseban lični procenat provizije za angažovanje mašina.
+  provizija_procenat_masine: string | null;
 }
 
 export interface CourierZoneRow {
@@ -276,6 +363,8 @@ export interface RatingRow {
 export interface CommissionSettingRow {
   id: number;
   procenat: string;
+  // Faza 19e: poseban globalni procenat za angažovanje mašina.
+  procenat_masine: string;
   updated_at: string;
 }
 

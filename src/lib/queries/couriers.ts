@@ -293,3 +293,16 @@ export async function setCourierCommissionPercent(
     courierId,
   ]);
 }
+
+/** Faza 19e: isto, samo za poseban lični procenat provizije za angažovanje
+ * mašina (provizija_procenat_masine) — vidi
+ * getEffectiveMachineCommissionPercent u commission.ts. */
+export async function setCourierMachineCommissionPercent(
+  courierId: string,
+  percent: number | null
+): Promise<void> {
+  await query("UPDATE couriers SET provizija_procenat_masine = $1 WHERE id = $2", [
+    percent,
+    courierId,
+  ]);
+}

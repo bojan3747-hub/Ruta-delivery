@@ -36,7 +36,7 @@ export default async function PrijavaPage({
       <p className="mt-4 text-center text-sm text-neutral-600">
         Nemate nalog?{" "}
         <Link href="/registracija" className="font-medium text-emerald-600 hover:underline">
-          Registrujte firmu
+          Registrujte se
         </Link>
       </p>
     </div>

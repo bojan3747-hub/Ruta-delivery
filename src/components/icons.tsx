@@ -176,3 +176,13 @@ export function XIcon(props: IconProps) {
     </Icon>
   );
 }
+
+// Faza 19b: ikonica za "Angažovanje mašina" (nav stavka + eventualne
+// kartice) — jednostavan ključ/alat oblik, isti linijski stil kao ostatak.
+export function WrenchIcon(props: IconProps) {
+  return (
+    <Icon {...props}>
+      <path d="M14.7 6.3a4 4 0 0 0-5.4 5.4L4 17l3 3 5.3-5.3a4 4 0 0 0 5.4-5.4l-2.7 2.7-2-2 2.7-2.7Z" />
+    </Icon>
+  );
+}

@@ -11,10 +11,14 @@ import {
   setCourierAvailability,
   updateCourierPricing,
 } from "../queries/couriers";
+import { setCourierMachines } from "../queries/machines";
 import { ZONES } from "../zones";
+import { MACHINE_TYPE_LABELS } from "../labels";
 import { isValidEmail, isValidPhone, isValidPib, isTooLong, MAX_NAME_LEN } from "../validation";
-import type { VehicleType, Zone } from "../types";
+import type { MachineType, VehicleType, Zone } from "../types";
 import type { ActionState } from "./auth-actions";
+
+const MACHINE_TYPES = Object.keys(MACHINE_TYPE_LABELS) as MachineType[];
 
 function str(formData: FormData, key: string): string {
   return String(formData.get(key) ?? "").trim();
@@ -202,5 +206,50 @@ export async function updatePricingAction(
   });
 
   revalidatePath("/dostavljac/cenovnik");
+  return { success: true };
+}
+
+// Faza 19b: dostavljač označava koje mašine nudi za "Angažovanje mašina"
+// (uvek sa rukovaocem) + opcionu indikativnu cenu po satu/danu za svaku.
+// Isti obrazac kao updatePricingAction iznad — replace-all na svaku izmenu.
+export async function updateCourierMachinesAction(
+  _prev: ActionState,
+  formData: FormData
+): Promise<ActionState> {
+  const user = await getCurrentUser();
+  if (!user || user.role !== "COURIER" || !user.courierId) {
+    return { error: "Morate biti prijavljeni kao dostavljač." };
+  }
+
+  const items: { tipMasine: MachineType; cenaPoSatu: number | null; cenaPoDanu: number | null }[] = [];
+
+  for (const tip of MACHINE_TYPES) {
+    if (formData.get(`masina_${tip}`) !== "on") continue;
+
+    const cenaPoSatuRaw = str(formData, `cenaPoSatu_${tip}`);
+    const cenaPoDanuRaw = str(formData, `cenaPoDanu_${tip}`);
+    let cenaPoSatu: number | null = null;
+    let cenaPoDanu: number | null = null;
+
+    if (cenaPoSatuRaw) {
+      cenaPoSatu = Number(cenaPoSatuRaw);
+      if (!Number.isFinite(cenaPoSatu) || cenaPoSatu <= 0) {
+        return { error: `Unesite validnu cenu po satu za "${MACHINE_TYPE_LABELS[tip]}" (veću od 0), ili ostavite prazno.` };
+      }
+    }
+    if (cenaPoDanuRaw) {
+      cenaPoDanu = Number(cenaPoDanuRaw);
+      if (!Number.isFinite(cenaPoDanu) || cenaPoDanu <= 0) {
+        return { error: `Unesite validnu cenu po danu za "${MACHINE_TYPE_LABELS[tip]}" (veću od 0), ili ostavite prazno.` };
+      }
+    }
+
+    items.push({ tipMasine: tip, cenaPoSatu, cenaPoDanu });
+  }
+
+  await setCourierMachines(user.courierId, items);
+
+  revalidatePath("/dostavljac/masine");
+  revalidatePath("/dostavljac");
   return { success: true };
 }
