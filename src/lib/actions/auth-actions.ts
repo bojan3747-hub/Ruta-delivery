@@ -3,8 +3,12 @@
 import { redirect } from "next/navigation";
 import { queryOne } from "../db";
 import { createSession, destroySession, verifyPassword } from "../auth";
-import { createCompanyAccount } from "../queries/companies";
+import { createCompanyAccount, createGoogleClientAccount } from "../queries/companies";
 import { requestPasswordReset, resetPassword } from "../queries/password-reset";
+import {
+  clearPendingGoogleProfile,
+  readPendingGoogleProfile,
+} from "../google-auth";
 import { isValidEmail, isValidPhone, isValidPib, isTooLong, MAX_NAME_LEN } from "../validation";
 import { CLIENT_TYPE_LABELS } from "../labels";
 import type { UserRow } from "../types";
@@ -36,7 +40,16 @@ export async function loginAction(
   const user = await queryOne<UserRow>("SELECT * FROM users WHERE email = $1", [
     email,
   ]);
-  if (!user || !(await verifyPassword(password, user.password_hash))) {
+  // Faza 20: nalog kreiran preko Google-a nema password_hash — jasna poruka
+  // umesto generičke "pogrešan email ili lozinka" (i umesto da se
+  // verifyPassword pozove sa null hash-om).
+  if (user && !user.password_hash) {
+    return {
+      error:
+        "Ovaj nalog je kreiran preko Google naloga — koristite dugme \"Nastavi sa Google\" ispod.",
+    };
+  }
+  if (!user || !user.password_hash || !(await verifyPassword(password, user.password_hash))) {
     return { error: "Pogrešan email ili lozinka." };
   }
 
@@ -132,6 +145,57 @@ export async function registerClientAction(
     return { error: "Registracija nije uspela. Pokušajte ponovo." };
   }
 
+  await createSession(userId, "CLIENT");
+  redirect("/klijent");
+}
+
+// Faza 20: završni korak Google registracije — profil (ime/email/google_id)
+// već čeka u kratkotrajnom kolačiću (vidi /auth/google/callback), ovde se
+// samo traži telefon i prihvatanje uslova pre nego što se nalog stvarno
+// kreira (isti obavezni podaci kao redovna registracija, minus
+// lozinka/naziv koji dolaze iz Google profila).
+export async function completeGoogleRegistrationAction(
+  _prev: ActionState,
+  formData: FormData
+): Promise<ActionState> {
+  const profile = await readPendingGoogleProfile();
+  if (!profile) {
+    return {
+      error: "Sesija za Google registraciju je istekla. Pokušajte ponovo.",
+    };
+  }
+
+  const telefon = str(formData, "telefon");
+  const uslovi = formData.get("uslovi") === "on";
+
+  if (!telefon) return { error: "Unesite broj telefona." };
+  if (!isValidPhone(telefon)) return { error: "Unesite validan broj telefona." };
+  if (!uslovi) return { error: "Morate prihvatiti Opšte uslove korišćenja." };
+
+  const existing = await queryOne("SELECT id FROM users WHERE email = $1", [
+    profile.email,
+  ]);
+  if (existing) {
+    // Neko se registrovao (drugim putem) u međuvremenu dok je Google
+    // registracija bila u toku — redak slučaj, ali provera je jeftina.
+    await clearPendingGoogleProfile();
+    return { error: "Nalog sa ovim emailom već postoji. Prijavite se." };
+  }
+
+  let userId: string;
+  try {
+    const { user } = await createGoogleClientAccount({
+      googleId: profile.sub,
+      email: profile.email,
+      ime: profile.name,
+      telefon,
+    });
+    userId = user.id;
+  } catch {
+    return { error: "Registracija nije uspela. Pokušajte ponovo." };
+  }
+
+  await clearPendingGoogleProfile();
   await createSession(userId, "CLIENT");
   redirect("/klijent");
 }

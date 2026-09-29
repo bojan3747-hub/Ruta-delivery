@@ -182,6 +182,15 @@ ALTER TABLE users ADD COLUMN IF NOT EXISTS uslovi_prihvaceni_at TIMESTAMPTZ;
 ALTER TABLE users ADD COLUMN IF NOT EXISTS reset_token UUID;
 ALTER TABLE users ADD COLUMN IF NOT EXISTS reset_token_expires_at TIMESTAMPTZ;
 
+-- Faza 20 (2026-09-28): Google SSO za klijente. Nalog kreiran preko Google-a
+-- nema lozinku (password_hash postaje opciono) — prijava tada ide isključivo
+-- preko "Nastavi sa Google", ne preko email/lozinka forme. google_id je
+-- Google-ov stabilan identifikator naloga ("sub" iz profila), NE email (email
+-- se kod nekih naloga može promeniti). UNIQUE dozvoljava proizvoljno mnogo
+-- NULL vrednosti (postojeći nalozi sa lozinkom) po Postgres semantici.
+ALTER TABLE users ADD COLUMN IF NOT EXISTS google_id TEXT UNIQUE;
+ALTER TABLE users ALTER COLUMN password_hash DROP NOT NULL;
+
 CREATE TABLE IF NOT EXISTS companies (
   id         UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id    UUID UNIQUE NOT NULL REFERENCES users(id) ON DELETE CASCADE,

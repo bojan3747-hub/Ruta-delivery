@@ -7,6 +7,7 @@ import { FormMessage } from "./FormMessage";
 import { SubmitButton } from "./SubmitButton";
 import { TermsCheckbox } from "./TermsCheckbox";
 import { StreetNumberFields } from "./StreetNumberFields";
+import { GoogleAuthButton } from "./GoogleAuthButton";
 import { CLIENT_TYPE_LABELS } from "@/lib/labels";
 import type { ClientType } from "@/lib/types";
 
@@ -25,7 +26,18 @@ export function RegisterForm() {
   const isFizickoLice = tipKlijenta === "FIZICKO_LICE";
 
   return (
-    <form action={formAction} className="space-y-6">
+    <div className="space-y-6">
+      {/* Faza 20: Google prijava kreira nalog fizičkog lica direktno (vidi
+          /registracija/google) — dostupna je samo za klijente, pa je forma
+          ispod i dalje potrebna za firme i za one koji ne koriste Google. */}
+      <GoogleAuthButton />
+      <div className="flex items-center gap-3 text-xs text-neutral-400">
+        <span className="h-px flex-1 bg-neutral-200" />
+        ili se registrujte mejlom
+        <span className="h-px flex-1 bg-neutral-200" />
+      </div>
+
+      <form action={formAction} className="space-y-6">
       <FormMessage error={state.error} />
 
       <input type="hidden" name="tipKlijenta" value={tipKlijenta} />
@@ -124,6 +136,7 @@ export function RegisterForm() {
       >
         {isFizickoLice ? "Registruj se" : "Registruj firmu"}
       </SubmitButton>
-    </form>
+      </form>
+    </div>
   );
 }

@@ -10,6 +10,20 @@ export default async function PrijavaPage({
   const aktivirano = params.aktivirano === "1";
   const resetovano = params.resetovano === "1";
 
+  // Faza 20: greške iz Google prijave stižu ovde preko query parametra
+  // (redirekcija sa /auth/google/callback), pošto ruta nema svoj UI.
+  const greska = typeof params.greska === "string" ? params.greska : null;
+  const GOOGLE_GRESKE: Record<string, string> = {
+    google: "Prijava preko Google-a nije uspela. Pokušajte ponovo.",
+    google_nepodesen:
+      "Prijava preko Google-a trenutno nije podešena na sajtu. Prijavite se emailom i lozinkom.",
+    google_email_zauzet:
+      "Nalog sa ovim emailom već postoji kao drugi tip naloga. Prijavite se emailom i lozinkom.",
+    google_email_nepotvrdjen:
+      "Vaš Google email nije verifikovan, pa ne možemo bezbedno da povežemo nalog. Prijavite se emailom i lozinkom.",
+  };
+  const googleGreska = greska ? GOOGLE_GRESKE[greska] : null;
+
   return (
     <div className="mx-auto max-w-sm py-6">
       <div className="mb-6 text-center">
@@ -29,6 +43,11 @@ export default async function PrijavaPage({
         {resetovano && (
           <p className="rounded-md bg-emerald-50 px-3 py-2 text-sm text-emerald-800 border border-emerald-200">
             Lozinka je promenjena. Prijavite se novom lozinkom.
+          </p>
+        )}
+        {googleGreska && (
+          <p className="rounded-md bg-red-50 px-3 py-2 text-sm text-red-800 border border-red-200">
+            {googleGreska}
           </p>
         )}
         <LoginForm />

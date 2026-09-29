@@ -212,13 +212,15 @@ export type InvoiceStatus = "NEPLACENO" | "NAPLACENO" | "NEUSPESNO";
 export interface UserRow {
   id: string;
   email: string;
-  password_hash: string;
+  // Faza 20: opciono za naloge kreirane preko Google-a (nemaju lozinku).
+  password_hash: string | null;
   role: Role;
   ime: string;
   telefon: string | null;
   uslovi_prihvaceni_at: string | null;
   reset_token: string | null;
   reset_token_expires_at: string | null;
+  google_id: string | null;
   created_at: string;
 }
 

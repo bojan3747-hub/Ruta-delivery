@@ -5,6 +5,7 @@ import { useActionState } from "react";
 import { loginAction, type ActionState } from "@/lib/actions/auth-actions";
 import { FormMessage } from "./FormMessage";
 import { SubmitButton } from "./SubmitButton";
+import { GoogleAuthButton } from "./GoogleAuthButton";
 
 const initialState: ActionState = {};
 
@@ -12,7 +13,14 @@ export function LoginForm() {
   const [state, formAction] = useActionState(loginAction, initialState);
 
   return (
-    <form action={formAction} className="space-y-4">
+    <div className="space-y-4">
+      <GoogleAuthButton />
+      <div className="flex items-center gap-3 text-xs text-neutral-400">
+        <span className="h-px flex-1 bg-neutral-200" />
+        ili
+        <span className="h-px flex-1 bg-neutral-200" />
+      </div>
+      <form action={formAction} className="space-y-4">
       <FormMessage error={state.error} />
       <div>
         <label className="block text-sm font-medium text-neutral-700">Email</label>
@@ -45,6 +53,7 @@ export function LoginForm() {
           Zaboravili ste lozinku?
         </Link>
       </p>
-    </form>
+      </form>
+    </div>
   );
 }
