@@ -1,5 +1,6 @@
 import { requireUser } from "@/lib/auth";
 import { PortalSidebar, type PortalNavItem } from "@/components/PortalSidebar";
+import { PushNotificationToggle } from "@/components/PushNotificationToggle";
 
 const NAV_ITEMS: PortalNavItem[] = [
   { href: "/klijent", label: "Pregled", icon: "home" },
@@ -17,6 +18,7 @@ export default async function KlijentLayout({
   const user = await requireUser("CLIENT");
   return (
     <PortalSidebar user={user} navItems={NAV_ITEMS}>
+      <PushNotificationToggle />
       {children}
     </PortalSidebar>
   );

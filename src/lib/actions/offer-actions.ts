@@ -2,9 +2,11 @@
 
 import { revalidatePath } from "next/cache";
 import { getCurrentUser } from "../auth";
-import { getShipmentById } from "../queries/shipments";
+import { getShipmentById, getClientUserIdForShipment } from "../queries/shipments";
 import { acceptOffer, createManualOffer } from "../queries/offers";
 import { isTooLong, MAX_TEXT_LEN } from "../validation";
+import { sendPushToUser } from "../push";
+import { formatMoney } from "../labels";
 import type { ActionState } from "./auth-actions";
 
 function str(formData: FormData, key: string): string {
@@ -71,6 +73,20 @@ export async function sendManualOfferAction(
     procenjenoVremeMin,
     napomena: napomena || undefined,
   });
+
+  // Faza 21: push klijentu da je stigla ponuda — najvremenski osetljiviji
+  // trenutak u celom toku (do sad je klijent morao sam da proverava
+  // aplikaciju). Greška u slanju push-a nikad ne sme da pokvari uspešno
+  // poslatu ponudu, zato je van try/catch bloka za samu ponudu i
+  // sendPushToUser sama po sebi guta sve greške (vidi src/lib/push.ts).
+  const clientUserId = await getClientUserIdForShipment(shipmentId);
+  if (clientUserId) {
+    await sendPushToUser(clientUserId, {
+      title: "Nova ponuda za vašu pošiljku",
+      body: `${formatMoney(cena)} · dolazak za ~${procenjenoVremeMin} min`,
+      url: `/klijent/posiljke/${shipmentId}`,
+    });
+  }
 
   // Intentionally no revalidatePath here: the courier should see the
   // "Ponuda je poslata klijentu." confirmation on THIS render first. The

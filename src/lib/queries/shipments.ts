@@ -221,3 +221,18 @@ export async function listOpenRequestsForCourier(
     [courierId]
   );
 }
+
+// Faza 21: push notifikacije se šalju po `users.id` (push_subscriptions.user_id),
+// ne po `companies.id` (shipments.client_id) — ovaj join izbegava dva
+// odvojena upita (pošiljka pa firma) na svakom mestu gde treba da se
+// obavesti klijent o njegovoj pošiljci.
+export async function getClientUserIdForShipment(shipmentId: string): Promise<string | null> {
+  const row = await queryOne<{ user_id: string }>(
+    `SELECT comp.user_id
+     FROM shipments s
+     JOIN companies comp ON comp.id = s.client_id
+     WHERE s.id = $1`,
+    [shipmentId]
+  );
+  return row?.user_id ?? null;
+}

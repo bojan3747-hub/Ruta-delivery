@@ -4,7 +4,9 @@ import { revalidatePath } from "next/cache";
 import { getCurrentUser } from "../auth";
 import { advanceOrder, cancelOrder } from "../queries/orders";
 import { uploadShipmentFotografija } from "../queries/shipment-fotografije";
+import { getClientUserIdForShipment } from "../queries/shipments";
 import { isImageFile, MAX_IMAGE_SIZE_BYTES } from "../validation";
+import { sendPushToUser } from "../push";
 
 export async function advanceOrderAction(
   orderId: string,
@@ -43,6 +45,27 @@ export async function advanceOrderAction(
       buffer,
       photoFile.type || "image/jpeg"
     );
+  }
+
+  // Faza 21: push klijentu o napretku porudžbine. Namerno NEMA push-a na
+  // sam trenutak prihvatanja ponude (status 'PREUZETO') — to je direktna
+  // posledica klijentovog sopstvenog klika na "Prihvati", pa bi push tu
+  // bio suvišan; pravi, korisni trenuci su kad DOSTAVLJAČ pomeri status
+  // (klijent inače nema drugi način da to sazna osim da sam proveri app).
+  const STATUS_PUSH_PORUKE: Partial<Record<typeof order.status, string>> = {
+    U_TRANZITU: "Dostavljač je preuzeo vašu pošiljku — u tranzitu je.",
+    ISPORUCENO: "Vaša pošiljka je isporučena.",
+  };
+  const poruka = STATUS_PUSH_PORUKE[order.status];
+  if (poruka) {
+    const clientUserId = await getClientUserIdForShipment(order.shipment_id);
+    if (clientUserId) {
+      await sendPushToUser(clientUserId, {
+        title: "Ruta-Dostava",
+        body: poruka,
+        url: `/klijent/posiljke/${order.shipment_id}`,
+      });
+    }
   }
 
   revalidatePath("/dostavljac/aktivne");

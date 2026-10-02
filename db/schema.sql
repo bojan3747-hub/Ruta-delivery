@@ -558,9 +558,25 @@ CREATE TABLE IF NOT EXISTS opsti_uslovi_dokumenti (
   created_at  TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
+-- Faza 21 (2026-10-02): Web Push notifikacije za klijente (nova ponuda,
+-- promena statusa porudžbine) preko Push API-ja iz browsera — bez spoljne
+-- usluge, koristi VAPID ključeve generisane jednom i čuvane u .env (vidi
+-- src/lib/push.ts). Jedan korisnik može imati više pretplata (više
+-- uređaja/browsera) — otuda `user_id` nije UNIQUE, ali `endpoint` jeste
+-- (jedan browser-profil dobija jedan endpoint od push servisa).
+CREATE TABLE IF NOT EXISTS push_subscriptions (
+  id         UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id    UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  endpoint   TEXT NOT NULL UNIQUE,
+  p256dh     TEXT NOT NULL,
+  auth       TEXT NOT NULL,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
 CREATE INDEX IF NOT EXISTS idx_shipments_client ON shipments(client_id);
 CREATE INDEX IF NOT EXISTS idx_offers_shipment ON offers(shipment_id);
 CREATE INDEX IF NOT EXISTS idx_offers_courier ON offers(courier_id);
 CREATE INDEX IF NOT EXISTS idx_orders_courier ON orders(courier_id);
 CREATE INDEX IF NOT EXISTS idx_courier_zones_courier ON courier_zones(courier_id);
 CREATE INDEX IF NOT EXISTS idx_commission_invoices_courier ON commission_invoices(courier_id);
+CREATE INDEX IF NOT EXISTS idx_push_subscriptions_user ON push_subscriptions(user_id);
