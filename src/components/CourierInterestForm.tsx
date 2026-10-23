@@ -4,7 +4,7 @@ import { useActionState, useRef, useEffect } from "react";
 import { submitCourierInterestAction } from "@/lib/actions/courier-actions";
 import type { ActionState } from "@/lib/actions/auth-actions";
 import { ZONES, ZONE_LABELS } from "@/lib/zones";
-import { VEHICLE_TYPE_LABELS } from "@/lib/labels";
+import { VEHICLE_TYPE_LABELS, MACHINE_TYPE_LABELS } from "@/lib/labels";
 import { FormMessage } from "./FormMessage";
 import { SubmitButton } from "./SubmitButton";
 
@@ -72,6 +72,24 @@ export function CourierInterestForm() {
         <input type="checkbox" name="imaRukuZaUtovar" className="h-4 w-4" />
         Vozilo ima ruku za utovar (hidraulična dizalica)
       </label>
+      <div>
+        <label className="block text-sm font-medium">
+          Mašine koje nudite sa rukovaocem (opciono)
+        </label>
+        <p className="mt-1 text-xs text-neutral-500">
+          Ostavite prazno ako se prijavljujete samo za prevoz vozilom — ovo
+          polje je i za izvođače koji nude ISKLJUČIVO mašinu, bez vozila za
+          dostavu.
+        </p>
+        <div className="mt-2 grid grid-cols-1 gap-2 sm:grid-cols-2">
+          {Object.entries(MACHINE_TYPE_LABELS).map(([value, label]) => (
+            <label key={value} className="flex items-center gap-2 text-sm">
+              <input type="checkbox" name={`masina_${value}`} className="h-4 w-4" />
+              {label}
+            </label>
+          ))}
+        </div>
+      </div>
       <div>
         <label className="block text-sm font-medium">Zone u kojima radite</label>
         <div className="mt-2 grid grid-cols-2 gap-2 sm:grid-cols-3">

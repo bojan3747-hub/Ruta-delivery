@@ -40,7 +40,7 @@ async function main() {
   // === Check 2: submit the form with minimal required fields + a couple optional ones ===
   await visitor.fill('input[name="naziv"]', naziv);
   await visitor.fill('input[name="telefon"]', uniquePhone);
-  await visitor.fill('input[name="pib"]', "123456789");
+  await visitor.fill('input[name="pib"]', "12345678");
   await visitor.selectOption('select[name="tipVozila"]', "KAMION");
   await visitor.fill('input[name="nosivostKg"]', "1000");
   await visitor.check('input[name="zona_ZEMUN"]');
@@ -68,7 +68,7 @@ async function main() {
   check("operator page shows 'Landing page prijava' as izvor kontakta", opText.includes("Landing page prijava"));
   check("operator page shows vehicle type (Kamion)", opText.includes("Kamion"));
   check("operator page shows nosivost (1000 kg)", opText.includes("1000 kg"));
-  check("operator page shows PIB", opText.includes("PIB 123456789"));
+  check("operator page shows PIB", opText.includes("PIB 12345678"));
   check(
     "operator page shows an activation link for the new lead",
     (await op.locator("li", { hasText: naziv }).locator("text=Link za aktivaciju").count()) === 1

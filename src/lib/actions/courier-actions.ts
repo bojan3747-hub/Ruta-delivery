@@ -28,6 +28,10 @@ function selectedZones(formData: FormData): Zone[] {
   return ZONES.filter((zone) => formData.get(`zona_${zone}`) === "on");
 }
 
+function selectedMachineTypes(formData: FormData): MachineType[] {
+  return MACHINE_TYPES.filter((tip) => formData.get(`masina_${tip}`) === "on");
+}
+
 export async function activateCourierAction(
   _prev: ActionState,
   formData: FormData
@@ -111,6 +115,7 @@ export async function submitCourierInterestAction(
   const nosivostKgRaw = str(formData, "nosivostKg");
   const imaRukuZaUtovar = formData.get("imaRukuZaUtovar") === "on";
   const zones = selectedZones(formData);
+  const masine = selectedMachineTypes(formData);
 
   if (!naziv || !telefon) {
     return { error: "Unesite naziv firme/radnje i broj telefona." };
@@ -131,10 +136,12 @@ export async function submitCourierInterestAction(
   }
 
   // Dedup: ako je isti broj telefona već prijavljen (bilo koji status),
-  // ne pravimo duplikat naloga — samo potvrđujemo prijem.
+  // ne pravimo duplikat naloga — samo potvrđujemo prijem. Mašine iz ove
+  // prijave se tad NE upisuju (isti princip kao i ostala polja: original
+  // se ne prepisuje) — operater već ima prvobitnu prijavu na uvid.
   const existing = await getCourierByPhone(telefon);
   if (!existing) {
-    await createPreApprovedCourier({
+    const created = await createPreApprovedCourier({
       naziv,
       telefon,
       izvorKontakta: "Landing page prijava",
@@ -144,6 +151,20 @@ export async function submitCourierInterestAction(
       imaRukuZaUtovar,
       zones,
     });
+
+    // Faza 22: izvođači mašina mogu da naznače koje mašine nude već na
+    // ovoj javnoj formi (pre ove izmene, mašine su se mogle dodati samo
+    // posle aktivacije naloga, preko /dostavljac/masine) — bez cene po
+    // satu/danu u ovoj fazi (ostaje prazno, popunjava se posle aktivacije,
+    // isti obrazac kao nosivostKg/tipVozila koji se takođe mogu doteraju
+    // kasnije). Operater ih odmah vidi na /operater/dostavljaci preko
+    // postojećeg getMachinesForCouriers, bez ikakve dodatne izmene tamo.
+    if (masine.length > 0) {
+      await setCourierMachines(
+        created.id,
+        masine.map((tip) => ({ tipMasine: tip, cenaPoSatu: null, cenaPoDanu: null }))
+      );
+    }
   }
 
   return {

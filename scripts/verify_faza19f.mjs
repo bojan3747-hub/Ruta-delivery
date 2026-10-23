@@ -58,21 +58,23 @@ async function main() {
     (await anon.getByRole("link", { name: "Angažujte mašinu" }).getAttribute("href")) === "/registracija"
   );
 
-  // Postojeći B2B prevoz sadržaj NIJE izmenjen/uklonjen.
-  check("H1 i dalje 'Kombi prevoz i dostava za firme u Beogradu'", anonText.includes("Kombi prevoz i dostava za"));
+  // Postojeći B2B prevoz sadržaj NIJE izmenjen/uklonjen (osim namernih
+  // izmena iz Faze 23 koje izbacuju "za firme" iz H1 i uvode fizička lica
+  // u opis problema — vidi te provere odvojeno, dole u "Faza 23" bloku).
+  check("H1 i dalje 'Kombi prevoz i dostava u Beogradu'", anonText.includes("Kombi prevoz i dostava"));
   check("sekcija 'Koji problem rešavamo' i dalje prisutna", anonText.includes("Koji problem rešavamo"));
   check(
-    "B2B opis problema nepromenjen",
-    anonText.includes("Firmama je dostava retko potpuno predvidljiva")
+    "opis problema i dalje prisutan (Faza 23: sad pominje i firme i pojedince)",
+    anonText.includes("dostava je retko potpuno predvidljiva")
   );
   check("sekcija 'Kako radi' i dalje prisutna", anonText.includes("Kako radi"));
   check(
     "CTA sekcija za dostavljače i dalje prisutna",
-    anonText.includes("Vozite kombi ili kamionet? Zaradite dodatno uz Ruta-Dostavu.")
+    anonText.includes("Zaradite dodatno uz Ruta-Dostavu.")
   );
   check(
-    "dodatna napomena za dostavljače o mašinama je dodata (aditivno)",
-    anonText.includes("Imate i mašinu sa rukovaocem")
+    "dodatna napomena za dostavljače o mašinama je dodata (aditivno, Faza 22: proširena da mašine budu ravnopravna opcija već na formi)",
+    anonText.includes("Imate mašinu sa rukovaocem")
   );
 
   // === Klijent (ulogovan) ===

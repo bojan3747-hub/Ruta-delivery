@@ -42,19 +42,20 @@ export default async function HomePage() {
               </span>
             </div>
             <h1 className="font-serif text-4xl font-bold leading-tight sm:text-5xl">
-              Kombi prevoz i dostava za
+              Kombi prevoz i dostava
               <br />
-              firme u <span className="text-emerald-400">Beogradu</span>
+              u <span className="text-emerald-400">Beogradu</span>
             </h1>
             <p className="text-sm font-medium uppercase tracking-wide text-slate-400">
               Od manjih paketa do kamionskog tereta — na vreme, svaki put.
             </p>
             <p className="max-w-md text-base text-slate-300">
-              Ruta-Dostava je napravljena za firme kojima je povremeno ili
-              redovno potrebna dostava — a ne žele da zovu pet različitih
-              prevoznika da uporede cenu i dostupnost. Unesite pošiljku,
-              uporedite ponude proverenih kombi i kamionskih prevoznika i
-              kurirskih službi, pratite isporuku — sve na jednom mestu.
+              Ruta-Dostava je napravljena za svakoga kome je povremeno ili
+              redovno potrebna dostava — firmi ili pojedincu — a ne želite
+              da zovete pet različitih prevoznika da uporedite cenu i
+              dostupnost. Unesite pošiljku, uporedite ponude proverenih
+              kombi i kamionskih prevoznika i kurirskih službi, pratite
+              isporuku — sve na jednom mestu.
             </p>
             {user ? (
               <div className="flex flex-col items-start gap-2 pt-2">
@@ -140,11 +141,11 @@ export default async function HomePage() {
             Koji problem rešavamo
           </h2>
           <p className="mx-auto mt-2 max-w-2xl text-neutral-600">
-            Firmama je dostava retko potpuno predvidljiva — nekad je paket mali
-            i hitan, nekad je pošiljka koju treba dogovoriti unapred.
-            Standardne kurirske službe rade po fiksnom rasporedu i jednoj ceni,
-            a poređenje ponuda više prevoznika ručno (telefonom, porukama)
-            oduzima vreme koje firma nema.
+            I firmama i pojedincima dostava je retko potpuno predvidljiva —
+            nekad je paket mali i hitan, nekad je pošiljka koju treba
+            dogovoriti unapred. Standardne kurirske službe rade po fiksnom
+            rasporedu i jednoj ceni, a poređenje ponuda više prevoznika ručno
+            (telefonom, porukama) oduzima vreme koje nemate.
           </p>
         </div>
         <div className="grid gap-6 sm:grid-cols-3">
@@ -165,11 +166,12 @@ export default async function HomePage() {
             </p>
           </div>
           <div className="rounded-lg border border-black/10 bg-white p-5">
-            <h3 className="font-semibold">Napravljeno za firme</h3>
+            <h3 className="font-semibold">Jednostavno za sve</h3>
             <p className="mt-1 text-sm text-neutral-600">
-              Nalog firme, istorija svih pošiljki i porudžbina na jednom
-              mestu, ocene dostavljača — bez papirologije koja ide uz
-              ugovaranje sa više pojedinačnih prevoznika.
+              Vaš nalog — firme ili fizičkog lica — istorija svih pošiljki i
+              porudžbina na jednom mestu, ocene dostavljača — bez
+              papirologije koja ide uz ugovaranje sa više pojedinačnih
+              prevoznika.
             </p>
           </div>
         </div>
@@ -276,12 +278,14 @@ export default async function HomePage() {
 
       <section className="rounded-lg border border-black/10 bg-white p-6 text-center">
         <h2 className="font-serif text-2xl font-semibold">
-          Vozite kombi ili kamionet? Zaradite dodatno uz Ruta-Dostavu.
+          Vozite kombi/kamion ili imate građevinsku mašinu sa rukovaocem?
+          Zaradite dodatno uz Ruta-Dostavu.
         </h2>
         <p className="mx-auto mt-2 max-w-2xl text-sm text-neutral-600">
-          Firmama u Beogradu treba prevoz za veće i nestandardne pošiljke koje
-          klasične kurirske službe teško pokrivaju — Ruta-Dostava vas povezuje
-          sa njima.
+          Firmama i pojedincima u Beogradu treba prevoz za veće i
+          nestandardne pošiljke koje klasične kurirske službe teško
+          pokrivaju, kao i mašine sa rukovaocem za rad na terenu —
+          Ruta-Dostava vas povezuje sa njima.
         </p>
         <div className="mx-auto mt-6 grid max-w-3xl gap-6 text-left sm:grid-cols-3">
           <div className="rounded-lg bg-neutral-50 p-4">
@@ -307,15 +311,16 @@ export default async function HomePage() {
           </div>
         </div>
         <p className="mx-auto mt-6 max-w-2xl text-sm text-neutral-600">
-          Imate i mašinu sa rukovaocem (bager, valjak, dizalica i slično)?
-          Posle otvaranja naloga možete je dodati na svoj profil i primati
-          zahteve i za angažovanje mašine, na istom nalogu.
+          Imate mašinu sa rukovaocem (bager, valjak, dizalica i slično)? Nije
+          potrebno da imate i vozilo za dostavu — naznačite koje mašine
+          nudite odmah u formi ispod, isti nalog pokriva i prevoz i mašine.
         </p>
         <div className="mx-auto mt-8 max-w-xl border-t border-black/10 pt-6">
           <h3 className="font-semibold">Prijavite se za saradnju</h3>
           <p className="mt-1 text-sm text-neutral-600">
             Ostavite osnovne podatke — kontaktiraćemo vas da dogovorimo
-            detalje i otvorimo vam nalog.
+            detalje i otvorimo vam nalog. Vozilo i mašine su oba opciona:
+            popunite ono što se odnosi na vas.
           </p>
           <div className="mt-4">
             <CourierInterestForm />
