@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { getCurrentUser } from "../auth";
 import { getOrderById } from "../queries/orders";
-import { getShipmentById } from "../queries/shipments";
+import { getShipmentById, getShipmentByGuestToken } from "../queries/shipments";
 import { createRating } from "../queries/ratings";
 import { isTooLong, MAX_TEXT_LEN } from "../validation";
 import type { RatingDirection } from "../types";
@@ -62,5 +62,48 @@ export async function submitRatingAction(
   }
 
   revalidatePath(revalidatePathTarget);
+  return {};
+}
+
+/** Faza 24: gost ocenjuje dostavljača preko gost_token-a — isti pravac
+ * ocene (KLIJENT_KA_DOSTAVLJACU) kao i ulogovani klijent, reuse iste
+ * queries/ratings.createRating funkcije; gostovo pravo se utvrđuje preko
+ * poklapanja tokena umesto sesije/companyId. */
+export async function submitRatingGuestAction(
+  _prev: ActionState,
+  formData: FormData
+): Promise<ActionState> {
+  const orderId = str(formData, "orderId");
+  const gostToken = str(formData, "gostToken");
+  const ocena = Number(str(formData, "ocena"));
+  const komentar = str(formData, "komentar");
+
+  if (!Number.isInteger(ocena) || ocena < 1 || ocena > 5) {
+    return { error: "Ocena mora biti od 1 do 5." };
+  }
+  if (isTooLong(komentar, MAX_TEXT_LEN)) {
+    return { error: "Komentar je predugačak." };
+  }
+
+  const order = await getOrderById(orderId);
+  if (!order) return { error: "Porudžbina nije pronađena." };
+
+  const shipment = await getShipmentByGuestToken(gostToken);
+  if (!shipment || shipment.id !== order.shipment_id) {
+    return { error: "Porudžbina nije pronađena." };
+  }
+
+  try {
+    await createRating({
+      orderId,
+      smer: "KLIJENT_KA_DOSTAVLJACU",
+      ocena,
+      komentar: komentar || undefined,
+    });
+  } catch (err) {
+    return { error: err instanceof Error ? err.message : "Greška." };
+  }
+
+  revalidatePath(`/pracenje/${gostToken}`);
   return {};
 }

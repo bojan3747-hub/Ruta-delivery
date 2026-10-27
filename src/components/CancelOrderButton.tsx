@@ -2,9 +2,17 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { cancelOrderAction } from "@/lib/actions/order-actions";
+import { cancelOrderAction, cancelOrderGuestAction } from "@/lib/actions/order-actions";
 
-export function CancelOrderButton({ orderId }: { orderId: string }) {
+export function CancelOrderButton({
+  orderId,
+  gostToken,
+}: {
+  orderId: string;
+  /** Faza 24: na /pracenje/[token] (gost, bez sesije) poziva se gost-
+   * varijanta akcije preko tokena umesto sesijske. */
+  gostToken?: string;
+}) {
   const [open, setOpen] = useState(false);
   const [razlog, setRazlog] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -41,7 +49,9 @@ export function CancelOrderButton({ orderId }: { orderId: string }) {
           onClick={() =>
             startTransition(async () => {
               setError(null);
-              const result = await cancelOrderAction(orderId, razlog || undefined);
+              const result = gostToken
+                ? await cancelOrderGuestAction(orderId, gostToken, razlog || undefined)
+                : await cancelOrderAction(orderId, razlog || undefined);
               if (result.error) setError(result.error);
               else router.refresh();
             })

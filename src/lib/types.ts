@@ -318,6 +318,10 @@ export interface ShipmentRow {
   zakazano_datum_vreme: string | null;
   status: ShipmentStatus;
   created_at: string;
+  // Faza 24: popunjeno samo za pošiljke napravljene kroz gost-formu (bez
+  // prijave) — gostov jedini "ključ" za pristup /pracenje/[token]. NULL za
+  // sve pošiljke napravljene kroz standardnu (ulogovanu) formu.
+  gost_token: string | null;
 }
 
 export interface OfferRow {

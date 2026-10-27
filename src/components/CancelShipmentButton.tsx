@@ -2,9 +2,20 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { cancelShipmentAction } from "@/lib/actions/shipment-actions";
+import {
+  cancelShipmentAction,
+  cancelShipmentGuestAction,
+} from "@/lib/actions/shipment-actions";
 
-export function CancelShipmentButton({ shipmentId }: { shipmentId: string }) {
+export function CancelShipmentButton({
+  shipmentId,
+  gostToken,
+}: {
+  shipmentId: string;
+  /** Faza 24: na /pracenje/[token] (gost, bez sesije) poziva se gost-
+   * varijanta akcije preko tokena umesto sesijske. */
+  gostToken?: string;
+}) {
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
   const router = useRouter();
@@ -18,7 +29,9 @@ export function CancelShipmentButton({ shipmentId }: { shipmentId: string }) {
           if (!confirm("Otkazati ovu pošiljku?")) return;
           startTransition(async () => {
             setError(null);
-            const result = await cancelShipmentAction(shipmentId);
+            const result = gostToken
+              ? await cancelShipmentGuestAction(shipmentId, gostToken)
+              : await cancelShipmentAction(shipmentId);
             if (result.error) setError(result.error);
             else router.refresh();
           });

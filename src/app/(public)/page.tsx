@@ -70,7 +70,7 @@ export default async function HomePage() {
                 </span>
               </div>
             ) : (
-              <div className="flex flex-wrap gap-3 pt-2">
+              <div className="flex flex-wrap items-center gap-3 pt-2">
                 <Link
                   href="/registracija"
                   className="rounded-md bg-emerald-500 px-5 py-2.5 text-sm font-medium text-slate-900 hover:bg-emerald-400"
@@ -82,6 +82,14 @@ export default async function HomePage() {
                   className="rounded-md border border-white/30 px-5 py-2.5 text-sm font-medium text-white hover:bg-white/10"
                 >
                   Prijavite se
+                </Link>
+                {/* Faza 24: "gost zahtev" — za fizička lica koja samo
+                    povremeno naruče dostavu, bez registracije. */}
+                <Link
+                  href="/zahtev"
+                  className="text-sm font-medium text-slate-300 underline hover:text-white"
+                >
+                  Ili naručite odmah, bez registracije
                 </Link>
               </div>
             )}

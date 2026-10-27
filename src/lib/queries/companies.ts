@@ -120,6 +120,62 @@ export async function createGoogleClientAccount(input: {
   }
 }
 
+// --- Faza 24: gost-zahtev (nalog u pozadini, bez prijave) ------------------
+
+/**
+ * Kreira nalog za "gosta" — fizičko lice koje naruči dostavu bez
+ * registracije (KAN: "olakšati deo kada korisnici dolaze na site i traže
+ * uslugu"). Isti obrazac transakcije kao createGoogleClientAccount
+ * (password_hash NULL, FIZICKO_LICE, naziv = ime), samo umesto google_id
+ * koristimo sintetički placeholder email izveden iz telefona —
+ * `users.email` je UNIQUE NOT NULL i nema nullable varijantu (za razliku od
+ * password_hash, već nullable od Faze 20), pa bismo inače morali šemsku
+ * izmenu samo za ovaj slučaj. Domen @gost.ruta-dostava.rs ne postoji kao
+ * pravi mejl (nikad se ne šalje mejl na njega) i služi i kao lak način da se
+ * gost-nalozi raspoznaju u bazi/operaterskom panelu bez posebne kolone.
+ *
+ * Svaki gost-zahtev dobija SVOJ nalog (odluka korisnika: "svaki zahtev =
+ * novi nalog" — najjednostavnije za MVP, bez rizika pogrešnog spajanja
+ * tuđih pošiljki po istom broju telefona; operater po potrebi ručno spaja
+ * istoriju ako ustanovi da je isti čovek).
+ */
+export async function createGuestClientAccount(input: {
+  ime: string;
+  telefon: string;
+}): Promise<{ user: UserRow; company: CompanyRow }> {
+  const client = await pool.connect();
+  try {
+    await client.query("BEGIN");
+
+    const placeholderEmail = `gost-${input.telefon.replace(/[^0-9]/g, "")}-${Date.now()}-${Math.random()
+      .toString(36)
+      .slice(2, 8)}@gost.ruta-dostava.rs`;
+
+    const userResult = await client.query<UserRow>(
+      `INSERT INTO users (email, password_hash, role, ime, telefon, uslovi_prihvaceni_at)
+       VALUES ($1, NULL, 'CLIENT', $2, $3, now())
+       RETURNING *`,
+      [placeholderEmail, input.ime, input.telefon]
+    );
+    const user = userResult.rows[0];
+
+    const companyResult = await client.query<CompanyRow>(
+      `INSERT INTO companies (user_id, naziv, tip_klijenta)
+       VALUES ($1, $2, 'FIZICKO_LICE')
+       RETURNING *`,
+      [user.id, input.ime]
+    );
+
+    await client.query("COMMIT");
+    return { user, company: companyResult.rows[0] };
+  } catch (err) {
+    await client.query("ROLLBACK");
+    throw err;
+  } finally {
+    client.release();
+  }
+}
+
 export interface CompanyForOperator extends CompanyRow {
   /** Faza 7: operater treba da vidi listu registrovanih klijenata sa svim
    * podacima koje klijent unese pri registraciji — deo tih podataka

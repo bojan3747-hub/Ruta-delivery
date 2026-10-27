@@ -423,6 +423,20 @@ ALTER TABLE shipments ADD COLUMN IF NOT EXISTS zakazano_datum_vreme TIMESTAMPTZ;
 -- obrascu kao opsti_uslovi_dokumenti (da SELECT * na shipments ne vuče BYTEA).
 ALTER TABLE shipments DROP COLUMN IF EXISTS fotografija_url;
 
+-- Faza 24 (2026-10-27): "gost" zahtev za dostavu — fizičko lice bez naloga
+-- naruči dostavu, nalog se kreira u pozadini (vidi createGuestClientAccount
+-- u queries/companies.ts), a gost pristupa SVOJOJ pošiljci isključivo preko
+-- ovog tokena (link /pracenje/[token]), bez prijave. NULL za sve postojeće
+-- i sve pošiljke kreirane kroz standardnu (ulogovanu) formu — kolona se
+-- popunjava samo za gost-zahteve. Partial unique index (umesto NOT NULL
+-- UNIQUE) baš zato što većina redova ima NULL, a UNIQUE indeks u Postgresu
+-- dozvoljava više NULL vrednosti svejedno — index je ovde samo da dva
+-- razna gost-zahteva nikad ne dobiju isti token (teorijski sudar
+-- gen_random_uuid()-a), ne da bi NULL bio jedinstven.
+ALTER TABLE shipments ADD COLUMN IF NOT EXISTS gost_token UUID;
+CREATE UNIQUE INDEX IF NOT EXISTS shipments_gost_token_unique_idx
+  ON shipments (gost_token) WHERE gost_token IS NOT NULL;
+
 CREATE TABLE IF NOT EXISTS shipment_fotografije (
   id           UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   shipment_id  UUID UNIQUE NOT NULL REFERENCES shipments(id) ON DELETE CASCADE,

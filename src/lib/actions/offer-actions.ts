@@ -2,7 +2,11 @@
 
 import { revalidatePath } from "next/cache";
 import { getCurrentUser } from "../auth";
-import { getShipmentById, getClientUserIdForShipment } from "../queries/shipments";
+import {
+  getShipmentById,
+  getClientUserIdForShipment,
+  getShipmentByGuestToken,
+} from "../queries/shipments";
 import { acceptOffer, createManualOffer } from "../queries/offers";
 import { isTooLong, MAX_TEXT_LEN } from "../validation";
 import { sendPushToUser } from "../push";
@@ -34,6 +38,30 @@ export async function acceptOfferAction(
   }
 
   revalidatePath(`/klijent/posiljke/${shipmentId}`);
+  return {};
+}
+
+/** Faza 24: gost prihvata ponudu preko svog gost_token-a umesto sesije —
+ * reuse iste queries/offers.acceptOffer funkcije (ona i tako ne provera
+ * vlasništvo na nivou upita, to je uvek posao akcije), samo se ovlašćenje
+ * utvrđuje preko poklapanja tokena. */
+export async function acceptOfferGuestAction(
+  shipmentId: string,
+  offerId: string,
+  gostToken: string
+): Promise<{ error?: string }> {
+  const shipment = await getShipmentByGuestToken(gostToken);
+  if (!shipment || shipment.id !== shipmentId) {
+    return { error: "Pošiljka nije pronađena." };
+  }
+
+  try {
+    await acceptOffer(shipmentId, offerId);
+  } catch (err) {
+    return { error: err instanceof Error ? err.message : "Greška." };
+  }
+
+  revalidatePath(`/pracenje/${gostToken}`);
   return {};
 }
 

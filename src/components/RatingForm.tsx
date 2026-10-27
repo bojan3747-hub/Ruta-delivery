@@ -1,7 +1,7 @@
 "use client";
 
 import { useActionState, useState } from "react";
-import { submitRatingAction } from "@/lib/actions/rating-actions";
+import { submitRatingAction, submitRatingGuestAction } from "@/lib/actions/rating-actions";
 import type { ActionState } from "@/lib/actions/auth-actions";
 import { FormMessage } from "./FormMessage";
 import { SubmitButton } from "./SubmitButton";
@@ -11,11 +11,19 @@ const initialState: ActionState = {};
 export function RatingForm({
   orderId,
   target,
+  gostToken,
 }: {
   orderId: string;
   target: "dostavljac" | "klijent";
+  /** Faza 24: na /pracenje/[token] (gost, bez sesije) šalje se gost-
+   * varijanta akcije — orderId + gostToken kao skriveni hidden field-ovi,
+   * bez provere sesije/companyId. */
+  gostToken?: string;
 }) {
-  const [state, formAction] = useActionState(submitRatingAction, initialState);
+  const [state, formAction] = useActionState(
+    gostToken ? submitRatingGuestAction : submitRatingAction,
+    initialState
+  );
   const [ocena, setOcena] = useState(5);
 
   return (
@@ -25,6 +33,7 @@ export function RatingForm({
       </h3>
       <FormMessage error={state.error} />
       <input type="hidden" name="orderId" value={orderId} />
+      {gostToken && <input type="hidden" name="gostToken" value={gostToken} />}
       <div className="flex gap-1">
         {[1, 2, 3, 4, 5].map((n) => (
           <button

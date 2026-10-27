@@ -21,6 +21,7 @@ import {
 import { FormMessage } from "./FormMessage";
 import { SubmitButton } from "./SubmitButton";
 import { AddressPicker } from "./AddressPicker";
+import { TermsCheckbox } from "./TermsCheckbox";
 import type { SavedAddressRow } from "@/lib/types";
 
 const initialState: ActionState = {};
@@ -55,6 +56,8 @@ export function ShipmentForm({
   defaultSenderName = "",
   defaultSenderPhone = "",
   defaultSenderAddress = "",
+  action = createShipmentAction,
+  mode = "client",
 }: {
   savedAddresses?: SavedAddressRow[];
   /** Prefilled from the logged-in contact person — still editable per shipment. */
@@ -62,8 +65,15 @@ export function ShipmentForm({
   defaultSenderPhone?: string;
   /** Prefilled from the company's registered (sedište) address. */
   defaultSenderAddress?: string;
+  /** Faza 24: gost-forma (/zahtev) prosleđuje createGuestShipmentAction
+   * umesto podrazumevanog createShipmentAction — isti hook, druga akcija. */
+  action?: typeof createShipmentAction;
+  /** "guest" dodaje "Vaši podaci" sekciju (ime/telefon identiteta naloga
+   * koji se kreira u pozadini) i saglasnost sa uslovima na vrhu forme —
+   * ulogovani klijent (mode="client", podrazumevano) ih ne vidi. */
+  mode?: "client" | "guest";
 }) {
-  const [state, formAction] = useActionState(createShipmentAction, initialState);
+  const [state, formAction] = useActionState(action, initialState);
   const [zeljeniTermin, setZeljeniTermin] = useState("ODMAH");
 
   const [zonaPreuzimanja, setZonaPreuzimanja] = useState("");
@@ -100,6 +110,30 @@ export function ShipmentForm({
   return (
     <form action={formAction} className="space-y-8">
       <FormMessage error={state.error} />
+
+      {mode === "guest" && (
+        <section className={sectionClass}>
+          <SectionHeading dotClassName="bg-neutral-500">
+            Vaši podaci
+          </SectionHeading>
+          <p className="text-xs text-neutral-500">
+            Ovo je vaš kontakt — koristimo ga da napravimo nalog u pozadini i
+            da vam pokažemo link za praćenje ove pošiljke. Nije potrebna
+            registracija.
+          </p>
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div>
+              <label className="block text-sm font-medium">Ime i prezime *</label>
+              <input name="gostIme" required className={inputClass} />
+            </div>
+            <div>
+              <label className="block text-sm font-medium">Telefon *</label>
+              <input name="gostTelefon" required className={inputClass} />
+            </div>
+          </div>
+          <TermsCheckbox />
+        </section>
+      )}
 
       <section className={sectionClass}>
         <SectionHeading dotClassName="bg-emerald-600">
@@ -437,7 +471,7 @@ export function ShipmentForm({
         className="w-full rounded-lg bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-700 disabled:opacity-50"
         pendingLabel="Slanje zahteva..."
       >
-        Zatraži ponude
+        {mode === "guest" ? "Pošaljite zahtev" : "Zatraži ponude"}
       </SubmitButton>
     </form>
   );

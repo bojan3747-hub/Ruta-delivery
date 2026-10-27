@@ -2,9 +2,9 @@
 
 import { revalidatePath } from "next/cache";
 import { getCurrentUser } from "../auth";
-import { advanceOrder, cancelOrder } from "../queries/orders";
+import { advanceOrder, cancelOrder, getOrderById } from "../queries/orders";
 import { uploadShipmentFotografija } from "../queries/shipment-fotografije";
-import { getClientUserIdForShipment } from "../queries/shipments";
+import { getClientUserIdForShipment, getShipmentByGuestToken } from "../queries/shipments";
 import { isImageFile, MAX_IMAGE_SIZE_BYTES } from "../validation";
 import { sendPushToUser } from "../push";
 
@@ -94,5 +94,31 @@ export async function cancelOrderAction(
 
   revalidatePath("/dostavljac/aktivne");
   revalidatePath("/klijent");
+  return {};
+}
+
+/** Faza 24: gost otkazuje svoju porudžbinu preko gost_token-a — reuse iste
+ * queries/orders.cancelOrder funkcije (ona interno provera da clientId
+ * odgovara pošiljci porudžbine), samo se gostovo pravo utvrđuje preko
+ * poklapanja tokena umesto sesije. */
+export async function cancelOrderGuestAction(
+  orderId: string,
+  gostToken: string,
+  razlog?: string
+): Promise<{ error?: string }> {
+  const order = await getOrderById(orderId);
+  if (!order) return { error: "Porudžbina nije pronađena." };
+  const shipment = await getShipmentByGuestToken(gostToken);
+  if (!shipment || shipment.id !== order.shipment_id) {
+    return { error: "Porudžbina nije pronađena." };
+  }
+
+  try {
+    await cancelOrder(orderId, { clientId: shipment.client_id }, razlog);
+  } catch (err) {
+    return { error: err instanceof Error ? err.message : "Greška." };
+  }
+
+  revalidatePath(`/pracenje/${gostToken}`);
   return {};
 }

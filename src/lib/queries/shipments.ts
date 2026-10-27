@@ -43,6 +43,10 @@ export async function createShipment(input: {
   isporukaLat?: number;
   isporukaLon?: number;
   udaljenostKm?: number;
+  // Faza 24: popunjeno SAMO kad pošiljku kreira gost (createGuestShipmentAction)
+  // — generiše ga akcija (crypto.randomUUID()), ne baza, da bi bio dostupan
+  // odmah za redirect na /pracenje/[token] bez dodatnog SELECT-a.
+  gostToken?: string;
 }): Promise<ShipmentRow> {
   const row = await queryOne<ShipmentRow>(
     `INSERT INTO shipments (
@@ -52,9 +56,9 @@ export async function createShipment(input: {
        hitno, nestandardna, zahteva_sleper, zahteva_ruku_za_utovar,
        zahteva_slep, zeljeni_termin, termin_detalji, napomena,
        deklarisana_vrednost, preuzimanje_lat, preuzimanje_lon, isporuka_lat,
-       isporuka_lon, udaljenost_km, zakazano_datum_vreme
+       isporuka_lon, udaljenost_km, zakazano_datum_vreme, gost_token
      ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,
-               $19,$20,$21,$22,$23,$24,$25,$26,$27)
+               $19,$20,$21,$22,$23,$24,$25,$26,$27,$28)
      RETURNING *`,
     [
       input.clientId,
@@ -84,6 +88,7 @@ export async function createShipment(input: {
       input.isporukaLon ?? null,
       input.udaljenostKm ?? null,
       input.terminDatumVreme ?? null,
+      input.gostToken ?? null,
     ]
   );
   if (!row) throw new Error("Kreiranje pošiljke nije uspelo");
@@ -94,6 +99,17 @@ export async function getShipmentById(
   id: string
 ): Promise<ShipmentRow | null> {
   return queryOne<ShipmentRow>("SELECT * FROM shipments WHERE id = $1", [id]);
+}
+
+/** Faza 24: jedini način da gost (bez prijave) pristupi svojoj pošiljci —
+ * vidi kolonu shipments.gost_token i /pracenje/[token]. */
+export async function getShipmentByGuestToken(
+  token: string
+): Promise<ShipmentRow | null> {
+  return queryOne<ShipmentRow>(
+    "SELECT * FROM shipments WHERE gost_token = $1",
+    [token]
+  );
 }
 
 export async function listShipmentsByClient(

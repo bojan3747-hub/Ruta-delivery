@@ -1,0 +1,269 @@
+import { notFound } from "next/navigation";
+import { getShipmentByGuestToken } from "@/lib/queries/shipments";
+import { listOffersForShipment } from "@/lib/queries/offers";
+import { getOrderByShipmentId } from "@/lib/queries/orders";
+import { getRatingForOrder } from "@/lib/queries/ratings";
+import { getCourierById } from "@/lib/queries/couriers";
+import { hasShipmentFotografija } from "@/lib/queries/shipment-fotografije";
+import { ZONE_LABELS } from "@/lib/zones";
+import {
+  ORDER_STATUS_LABELS,
+  ORDER_STATUS_STEPS,
+  SHIPMENT_CONTENT_LABELS,
+  SHIPMENT_STATUS_LABELS,
+  SHIPMENT_TYPE_LABELS,
+  SPECIAL_CARGO_LABELS,
+  TERMIN_LABELS,
+  formatDateTime,
+  formatMoney,
+} from "@/lib/labels";
+import type { OrderStatus } from "@/lib/types";
+import { StatusBadge } from "@/components/StatusBadge";
+import { AcceptOfferButton } from "@/components/AcceptOfferButton";
+import { RatingForm } from "@/components/RatingForm";
+import { CancelShipmentButton } from "@/components/CancelShipmentButton";
+import { CancelOrderButton } from "@/components/CancelOrderButton";
+import { AutoRefresh } from "@/components/AutoRefresh";
+import { CopyLinkBanner } from "@/components/CopyLinkBanner";
+
+// Faza 24: stranica za praćenje gost-zahteva — isti prikaz kao
+// klijent/posiljke/[id], samo bez sesije: vlasništvo se utvrđuje preko
+// gost_token-a u URL-u (jedini "ključ" koji gost ima), ne preko
+// user.companyId. Namerno BEZ pretrage po telefonu (odluka korisnika:
+// "samo link, bez povratne pretrage") — izgubljen link znači ručni
+// kontakt sa operaterom.
+export default async function PracenjePage({
+  params,
+}: {
+  params: Promise<{ token: string }>;
+}) {
+  const { token } = await params;
+  const shipment = await getShipmentByGuestToken(token);
+
+  if (!shipment) {
+    notFound();
+  }
+
+  const order = await getOrderByShipmentId(shipment.id);
+  const offers = order ? [] : await listOffersForShipment(shipment.id);
+  const courier = order ? await getCourierById(order.courier_id) : null;
+  const rating = order
+    ? await getRatingForOrder(order.id, "KLIJENT_KA_DOSTAVLJACU")
+    : null;
+  const hasFotografija =
+    order?.status === "ISPORUCENO" ? await hasShipmentFotografija(shipment.id) : false;
+
+  return (
+    <div className="mx-auto max-w-2xl space-y-6">
+      <AutoRefresh intervalMs={20000} />
+      <CopyLinkBanner />
+      <div>
+        <h1 className="font-serif text-2xl font-semibold text-neutral-900">
+          {ZONE_LABELS[shipment.zona_preuzimanja]} → {ZONE_LABELS[shipment.zona_isporuke]}
+        </h1>
+        <div className="mt-2 grid gap-x-4 gap-y-1 text-sm text-neutral-600 sm:grid-cols-2">
+          <p>
+            <span className="text-neutral-400">Pošiljalac:</span>{" "}
+            {shipment.posiljalac_ime ?? "—"}
+            {shipment.posiljalac_telefon ? ` · ${shipment.posiljalac_telefon}` : ""}
+            <br />
+            {shipment.adresa_preuzimanja}
+          </p>
+          <p>
+            <span className="text-neutral-400">Primalac:</span>{" "}
+            {shipment.primalac_ime ?? "—"}
+            {shipment.primalac_telefon ? ` · ${shipment.primalac_telefon}` : ""}
+            <br />
+            {shipment.adresa_isporuke}
+          </p>
+        </div>
+      </div>
+
+      <div className="flex flex-wrap items-center gap-2">
+        <StatusBadge
+          status={shipment.status}
+          label={SHIPMENT_STATUS_LABELS[shipment.status]}
+        />
+        <span className="text-sm text-neutral-500">
+          {SHIPMENT_TYPE_LABELS[shipment.tip]}
+          {shipment.sadrzaj_posiljke
+            ? ` · ${SHIPMENT_CONTENT_LABELS[shipment.sadrzaj_posiljke]}`
+            : ""}
+          {shipment.posebna_kategorija_tereta
+            ? ` · ${SPECIAL_CARGO_LABELS[shipment.posebna_kategorija_tereta]}`
+            : ""}
+          {shipment.hitno ? " · Hitno" : ""}
+          {shipment.nestandardna ? " · Nestandardna" : ""}
+          {shipment.zahteva_sleper ? " · Potreban šleper" : ""}
+          {shipment.zahteva_ruku_za_utovar ? " · Potrebna ruka za utovar" : ""}
+          {shipment.zahteva_slep ? " · Potreban šlep" : ""}{" "}
+          ·{" "}
+          {TERMIN_LABELS[shipment.zeljeni_termin]}
+          {shipment.termin_detalji ? ` (${shipment.termin_detalji})` : ""}
+          {shipment.udaljenost_km
+            ? ` · ~${Number(shipment.udaljenost_km)} km`
+            : ""}
+        </span>
+      </div>
+
+      {shipment.deklarisana_vrednost && (
+        <p className="text-sm text-neutral-500">
+          Deklarisana vrednost: {formatMoney(shipment.deklarisana_vrednost)}
+        </p>
+      )}
+
+      {shipment.napomena && (
+        <p className="rounded-md bg-neutral-100 px-3 py-2 text-sm text-neutral-700">
+          Napomena: {shipment.napomena}
+        </p>
+      )}
+
+      {!order &&
+        (shipment.status === "OTVORENA" || shipment.status === "PONUDE_STIGLE") && (
+          <CancelShipmentButton shipmentId={shipment.id} gostToken={token} />
+        )}
+
+      {!order && (
+        <section className="space-y-3">
+          <h2 className="font-semibold">Ponude</h2>
+          {offers.length > 0 && (
+            <p className="text-xs text-neutral-500">
+              Naznačeno vreme je procena dostavljača od trenutka kada
+              preuzme pošiljku, ne od trenutka slanja ponude.
+            </p>
+          )}
+          {offers.length === 0 ? (
+            <p className="rounded-lg border border-dashed border-black/15 p-6 text-center text-sm text-neutral-500">
+              {shipment.nestandardna
+                ? "Čekamo ponude dostavljača za ovu nestandardnu pošiljku (do 15 minuta po dostavljaču)."
+                : "Čekamo da neki od dostavljača u vašim zonama pošalje ponudu."}
+            </p>
+          ) : (
+            <ul className="divide-y divide-black/10 rounded-xl border border-black/10 bg-white">
+              {offers.map((o) => (
+                <li
+                  key={o.id}
+                  className="flex flex-wrap items-center justify-between gap-3 px-4 py-3"
+                >
+                  <div>
+                    <p className="flex items-center gap-1.5 font-medium">
+                      {o.courier_naziv}
+                      {o.courier_verifikovan && (
+                        <span
+                          title="Operater je proverio registraciju ovog dostavljača"
+                          className="rounded-full bg-emerald-100 px-1.5 py-0.5 text-xs font-medium text-emerald-800"
+                        >
+                          ✓ Verifikovan
+                        </span>
+                      )}
+                    </p>
+                    <p className="text-sm text-neutral-500">
+                      ETA ~{o.procenjeno_vreme_min} min
+                      {o.courier_ocena_prosek
+                        ? ` · ★ ${Number(o.courier_ocena_prosek).toFixed(1)}`
+                        : ""}
+                      {o.napomena ? ` · ${o.napomena}` : ""}
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-4">
+                    <span className="font-semibold">{formatMoney(o.cena)}</span>
+                    <AcceptOfferButton
+                      shipmentId={shipment.id}
+                      offerId={o.id}
+                      gostToken={token}
+                    />
+                  </div>
+                </li>
+              ))}
+            </ul>
+          )}
+        </section>
+      )}
+
+      {order && (
+        <section className="space-y-4">
+          <h2 className="font-semibold">Praćenje isporuke</h2>
+          <ol className="flex flex-wrap gap-2">
+            {ORDER_STATUS_STEPS.map((step, idx) => {
+              const currentIdx = ORDER_STATUS_STEPS.indexOf(order.status);
+              const reached = order.status !== "OTKAZANO" && idx <= currentIdx;
+              const stepTimestamp: Partial<Record<OrderStatus, string | null>> = {
+                PREUZETO: order.created_at,
+                U_TRANZITU: order.preuzeto_at,
+                ISPORUCENO: order.isporuceno_at,
+              };
+              const timestamp = reached ? stepTimestamp[step] : null;
+              return (
+                <li key={step} className="flex items-center gap-2">
+                  <span className="flex flex-col items-center">
+                    <span
+                      className={`rounded-full px-3 py-1 text-xs font-medium ${
+                        reached
+                          ? "bg-emerald-600 text-white"
+                          : "bg-neutral-200 text-neutral-500"
+                      }`}
+                    >
+                      {ORDER_STATUS_LABELS[step]}
+                    </span>
+                    {timestamp && (
+                      <span className="mt-0.5 text-[10px] text-neutral-400">
+                        {formatDateTime(timestamp)}
+                      </span>
+                    )}
+                  </span>
+                  {idx < ORDER_STATUS_STEPS.length - 1 && (
+                    <span className="text-neutral-300">→</span>
+                  )}
+                </li>
+              );
+            })}
+          </ol>
+
+          <div className="rounded-xl border border-black/10 bg-white p-4 text-sm">
+            <p>
+              <span className="text-neutral-500">Dostavljač:</span>{" "}
+              {courier?.naziv} {courier?.telefon ? `· ${courier.telefon}` : ""}
+            </p>
+            <p className="mt-1">
+              <span className="text-neutral-500">Cena:</span>{" "}
+              {formatMoney(order.cena)}
+            </p>
+            {hasFotografija && (
+              <p className="mt-1">
+                <a
+                  href={`/api/posiljke/${shipment.id}/fotografija`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-emerald-600 hover:underline"
+                >
+                  Pogledajte foto-dokaz o isporuci
+                </a>
+              </p>
+            )}
+          </div>
+
+          {order.status === "ISPORUCENO" &&
+            (rating ? (
+              <p className="rounded-lg border border-black/10 bg-white p-4 text-sm">
+                Ocenili ste dostavljača sa {rating.ocena} ★
+                {rating.komentar ? ` — “${rating.komentar}”` : ""}
+              </p>
+            ) : (
+              <RatingForm orderId={order.id} target="dostavljac" gostToken={token} />
+            ))}
+
+          {order.status === "OTKAZANO" && (
+            <p className="rounded-lg border border-black/10 bg-white p-4 text-sm text-neutral-600">
+              Porudžbina je otkazana.
+              {order.otkazano_razlog ? ` Razlog: ${order.otkazano_razlog}` : ""}
+            </p>
+          )}
+
+          {order.status !== "ISPORUCENO" && order.status !== "OTKAZANO" && (
+            <CancelOrderButton orderId={order.id} gostToken={token} />
+          )}
+        </section>
+      )}
+    </div>
+  );
+}

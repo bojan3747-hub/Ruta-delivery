@@ -2,14 +2,18 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { acceptOfferAction } from "@/lib/actions/offer-actions";
+import { acceptOfferAction, acceptOfferGuestAction } from "@/lib/actions/offer-actions";
 
 export function AcceptOfferButton({
   shipmentId,
   offerId,
+  gostToken,
 }: {
   shipmentId: string;
   offerId: string;
+  /** Faza 24: kad je stranica /pracenje/[token] (gost, bez sesije), prosleđuje
+   * se token i poziva se gost-varijanta akcije umesto sesijske. */
+  gostToken?: string;
 }) {
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
@@ -23,7 +27,9 @@ export function AcceptOfferButton({
         onClick={() =>
           startTransition(async () => {
             setError(null);
-            const result = await acceptOfferAction(shipmentId, offerId);
+            const result = gostToken
+              ? await acceptOfferGuestAction(shipmentId, offerId, gostToken)
+              : await acceptOfferAction(shipmentId, offerId);
             if (result.error) {
               setError(result.error);
             } else {
